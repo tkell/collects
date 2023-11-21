@@ -3,6 +3,6 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   get "/collections",     to: "collections#index"
-  get "/collections/:id", to: "collections#show", as: 'collection'
-  get "/gardens:id",      to: "gardens#show"
+  get "/collections/:id", to: "collections#show", as: "collection"
+  get "/gardens/:id",     to: "gardens#show", as: "garden"
 end
