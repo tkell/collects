@@ -2,3 +2,9 @@
 <h1>Garden</h1>
 
 The Garden: <%= @garden.name %>
+
+<ul>
+  <% @garden.items.each do |item| %>
+    <li><%= item.artist %> - <%= item.title %></li>
+  <% end %>
+</ul>

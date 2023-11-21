@@ -2,3 +2,8 @@
 <h1>Collection</h1>
 
 <%= @collection.name %>
+<ul>
+  <% @collection.items.each do |item| %>
+    <li><%= item.artist %></li>
+  <% end %>
+</ul>
