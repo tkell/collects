@@ -17,11 +17,8 @@ class GardensController < ApplicationController
     @garden = @collection.gardens.create(garden_params)
 
     if @garden.save
-      ## OK, we're close, we need to fix this redirect, but nbd!
-
-      redirect_to @garden
+      redirect_to collection_garden_path(@collection, @garden)
     else
-      puts(@garden.errors.full_messages)
       render :new, status: :unprocessable_entity
     end
   end
