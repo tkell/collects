@@ -1,0 +1,27 @@
+<h1>Update <%= @garden.name %> </h1>
+
+<%= form_with(model: [@collection, @garden]) do |form| %>
+  <div>
+    <%= form.label :name %><br>
+    <%= form.text_field :name %>
+  </div>
+
+  Existing:
+  <% @garden.items.each do |item| %>
+    <li><%= item.artist %> - <%= item.title %></li>
+  <% end %>
+
+  Add:
+  <div>
+    <%= form.fields_for :garden_items, GardenItem.new, child_index: Time.now.to_i do |garden_item_form| %>
+      <div>
+        <%= garden_item_form.label :item_id %>
+        <%= garden_item_form.collection_select :item_id, Item.all, :id, :title, prompt: 'Select an item' %>
+      </div>
+    <% end %>
+  </div>
+
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
