@@ -19,11 +19,13 @@
 
   Add:
   <div>
-    <%= form.fields_for :garden_items, GardenItem.new, child_index: Time.now.to_i do |garden_item_form| %>
-      <div>
-        <%= garden_item_form.label :item_id %>
-        <%= garden_item_form.collection_select :item_id, Item.all, :id, :title, prompt: 'Select an item' %>
-      </div>
+    <% (0..10).each do |offset| %>
+      <%= form.fields_for :garden_items, GardenItem.new, child_index: Time.now.to_i + offset do |garden_item_form| %>
+        <div>
+          <%= garden_item_form.label :item_id %>
+          <%= garden_item_form.collection_select :item_id, Item.all, :id, :title, prompt: 'Select an item' %>
+        </div>
+      <% end %>
     <% end %>
   </div>
 
