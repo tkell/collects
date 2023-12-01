@@ -1,5 +1,11 @@
 <h1>Update <%= @garden.name %> </h1>
 
+  <%= form_with(url: "edit", method: :get) do |form| %>
+    <%= form.label :item_search, "Search Items For:" %>
+    <%= form.text_field :item_search %>
+    <%= form.submit "Search" %>
+  <% end %>
+
 <%= form_with(model: [@collection, @garden]) do |form| %>
   <div>
     <%= form.label :name %><br>
@@ -17,13 +23,14 @@
   <% end %>
 
 
+
   Add:
   <div>
     <% (0..10).each do |offset| %>
       <%= form.fields_for :garden_items, GardenItem.new, child_index: Time.now.to_i + offset do |garden_item_form| %>
         <div>
           <%= garden_item_form.label :item_id %>
-          <%= garden_item_form.collection_select :item_id, Item.all, :id, :title, prompt: 'Select an item' %>
+          <%= garden_item_form.collection_select :item_id, @searched_items, :id, :title, prompt: 'Select an item' %>
         </div>
       <% end %>
     <% end %>

@@ -26,6 +26,8 @@ class GardensController < ApplicationController
   def edit
     @collection = Collection.find(params[:collection_id])
     @garden = Garden.find(params[:id])
+    safe_search_string = Item.sanitize_sql_like("#{params[:item_search]}") + "%"
+    @searched_items = Item.where("title LIKE ?", safe_search_string)
   end
 
   def update
