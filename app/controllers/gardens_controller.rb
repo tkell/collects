@@ -1,4 +1,6 @@
 class GardensController < ApplicationController
+  MAX_ITEMS_PER_GARDEN = 28
+
   def index
     @gardens = Garden.all
   end
@@ -28,6 +30,8 @@ class GardensController < ApplicationController
     @garden = Garden.find(params[:id])
     safe_search_string = Item.sanitize_sql_like("#{params[:item_search]}") + "%"
     @searched_items = Item.where("title LIKE ?", safe_search_string)
+
+    @number_of_addable_items = MAX_ITEMS_PER_GARDEN - @garden.items.size
   end
 
   def update

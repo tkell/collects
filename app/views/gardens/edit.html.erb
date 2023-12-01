@@ -26,7 +26,7 @@
 
   Add:
   <div>
-    <% (0..10).each do |offset| %>
+    <% (0..@number_of_addable_items).each do |offset| %>
       <%= form.fields_for :garden_items, GardenItem.new, child_index: Time.now.to_i + offset do |garden_item_form| %>
         <div>
           <%= garden_item_form.label :item_id %>
