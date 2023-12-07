@@ -4,6 +4,11 @@
 <%= @collection.name %>
 <ul>
   <% @collection.items.each do |item| %>
-    <li><%= item.artist %></li>
+    <li><%= item.artist %> - <%= item.title %></li>
+    <% item.subitems.each do |subitem| %>
+      <ul>
+        <li><%= subitem.number %> - <%= subitem.title %></li>
+      </ul>
+    <% end %>
   <% end %>
 </ul>
