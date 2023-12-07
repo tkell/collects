@@ -6,5 +6,10 @@ The Garden: <%= @garden.name %>
 <ul>
   <% @garden.items.each do |item| %>
     <li><%= item.artist %> - <%= item.title %></li>
+    <% item.subitems.each do |subitem| %>
+      <ul>
+        <li><%= subitem.number %> - <%= subitem.title %></li>
+      </ul>
+    <% end %>
   <% end %>
 </ul>
