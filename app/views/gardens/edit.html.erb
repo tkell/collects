@@ -1,10 +1,12 @@
 <h1>Update <%= @garden.name %> </h1>
 
-  <%= form_with(url: "edit", method: :get) do |form| %>
-    <%= form.label :item_search, "Search Items For:" %>
-    <%= form.text_field :item_search %>
-    <%= form.submit "Search" %>
-  <% end %>
+<%= form_with(url: "edit", method: :get) do |form| %>
+  <%= form.label :item_search, "Search Items For:" %>
+  <%= form.text_field :item_search %>
+  <%= form.submit "Search" %>
+<% end %>
+
+<hr/>
 
 <%= form_with(model: [@collection, @garden]) do |form| %>
   <div>
@@ -12,7 +14,7 @@
     <%= form.text_field :name %>
   </div>
 
-  Existing:
+  <h3>Existing Items:</h3>
   <%= form.fields_for :garden_items, @garden.garden_items.reject(&:new_record?) do |garden_item_form| %>
       <div>
         <%= garden_item_form.object.item.title %> - <%= garden_item_form.object.item.artist %>
@@ -22,9 +24,7 @@
       <%= garden_item_form.hidden_field :item_id %>
   <% end %>
 
-
-
-  Add:
+  <h3>Add Items:</h3>
   <div>
     <% (0..@number_of_addable_items).each do |offset| %>
       <%= form.fields_for :garden_items, GardenItem.new, child_index: Time.now.to_i + offset do |garden_item_form| %>
