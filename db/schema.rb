@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_11_23_022208) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_07_014447) do
   create_table "collections", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -51,8 +51,18 @@ ActiveRecord::Schema[7.1].define(version: 2023_11_23_022208) do
     t.index ["collection_id"], name: "index_items_on_collection_id"
   end
 
+  create_table "subitems", force: :cascade do |t|
+    t.string "title"
+    t.string "media_link"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "item_id", null: false
+    t.index ["item_id"], name: "index_subitems_on_item_id"
+  end
+
   add_foreign_key "garden_items", "gardens"
   add_foreign_key "garden_items", "items"
   add_foreign_key "gardens", "collections"
   add_foreign_key "items", "collections"
+  add_foreign_key "subitems", "items"
 end
