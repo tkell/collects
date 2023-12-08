@@ -4,9 +4,9 @@ class CollectionsController < ApplicationController
   end
 
   def show
-    @collection = Collection.find(params[:id])
+    @collection = Collection.includes(items: :tracks).find(params[:id])
     if params.has_key?(:serve_json)
-      render json: @collection.items
+      render json: @collection.items.includes(:tracks)
     end
   end
 end
