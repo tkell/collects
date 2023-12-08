@@ -24,7 +24,13 @@ task :import_music, [:source_file, :collection_name] => [:environment] do |task,
     maybe_items = Item.where(external_id: external_id)
     if maybe_items.size == 0
       print(".")
-      item = Item.new(title: item_data["title"], artist: item_data["artist"], label: item_data["label"], external_id: item_data["id"].to_s)
+      item = Item.new(
+        title: item_data["title"],
+        artist: item_data["artist"],
+        label: item_data["label"],
+        folder:  item_data["folder"] || "",
+        external_id: item_data["id"].to_s
+      )
       collection.items << item
       item.save
 
