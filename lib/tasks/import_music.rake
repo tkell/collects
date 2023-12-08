@@ -1,12 +1,12 @@
 desc "Import music objects into the db"
 
 task :import_digital do
-  filepath = "/Volumes/Bragi/Code/music-collection/organize-music/digital.json"
+  filepath = "/Volumes/Bragi/Code/music-collection/tessellates/app/digital/release_source.json"
   Rake::Task[:import_music].invoke(filepath, "Digital")
 end
 
 task :import_vinyl do
-  filepath = "/Volumes/Bragi/Code/music-collection/vinyl.json"
+  filepath = "/Volumes/Bragi/Code/music-collection/tessellates/app/vinyl/release_source.json"
   Rake::Task[:import_music].invoke(filepath, "Vinyl")
 end
 
@@ -29,6 +29,7 @@ task :import_music, [:source_file, :collection_name] => [:environment] do |task,
         artist: item_data["artist"],
         label: item_data["label"],
         folder:  item_data["folder"] || "",
+        colors: item_data["colors"],
         external_id: item_data["id"].to_s
       )
       collection.items << item
