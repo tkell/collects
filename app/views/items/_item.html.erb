@@ -1,0 +1,8 @@
+
+<li><%= item.artist %> - <%= item.title %></li>
+<% item.subitems.each do |subitem| %>
+  <ul>
+    <li><%= subitem.position %> - <%= subitem.title %></li>
+  </ul>
+<% end %>
+

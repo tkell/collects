@@ -4,11 +4,6 @@
 <%= @collection.name %>
 <ul>
   <% @collection.items.each do |item| %>
-    <li><%= item.artist %> - <%= item.title %></li>
-    <% item.subitems.each do |subitem| %>
-      <ul>
-        <li><%= subitem.position %> - <%= subitem.title %></li>
-      </ul>
-    <% end %>
+    <%= render item %>
   <% end %>
 </ul>
