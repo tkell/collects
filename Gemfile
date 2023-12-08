@@ -58,6 +58,9 @@ group :development do
 
   # Speed up commands on slow machines / big apps [https://github.com/rails/spring]
   # gem "spring"
+
+  # Set up CORS for dev-only, for now
+  gem 'rack-cors', '~> 0.3.1'
 end
 
 group :test do

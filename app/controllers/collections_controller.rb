@@ -5,5 +5,8 @@ class CollectionsController < ApplicationController
 
   def show
     @collection = Collection.find(params[:id])
+    if params.has_key?(:serve_json)
+      render json: @collection.items
+    end
   end
 end
