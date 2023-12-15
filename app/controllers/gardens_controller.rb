@@ -41,7 +41,6 @@ class GardensController < ApplicationController
     if @garden.update(garden_params)
       redirect_to collection_garden_path(@collection, @garden)
     else
-      puts(@garden.errors.full_messages)
       render :edit, status: :unprocessable_entity
     end
   end
