@@ -1,3 +1,3 @@
 class Track < ApplicationRecord
-  belongs_to :item
+  belongs_to :release
 end

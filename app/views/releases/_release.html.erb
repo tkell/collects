@@ -1,0 +1,8 @@
+
+<li><%= release.artist %> - <%= release.title %></li>
+<% release.tracks.each do |track| %>
+  <ul>
+    <li><%= track.position %> - <%= track.title %></li>
+  </ul>
+<% end %>
+

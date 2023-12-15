@@ -28,10 +28,10 @@ class GardensController < ApplicationController
   def edit
     @collection = Collection.find(params[:collection_id])
     @garden = Garden.find(params[:id])
-    safe_search_string = Item.sanitize_sql_like("#{params[:item_search]}") + "%"
-    @searched_items = Item.where("title LIKE ?", safe_search_string)
+    safe_search_string = Release.sanitize_sql_like("#{params[:release_search]}") + "%"
+    @searched_releases = Release.where("title LIKE ?", safe_search_string)
 
-    @number_of_addable_items = MAX_ITEMS_PER_GARDEN - @garden.items.size
+    @number_of_addable_releases = MAX_ITEMS_PER_GARDEN - @garden.releases.size
   end
 
   def update
@@ -49,6 +49,6 @@ class GardensController < ApplicationController
   private
 
   def garden_params
-    params.require(:garden).permit(:name, garden_items_attributes: [:id, :item_id, :_destroy])
+    params.require(:garden).permit(:name, garden_items_attributes: [:id, :release_id, :_destroy])
   end
 end
