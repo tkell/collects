@@ -49,6 +49,6 @@ class GardensController < ApplicationController
   private
 
   def garden_params
-    params.require(:garden).permit(:name, garden_items_attributes: [:id, :release_id, :_destroy])
+    params.require(:garden).permit(:name, garden_releases_attributes: [:id, :release_id, :_destroy])
   end
 end

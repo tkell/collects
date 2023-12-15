@@ -1,6 +1,6 @@
 class Release < ApplicationRecord
   belongs_to :collection
-  has_many :garden_items
+  has_many :garden_releases
   has_many :tracks
 
   serialize :colors, coder: JSON, type: Array

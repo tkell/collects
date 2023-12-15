@@ -2,7 +2,7 @@
 
 <%= form_with(url: "edit", method: :get) do |form| %>
   <%= form.label :release_search, "Search Releases For:" %>
-  <%= form.text_field :item_search %>
+  <%= form.text_field :release_search %>
   <%= form.submit "Search" %>
 <% end %>
 
@@ -14,23 +14,23 @@
     <%= form.text_field :name %>
   </div>
 
-  <h3>Existing Items:</h3>
-  <%= form.fields_for :garden_items, @garden.garden_items.reject(&:new_record?) do |garden_item_form| %>
+  <h3>Existing Releases:</h3>
+  <%= form.fields_for :garden_releases, @garden.garden_releases.reject(&:new_record?) do |garden_release_form| %>
       <div>
-        <%= garden_item_form.object.item.title %> - <%= garden_item_form.object.item.artist %>
-        <%= garden_item_form.check_box :_destroy %>
-        <%= garden_item_form.label :_destroy, 'Remove' %>
+        <%= garden_release_form.object.release.title %> - <%= garden_release_form.object.release.artist %>
+        <%= garden_release_form.check_box :_destroy %>
+        <%= garden_release_form.label :_destroy, 'Remove' %>
       </div>
-      <%= garden_item_form.hidden_field :release_id %>
+      <%= garden_release_form.hidden_field :release_id %>
   <% end %>
 
   <h3>Add Items:</h3>
   <div>
     <% (0..@number_of_addable_releases).each do |offset| %>
-      <%= form.fields_for :garden_items, GardenItem.new, child_index: Time.now.to_i + offset do |garden_item_form| %>
+      <%= form.fields_for :garden_releases, GardenRelease.new, child_index: Time.now.to_i + offset do |garden_release_form| %>
         <div>
-          <%= garden_item_form.label :release_id %>
-          <%= garden_item_form.collection_select :release_id, @searched_releases, :id, :title, prompt: 'Select an item' %>
+          <%= garden_release_form.label :release_id %>
+          <%= garden_release_form.collection_select :release_id, @searched_releases, :id, :title, prompt: 'Select a release' %>
         </div>
       <% end %>
     <% end %>

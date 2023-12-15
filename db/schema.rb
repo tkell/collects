@@ -10,20 +10,20 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2023_12_15_015349) do
+ActiveRecord::Schema[7.1].define(version: 2023_12_15_020100) do
   create_table "collections", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "garden_items", force: :cascade do |t|
+  create_table "garden_releases", force: :cascade do |t|
     t.integer "release_id", null: false
     t.integer "garden_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.index ["garden_id"], name: "index_garden_items_on_garden_id"
-    t.index ["release_id"], name: "index_garden_items_on_release_id"
+    t.index ["garden_id"], name: "index_garden_releases_on_garden_id"
+    t.index ["release_id"], name: "index_garden_releases_on_release_id"
   end
 
   create_table "gardens", force: :cascade do |t|
@@ -58,8 +58,8 @@ ActiveRecord::Schema[7.1].define(version: 2023_12_15_015349) do
     t.index ["release_id"], name: "index_tracks_on_release_id"
   end
 
-  add_foreign_key "garden_items", "gardens"
-  add_foreign_key "garden_items", "releases"
+  add_foreign_key "garden_releases", "gardens"
+  add_foreign_key "garden_releases", "releases"
   add_foreign_key "gardens", "collections"
   add_foreign_key "releases", "collections"
   add_foreign_key "tracks", "releases"

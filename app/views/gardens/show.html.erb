@@ -4,7 +4,7 @@
 The Garden: <%= @garden.name %>
 
 <ul>
-  <% @garden.releases.each do |item| %>
-    <%= render releases %>
+  <% @garden.releases.each do |release| %>
+    <%= render release %>
   <% end %>
 </ul>
