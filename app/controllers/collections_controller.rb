@@ -7,11 +7,6 @@ class CollectionsController < ApplicationController
     @collection = Collection.includes(releases: :tracks).find(params[:id])
     if params.has_key?(:serve_json)
 
-      # so .limit and .offset work on release here ...
-      # as does .where, with a hash:
-      # OK, and search on all our fields - and am empty strings seaches for everything, cool
-      # and I bet folder will be very easy to add, we just start with a WHERE: folder
-      #
       p = tessellates_params
       filter_string = "%" + Release.sanitize_sql_like(p[:filter_string]) + "%"
       render json: @collection.releases
