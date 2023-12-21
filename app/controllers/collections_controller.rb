@@ -4,17 +4,20 @@ class CollectionsController < ApplicationController
   end
 
   def show
-    @collection = Collection.includes(releases: :tracks).find(params[:id])
     if params.has_key?(:serve_json)
-
       p = tessellates_params
       filter_string = "%" + Release.sanitize_sql_like(p[:filter_string]) + "%"
-      render json: @collection.releases
+      render json: Collection.find(params[:id])
+        .releases
         .where("artist LIKE :search_string OR title LIKE :search_string OR label LIKE :search_string", {search_string: filter_string})
+        #.where(folder: p[:folder])
         .limit(p[:limit])
         .offset(p[:offset])
         .includes(:tracks)
+    else
+      @collection = Collection.includes(releases: :tracks).find(params[:id])
     end
+
   end
 
   private
