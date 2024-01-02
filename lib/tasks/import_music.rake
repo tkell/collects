@@ -19,26 +19,26 @@ task :import_music, [:source_file, :collection_name] => [:environment] do |task,
   file.close()
 
   collection = Collection.where(name: args[:collection_name]).first
-  data.each do | item_data |
-    external_id = item_data["id"].to_s
-    maybe_items = Item.where(external_id: external_id)
-    if maybe_items.size == 0
+  data.each do | release_data |
+    external_id = release_data["id"].to_s
+    maybe_release = Release.where(external_id: external_id)
+    if maybe_release.size == 0
       print(".")
-      item = Item.new(
-        title: item_data["title"],
-        artist: item_data["artist"],
-        label: item_data["label"],
-        folder:  item_data["folder"] || "",
-        colors: item_data["colors"],
-        external_id: item_data["id"].to_s
+      release = Release.new(
+        title: release_data["title"],
+        artist: release_data["artist"],
+        label: release_data["label"],
+        folder:  release_data["folder"] || "",
+        colors: release_data["colors"],
+        external_id: release_data["id"].to_s
       )
-      collection.items << item
-      item.save
+      collection.releases << release
+      release.save
 
-      tracks = item_data["tracks"]
+      tracks = release_data["tracks"]
       tracks.each do |track|
-        t = Subitem.new(title: track["title"], position: track["position"].to_s, media_link: "-")
-        item.tracks << t
+        t = Track.new(title: track["title"], position: track["position"].to_s, media_link: "-")
+        release.tracks << t
         t.save
       end
     end
