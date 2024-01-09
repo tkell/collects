@@ -37,7 +37,7 @@ task :import_music, [:source_file, :collection_name] => [:environment] do |task,
 
       tracks = release_data["tracks"]
       tracks.each do |track|
-        t = Track.new(title: track["title"], position: track["position"].to_s, media_link: "-")
+        t = Track.new(title: track["title"], position: track["position"].to_s, media_link: track["filepath"])
         release.tracks << t
         t.save
       end
