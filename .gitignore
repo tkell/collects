@@ -33,3 +33,6 @@
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key
+
+# Ignore deploy scripts
+deploy_to_digital_ocean.sh
