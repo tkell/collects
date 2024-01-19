@@ -44,7 +44,7 @@ gem "bootsnap", require: false
 # Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
 # gem "image_processing", "~> 1.2"
 
-# Set up CORS for dev-only, for now
+# Set up CORS
 gem 'rack-cors', '~> 0.3.1'
 
 group :development, :test do
