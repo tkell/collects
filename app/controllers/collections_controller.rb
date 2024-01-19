@@ -6,7 +6,8 @@ class CollectionsController < ApplicationController
   def show
     if params.has_key?(:serve_json)
       p = tessellates_params
-      data = Collection.find(params[:id]).releases
+      collection_name = p[:id].capitalize
+      data = Collection.where(name: collection_name).first.releases
 
       if p[:folder]
         data = data.where(folder: p[:folder])
