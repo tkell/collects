@@ -67,7 +67,7 @@ def update_release(collection, release_data, release)
   end
 
   # Trying to find if a single track has been changed is hard, so we look for an exact comparision
-  # If we get a single think different, we just re-load all the tracks.
+  # If we get a single thing different, we just re-load all the tracks.
   # This is cool because we don't use tracks as a reference for anything ... yet!
   tracks_dirty = false
   tracks_data = release_data["tracks"]
