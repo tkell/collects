@@ -45,10 +45,10 @@ task :import_music, [:source_file, :collection_name, :overwrite_style] => [:envi
 
     if args[:overwrite_style] == "update_existing" && maybe_release.size > 0
       update_release(collection, release_data, maybe_release.first)
-    elsif maybe_release.size == 0
+    elsif args[:overwrite_style] == "only_new" && maybe_release.size == 0
       make_release(collection, release_data)
     else
-      puts("Got some sort of bad state, check your arguments!")
+      print("-")
     end
   end
 end
