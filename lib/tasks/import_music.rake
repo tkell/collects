@@ -1,12 +1,12 @@
 desc "Import music objects into the db"
 
 task :import_digital_prod do
-  filepath = "release_source.json"
+  filepath = "digital.json"
   Rake::Task[:import_music].invoke(filepath, "Digital", "only_new")
 end
 
 task :import_vinyl_prod do
-  filepath = "release_source.json"
+  filepath = "vinyl.json"
   Rake::Task[:import_music].invoke(filepath, "Vinyl", "only_new")
 end
 
