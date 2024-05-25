@@ -30,7 +30,7 @@ task :import_music, [:source_file, :collection_name, :overwrite_style] => [:envi
   file.close()
 
   collection = Collection.where(name: args[:collection_name]).first
-  if args[:overwrite_style] == "destroy_all"
+  if args[:overwrite_style] == "destroy_all" && collection
     puts("Destroying all releases in #{collection.name} ...")
     all_releases = Release.where(collection_id: collection.id)
     all_releases.each do | release |
@@ -41,8 +41,12 @@ task :import_music, [:source_file, :collection_name, :overwrite_style] => [:envi
 
   data.each do | release_data |
     external_id = release_data["id"].to_s
-    maybe_release = Release.where(external_id: external_id)
+    if args[:overwrite_style] == "destroy_all"
+      make_release(collection, release_data)
+      next
+    end
 
+    maybe_release = Release.where(external_id: external_id)
     if args[:overwrite_style] == "update_existing" && maybe_release.size > 0
       update_release(collection, release_data, maybe_release.first)
     elsif args[:overwrite_style] == "only_new" && maybe_release.size == 0
@@ -60,6 +64,7 @@ def update_release(collection, release_data, release)
       title: release_data["title"],
       artist: release_data["artist"],
       label: release_data["label"],
+      release_year: release_data["year"],
       folder:  release_data["folder"] || "",
       colors: release_data["colors"]
     )
@@ -70,7 +75,7 @@ def update_release(collection, release_data, release)
   # If we get a single thing different, we just re-load all the tracks.
   # This is cool because we don't use tracks as a reference for anything ... yet!
   tracks_dirty = false
-  tracks_data = release_data["tracks"]
+  mtracks_data = release_data["tracks"]
   release.tracks.each_with_index do |track, index|
     if not tracks_data[index].except("filepath") < track.attributes or tracks_data[index]["filepath"] != track.attributes["media_link"]
       tracks_dirty = true
@@ -96,6 +101,7 @@ def make_release(collection, release_data)
     artist: release_data["artist"],
     label: release_data["label"],
     folder:  release_data["folder"] || "",
+    release_year: release_data["year"],
     colors: release_data["colors"],
     external_id: release_data["id"].to_s
   )
