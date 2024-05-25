@@ -12,6 +12,19 @@ class CollectionsController < ApplicationController
       if p[:folder]
         data = data.where(folder: p[:folder])
       end
+      # format is `1990 - 1999`, or `1990`
+      # check this on the JS side to!
+      if p[:release_year]
+        if p[:release_year].include? "-"
+          year_range = p[:release_year].split("-")
+          start_year = year_range[0].strip.to_i
+          end_year = year_range[1].strip.to_i
+          data = data.where(release_year: start_year..end_year)
+        else
+          data = data.where(release_year: Integer(p[:release_year]))
+        end
+
+      end
       if p[:filter_string]
         filter_string = "%" + Release.sanitize_sql_like(p[:filter_string]) + "%"
         data = data
@@ -34,7 +47,7 @@ class CollectionsController < ApplicationController
 
   def tessellates_params
     params
-      .permit(:id, :serve_json, :limit, :offset, :filter_string, :folder)
-      .with_defaults(limit: 100, offset: 0, filter_string: nil, folder: nil)
+      .permit(:id, :serve_json, :limit, :offset, :filter_string, :folder, :release_year)
+      .with_defaults(limit: 100, offset: 0, filter_string: nil, folder: nil, release_year: nil)
   end
 end
