@@ -1,4 +1,11 @@
 class CollectionsController < ApplicationController
+  SORT_KEYS = {
+    "a" => :artist,
+    "t" => :title,
+    "l" => :label,
+    "y" => :release_year
+  }
+
   def index
     @collections = Collection.all
   end
@@ -13,7 +20,6 @@ class CollectionsController < ApplicationController
         data = data.where(folder: p[:folder])
       end
       # format is `1990 - 1999`, or `1990`
-      # check this on the JS side to!
       if p[:release_year]
         if p[:release_year].include? "-"
           year_range = p[:release_year].split("-")
@@ -29,6 +35,17 @@ class CollectionsController < ApplicationController
         filter_string = "%" + Release.sanitize_sql_like(p[:filter_string]) + "%"
         data = data
           .where("artist LIKE :search_string OR title LIKE :search_string OR label LIKE :search_string", {search_string: filter_string})
+      end
+
+      # see above, options are artist, title, label, release_year
+      if p[:sort] && p[:sort].length > 0 && p[:sort].size < 5
+        sort_args = []
+        p[:sort].split("").each do |key|
+          if SORT_KEYS.has_key?(key)
+            sort_args << SORT_KEYS[key]
+          end
+        end
+        data = data.order(*sort_args)
       end
 
       data = data
@@ -47,7 +64,7 @@ class CollectionsController < ApplicationController
 
   def tessellates_params
     params
-      .permit(:id, :serve_json, :limit, :offset, :filter_string, :folder, :release_year)
-      .with_defaults(limit: 100, offset: 0, filter_string: nil, folder: nil, release_year: nil)
+      .permit(:id, :serve_json, :limit, :offset, :filter_string, :folder, :release_year, :sort)
+      .with_defaults(limit: 100, offset: 0, filter_string: nil, folder: nil, release_year: nil, sort: nil)
   end
 end
