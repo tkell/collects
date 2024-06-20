@@ -3,7 +3,8 @@ class CollectionsController < ApplicationController
     "a" => :artist,
     "t" => :title,
     "l" => :label,
-    "y" => :release_year
+    "y" => :release_year,
+    "p" => 'purchase_date DESC'
   }
 
   def index
