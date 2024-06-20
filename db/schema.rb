@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_05_25_181809) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_20_003012) do
   create_table "collections", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -47,6 +47,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_05_25_181809) do
     t.string "folder"
     t.string "colors"
     t.integer "release_year"
+    t.date "purchase_date"
     t.index ["collection_id"], name: "index_releases_on_collection_id"
     t.index ["external_id"], name: "index_releases_on_external_id", unique: true
   end
