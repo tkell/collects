@@ -38,7 +38,7 @@ class CollectionsController < ApplicationController
           .where("artist LIKE :search_string OR title LIKE :search_string OR label LIKE :search_string", {search_string: filter_string})
       end
 
-      # see above, options are artist, title, label, release_year
+      # see above, options are artist, title, label, release_year, purchase_date
       if p[:sort] && p[:sort].length > 0 && p[:sort].size < 5
         sort_args = []
         p[:sort].split("").each do |key|
