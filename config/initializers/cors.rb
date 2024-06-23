@@ -1,8 +1,9 @@
-# As of Dec 7, we're only install this gem in dev
-# We'll need a better (and more secure!) version of this before we deploy
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins '*'
-    resource '*', headers: :any, methods: [:get, :post, :patch, :put]
+    origins 'http://localhost:3000', 'https://tide-pool.ca', 'https://www.tide-pool.ca'
+    resource '*',
+      headers: :any,
+      methods: [:get, :post, :put, :patch, :delete, :options, :head],
+      credentials: true
   end
 end
