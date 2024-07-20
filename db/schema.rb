@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_23_162136) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_20_025221) do
   create_table "collections", force: :cascade do |t|
     t.string "name"
     t.datetime "created_at", null: false
@@ -34,6 +34,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_23_162136) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["collection_id"], name: "index_gardens_on_collection_id"
+  end
+
+  create_table "playbacks", force: :cascade do |t|
+    t.integer "user_id", null: false
+    t.integer "release_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["release_id"], name: "index_playbacks_on_release_id"
+    t.index ["user_id"], name: "index_playbacks_on_user_id"
   end
 
   create_table "releases", force: :cascade do |t|
@@ -74,6 +83,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_23_162136) do
   add_foreign_key "garden_releases", "gardens"
   add_foreign_key "garden_releases", "releases"
   add_foreign_key "gardens", "collections"
+  add_foreign_key "playbacks", "releases"
+  add_foreign_key "playbacks", "users"
   add_foreign_key "releases", "collections"
   add_foreign_key "tracks", "releases"
 end
