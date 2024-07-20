@@ -3,14 +3,15 @@ class AuthenticationController < ApplicationController
     user = User.find_by(email: params[:email].downcase)
     if user && user.authenticate(params[:password])
       token = JWT.encode({user_id: user.id}, Rails.application.secrets.secret_key_base)
+      expires_at = Time.now + 1.day
       cookies.encrypted[:jwt] = {
         value: token,
+        expires: expires_at,
         httponly: true,
         secure: Rails.env.production?, # Use secure in production
-        expires: 1.day.from_now
       }
 
-      render json: { message: "Logged in successfully" }, status: :ok
+      render json: {message: "Logged in", username: user.username, expires_at: expires_at}, status: :ok
     else
       render json: {error: 'Invalid credentials'}, status: :unauthorized
     end
