@@ -8,4 +8,7 @@ Rails.application.routes.draw do
     # Gardens will be / are fully REST-ful
     resources :gardens
   end
+
+  # let's have playbacks out here for now
+  resources :playbacks
 end
