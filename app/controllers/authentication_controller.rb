@@ -2,7 +2,7 @@ class AuthenticationController < ApplicationController
   def login
     user = User.find_by(email: params[:email].downcase)
     if user && user.authenticate(params[:password])
-      token = JWT.encode({user_id: user.id}, Rails.application.secrets.secret_key_base)
+      token = JWT.encode({user_id: user.id}, Rails.application.credentials.read)
       expires_at = Time.now + 30.days
       cookies.encrypted[:jwt] = {
         value: token,

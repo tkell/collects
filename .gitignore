@@ -32,7 +32,9 @@
 /public/assets
 
 # Ignore master key for decrypting credentials and more.
+# Also ignore creds, just in case
 /config/master.key
+/config/credentials.yml.enc
 
 # Ignore deploy scripts
 deploy_to_digital_ocean.sh
