@@ -9,6 +9,6 @@ Rails.application.routes.draw do
     resources :gardens
   end
 
-  # let's have playbacks out here for now
-  resources :playbacks
+  # playbacks can't be modified
+  resources :playbacks, only: [:index, :show, :create ]
 end

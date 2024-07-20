@@ -11,9 +11,8 @@ class PlaybacksController < ApplicationController
   end
 
   def create
-    release_id = params[:playback][:release_id]
-    @current_user = User.find(@current_user_id)
-    user_id = current_user.id
+    user_id = @current_user_id
+    release_id = playbacks_params
     @playback = Playback.new(release_id: release_id, user_id: user_id)
 
     if @playback.save
@@ -21,5 +20,10 @@ class PlaybacksController < ApplicationController
     else
       render json: @playback.errors, status: :unprocessable_entity
     end
+  end
+
+  private
+  def playbacks_params
+    params.require(:release_id)
   end
 end
