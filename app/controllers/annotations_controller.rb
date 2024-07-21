@@ -1,4 +1,6 @@
 class AnnotationsController < ApplicationController
+  before_action :authenticate_user
+
   # per-release
   def index
     @release = Release.where(id: params['release_id']).includes(:tracks).first
@@ -10,10 +12,14 @@ class AnnotationsController < ApplicationController
   end
 
   def create
-    @annotation = Annotation.new(annotation_params)
+    @release_id = params['release_id']
+    @annotation_type = params['annotation_type'].to_i
+    @body = params['body']
+    user_id = @current_user_id
+    @annotation = Annotation.new(release_id: @release_id, annotation_type: @annotation_type, body: @body, user_id: user_id)
 
     if @annotation.save
-      redirect_to @article
+      redirect_to action: "index"
     else
       render :new, status: :unprocessable_entity
     end
@@ -22,6 +28,6 @@ class AnnotationsController < ApplicationController
   private
 
   def annotation_params
-    params.require(:annotation).permit(:release_id, :user_id, :body, :type)
+    params.permit(:release_id, :body, :annotation_type)
   end
 end

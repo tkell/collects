@@ -16,3 +16,17 @@
     </li>
   <% end %>
 </ul>
+
+
+<h4>new annotation</h>
+
+<%= form_with model: @annotation do |form| %>
+  <div>
+    <%= form.label :annotation_type %> </br>
+    <%= form.select :annotation_type, Annotation.annotation_types %> </br>
+    <%= form.label :body %> </br>
+    <%= form.text_field :body %> </br>
+  <div>
+    <%= form.submit %>
+  </div>
+<% end %>
