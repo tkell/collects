@@ -1,0 +1,17 @@
+
+<h1><%= @release.artist %> - <%= @release.title %> [<%= @release.label %>]</h1>
+<ul>
+  <% @release.tracks.each do |t| %>
+    <li>
+      <%= t.position %> - <%= t.title %>
+    </li>
+  <% end %>
+</ul>
+
+<ul>
+  <% @annotations.each do |a| %>
+    <li>
+      a.body
+    </li>
+  <% end %>
+</ul>

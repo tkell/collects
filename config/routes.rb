@@ -9,6 +9,14 @@ Rails.application.routes.draw do
     resources :gardens
   end
 
-  # playbacks can't be modified
+  # playbacks can't be modified,
+  # maybe move these under releases someday
   resources :playbacks, only: [:index, :show, :create ]
+
+  # releases are also read-only,
+  # annotations are under releases, so index shows all annotations for a release
+  # hmm, release#show and annotations#index are awfully similar, oh well
+  resources :releases, only: [:show] do
+    resources :annotations, only: [:index, :create, :update, :destroy]
+  end
 end
