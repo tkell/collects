@@ -8,14 +8,16 @@
   <% end %>
 </ul>
 
-<ul>
-  <% @annotations.each do |a| %>
-    <li>
-      <%= a.annotation_type %>
-      <%= a.body %>
-    </li>
-  <% end %>
-</ul>
+<% Annotation.annotation_types.keys.each do |a_type| %>
+  <%= a_type %>
+  <ul>
+    <% @annotations_by_type.fetch(a_type, []).each do |a| %>
+      <li>
+        <%= a.body %>
+      </li>
+    <% end %>
+  </ul>
+<% end %>
 
 
 <h4>new annotation</h>
