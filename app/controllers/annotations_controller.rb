@@ -6,7 +6,7 @@ class AnnotationsController < ApplicationController
     @release = Release.where(id: params['release_id']).includes(:tracks).first
     @annotations = Annotation.where(release_id: @release.id)
 
-    if @release.collection_id == 1
+    if @release.collection_id == 1 || @release.collection_id == 3
       @collection_name = 'digital'
     else
       @collection_name = 'vinyl'
