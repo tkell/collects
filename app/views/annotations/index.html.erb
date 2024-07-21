@@ -11,7 +11,8 @@
 <ul>
   <% @annotations.each do |a| %>
     <li>
-      a.body
+      <%= a.annotation_type %>
+      <%= a.body %>
     </li>
   <% end %>
 </ul>
