@@ -6,6 +6,12 @@ class AnnotationsController < ApplicationController
     @release = Release.where(id: params['release_id']).includes(:tracks).first
     @annotations = Annotation.where(release_id: @release.id)
 
+    if @release.collection_id == 1
+      @collection_name = 'digital'
+    else
+      @collection_name = 'vinyl'
+    end
+
     @annotations_by_type = {}
     @annotations.each do |annotation|
       if @annotations_by_type[annotation.annotation_type].nil?
@@ -24,9 +30,11 @@ class AnnotationsController < ApplicationController
     @release_id = params['release_id']
     @annotation_type = params['annotation_type'].to_i
     user_id = @current_user_id
+
     if @annotation_type != 3
       @body = params['body'].downcase
     end
+
     @annotation = Annotation.new(release_id: @release_id, annotation_type: @annotation_type, body: @body, user_id: user_id)
 
     if @annotation.save
@@ -35,6 +43,14 @@ class AnnotationsController < ApplicationController
       render :new, status: :unprocessable_entity
     end
   end
+
+  def destroy
+    @annotation = Annotation.find(params[:id])
+    @annotation.destroy
+
+    redirect_to action: "index"
+  end
+
 
   private
 

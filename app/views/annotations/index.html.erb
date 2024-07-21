@@ -1,5 +1,7 @@
 
 <h1><%= @release.artist %> - <%= @release.title %> [<%= @release.label %>]</h1>
+
+<img src="https://tide-pool.ca/tessellates/<%= @collection_name %>/images/<%= @release.external_id %>.jpg">
 <ul>
   <% @release.tracks.each do |t| %>
     <li>
@@ -14,6 +16,10 @@
     <% @annotations_by_type.fetch(a_type, []).each do |a| %>
       <li>
         <%= a.body %>
+        <%= button_to "X", release_annotation_path(a.release_id, a.id), method: :delete, data: {
+                    turbo_method: :delete,
+                    turbo_confirm: "Are you sure?"
+                  } %>
       </li>
     <% end %>
   </ul>
