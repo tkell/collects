@@ -1,40 +1,40 @@
+<%= stylesheet_link_tag "application" %>
 
-<h1><%= @release.artist %> - <%= @release.title %> [<%= @release.label %>]</h1>
-
-<img src="https://tide-pool.ca/tessellates/<%= @collection_name %>/images/<%= @release.external_id %>.jpg">
-<ul>
-  <% @release.tracks.each do |t| %>
-    <li>
-      <%= t.position %> - <%= t.title %>
-    </li>
-  <% end %>
-</ul>
-
-<% Annotation.annotation_types.keys.each do |a_type| %>
-  <%= a_type %>
-  <ul>
-    <% @annotations_by_type.fetch(a_type, []).each do |a| %>
+<div class="centre">
+  <h1 ><%= @release.artist %> - <%= @release.title %> [<%= @release.label %>]</h1>
+  <img src="https://tide-pool.ca/tessellates/<%= @collection_name %>/images/<%= @release.external_id %>.jpg">
+  <ul class="track-list">
+    <% @release.tracks.each do |t| %>
       <li>
-        <%= a.body %>
-        <%= button_to "X", release_annotation_path(a.release_id, a.id), method: :delete, data: {
-                    turbo_method: :delete,
-                    turbo_confirm: "Are you sure?"
-                  } %>
+        <%= t.position %> - <%= t.title %>
       </li>
     <% end %>
   </ul>
-<% end %>
+</div>
+
+<div class="centre annotation-container">
+  <% Annotation.annotation_types.keys.each do |a_type| %>
+    <div class="annotation-type">
+      <h3>
+        <%= a_type %>
+      </h3>
+      <ul class="annotation-list">
+        <% @annotations_by_type.fetch(a_type, []).each do |a| %>
+          <li class="annotation-item">
+            <%= button_to(a.body, release_annotation_path(a.release_id, a.id), method: :delete, data: {turbo_method: :delete}, class: "btn-small")%>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+  <% end %>
+</div>
 
 
-<h4>new annotation</h>
-
-<%= form_with model: @annotation do |form| %>
-  <div>
-    <%= form.label :annotation_type %> </br>
-    <%= form.select :annotation_type, Annotation.annotation_types %> </br>
-    <%= form.label :body %> </br>
-    <%= form.text_field :body %> </br>
-  <div>
-    <%= form.submit %>
-  </div>
-<% end %>
+<div class="centre form-div">
+  <h4>new annotation</h4>
+  <%= form_with model: @annotation do |form| %>
+    <div>
+      <%= form.select :annotation_type, Annotation.annotation_types %> <%= form.text_field :body %> <%= form.submit %>
+    </div>
+  <% end %>
+</div>

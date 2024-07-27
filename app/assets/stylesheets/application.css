@@ -13,3 +13,81 @@
  *= require_tree .
  *= require_self
  */
+
+
+
+/*
+ * Starting with big global css!
+ *
+ */
+body {
+    font-family: 'Inconsolata', "Courier New", Courier, monospace;
+}
+
+h1 {
+    font-weight: normal;
+}
+
+h2 {
+    font-weight: normal;
+}
+
+h3 {
+    font-weight: 600;
+}
+
+h4 {
+    font-weight: normal;
+}
+
+div.centre {
+    text-align: center;
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+
+ul.track-list {
+    list-style-type: none;
+    margin-left: 25%;
+    margin-right: 25%;
+}
+
+div.annotation-container {
+    width: 75%;
+    display: flex;
+    justify-content: center;
+}
+
+div.annotation-type {
+    flex: 2 1 auto;
+}
+
+ul.annotation-list {
+    list-style-type: none;
+
+li.annotation-item {
+    text-align: left;
+}
+
+button.btn-small {
+    border: none;
+    background: none;
+    font-size: 100%;
+    font-family: 'Inconsolata', "Courier New", Courier, monospace;
+}
+
+div.form-div {
+    padding-left: 0;
+    padding-right: 0;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
