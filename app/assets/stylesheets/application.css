@@ -66,14 +66,14 @@ div.annotation-container {
 }
 
 div.annotation-type {
-    flex: 2 1 auto;
+    flex: 1 1 auto;
 }
 
 ul.annotation-list {
     list-style-type: none;
 
 li.annotation-item {
-    text-align: left;
+    text-align: center;
 }
 
 button.btn-small {
