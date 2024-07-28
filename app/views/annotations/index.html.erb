@@ -3,7 +3,7 @@
 <div class="centre">
   <h1 ><%= @release.artist %> - <%= @release.title %> [<%= @release.label %>]</h1>
   <div>
-    <p><%= @release.release_year %> // <%= @release.purchase_date %></p>
+    <p><%= @release.release_year %> // <%= @release.purchase_date %> | <%= @release.points_spent %> / <%= @release.points %></p>
   </div>
   <img src="https://tide-pool.ca/tessellates/<%= @collection_name %>/images/<%= @release.external_id %>.jpg">
   <ul class="track-list">

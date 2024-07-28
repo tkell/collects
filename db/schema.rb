@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_21_003456) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_28_011633) do
   create_table "annotations", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "release_id", null: false
@@ -27,6 +27,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_21_003456) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "user_id"
+    t.integer "level"
     t.index ["user_id"], name: "index_collections_on_user_id"
   end
 
@@ -68,6 +69,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_21_003456) do
     t.string "colors"
     t.integer "release_year"
     t.date "purchase_date"
+    t.integer "points", default: 0
+    t.integer "points_spent", default: 0
     t.index ["collection_id"], name: "index_releases_on_collection_id"
     t.index ["external_id"], name: "index_releases_on_external_id", unique: true
   end
