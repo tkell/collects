@@ -15,6 +15,10 @@ class PlaybacksController < ApplicationController
     release_id = playbacks_params
     @playback = Playback.new(release_id: release_id, user_id: user_id)
 
+    release = Release.find(release_id)
+    release.points += 1
+    release.save
+
     if @playback.save
       render json: @playback, status: :ok
     else

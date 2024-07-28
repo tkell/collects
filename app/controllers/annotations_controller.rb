@@ -29,10 +29,11 @@ class AnnotationsController < ApplicationController
   def create
     @release_id = params['release_id']
     @annotation_type = params['annotation_type'].to_i
-    @body = params['body'].downcase
+    @body = params['body']
     user_id = @current_user_id
 
     if @annotation_type != 3
+      @body = @body.downcase
       @bodies = @body.split(',')
     else
       @bodies = [@body]
@@ -44,6 +45,9 @@ class AnnotationsController < ApplicationController
     end
 
     if @annotation.save
+      release = Release.find(@release_id)
+      release.points += 1
+      release.save
       redirect_to action: "index"
     else
       render :new, status: :unprocessable_entity
