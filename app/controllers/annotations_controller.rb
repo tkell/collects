@@ -29,13 +29,19 @@ class AnnotationsController < ApplicationController
   def create
     @release_id = params['release_id']
     @annotation_type = params['annotation_type'].to_i
+    @body = params['body'].downcase
     user_id = @current_user_id
 
     if @annotation_type != 3
-      @body = params['body'].downcase
+      @bodies = @body.split(',')
+    else
+      @bodies = [@body]
     end
 
-    @annotation = Annotation.new(release_id: @release_id, annotation_type: @annotation_type, body: @body, user_id: user_id)
+    @bodies.each do |body|
+      @annotation = Annotation.new(release_id: @release_id, annotation_type: @annotation_type, body: body.strip(), user_id: user_id)
+      @annotation.save
+    end
 
     if @annotation.save
       redirect_to action: "index"
