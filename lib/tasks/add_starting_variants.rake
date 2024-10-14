@@ -9,6 +9,7 @@ task :add_starting_variants => :environment do
       image_path = "https://tide-pool.ca/tessellates/#{collection.name.downcase}/images/#{release.external_id}"
       v = Variant.new(release_id: release.id, image_path: image_path)
       release.variants << v
+      release.current_variant_id = v.id
 
       release.save!
       v.save!
