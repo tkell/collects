@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_10_14_173821) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_14_174324) do
   create_table "annotations", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "release_id", null: false
@@ -71,6 +71,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_14_173821) do
     t.date "purchase_date"
     t.integer "points", default: 0
     t.integer "points_spent", default: 0
+    t.integer "current_variant_id"
     t.index ["collection_id"], name: "index_releases_on_collection_id"
     t.index ["external_id"], name: "index_releases_on_external_id", unique: true
   end
@@ -110,6 +111,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_10_14_173821) do
   add_foreign_key "playbacks", "releases"
   add_foreign_key "playbacks", "users"
   add_foreign_key "releases", "collections"
+  add_foreign_key "releases", "variants", column: "current_variant_id"
   add_foreign_key "tracks", "releases"
   add_foreign_key "variants", "releases"
 end
