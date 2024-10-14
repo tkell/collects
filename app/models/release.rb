@@ -9,4 +9,8 @@ class Release < ApplicationRecord
   def as_json(options={})
     super(include: :tracks)
   end
+
+  def current_variant
+    variants.find(current_variant_id)
+  end
 end
