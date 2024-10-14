@@ -53,6 +53,8 @@ class CollectionsController < ApplicationController
         .limit(p[:limit])
         .offset(p[:offset])
         .includes(:tracks)
+        .joins("LEFT JOIN variants ON variants.release_id = releases.id AND variants.id = releases.current_variant_id")
+        .includes(:variants)
 
       render json: data
     else
