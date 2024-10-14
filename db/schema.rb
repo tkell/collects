@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_28_011633) do
+ActiveRecord::Schema[7.1].define(version: 2024_10_14_173821) do
   create_table "annotations", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "release_id", null: false
@@ -93,6 +93,14 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_28_011633) do
     t.string "password_digest"
   end
 
+  create_table "variants", force: :cascade do |t|
+    t.string "image_path"
+    t.integer "release_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["release_id"], name: "index_variants_on_release_id"
+  end
+
   add_foreign_key "annotations", "releases"
   add_foreign_key "annotations", "users"
   add_foreign_key "collections", "users"
@@ -103,4 +111,5 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_28_011633) do
   add_foreign_key "playbacks", "users"
   add_foreign_key "releases", "collections"
   add_foreign_key "tracks", "releases"
+  add_foreign_key "variants", "releases"
 end
