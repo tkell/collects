@@ -18,5 +18,6 @@ Rails.application.routes.draw do
   # hmm, release#show and annotations#index are awfully similar, oh well
   resources :releases, only: [:show] do
     resources :annotations, only: [:index, :create, :update, :destroy]
+    resources :variants, only: [:index, :show, :create, :update, :destroy]
   end
 end
