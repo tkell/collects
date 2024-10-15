@@ -1,0 +1,10 @@
+
+<h1><%= @release.artist %> - <%= @release.title %></h1>
+<ul>
+  <% @variants.each do |variant| %>
+    <li>
+      <%= variant.image_path %>
+      <%= variant.id %>
+    </li>
+  <% end %>
+</ul>
