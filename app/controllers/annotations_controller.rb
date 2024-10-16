@@ -19,7 +19,6 @@ class AnnotationsController < ApplicationController
       end
       @annotations_by_type[annotation.annotation_type].push(annotation)
     end
-    puts @annotations_by_type
   end
 
   def new

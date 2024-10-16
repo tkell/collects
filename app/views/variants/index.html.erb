@@ -1,10 +1,37 @@
 
-<h1><%= @release.artist %> - <%= @release.title %></h1>
-<ul>
-  <% @variants.each do |variant| %>
-    <li>
-      <%= variant.image_path %>
-      <%= variant.id %>
-    </li>
+<%= stylesheet_link_tag "application" %>
+
+<div class="centre">
+  <h1 ><%= @release.artist %> - <%= @release.title %> [<%= @release.label %>]</h1>
+  <div>
+    <p><%= @release.release_year %> // <%= @release.purchase_date %> | <%= @release.points_spent %> / <%= @release.points %></p>
+  </div>
+  <ul class="track-list">
+    <% @release.tracks.each do |t| %>
+      <li>
+        <%= t.position %> - <%= t.title %>
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+<div class="centre annotation-container">
+  <ul>
+    <% @variants.each do |variant| %>
+      <li>
+        <%= variant.id %> <br />
+        <%= button_to("delete variant", release_variant_path(variant.release_id, variant.id), method: :delete, data: {turbo_method: :delete}, class: "btn-small")%>
+        <img src="<%= variant.image_path + ".jpg"%>">
+      </li>
+    <% end %>
+  </ul>
+</div>
+
+<div class="centre form-div">
+  <h4>new variant</h4>
+  <%= form_with model: @variant do |form| %>
+    <div>
+      imag path: <%= form.text_field :image_path %> <%= form.submit %>
+    </div>
   <% end %>
-</ul>
+</div>
