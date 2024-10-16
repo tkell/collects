@@ -38,7 +38,7 @@ class VariantsController < ApplicationController
       @release.points -= variant_cost
       @release.points_spent += variant_cost
       @release.save
-      
+
       redirect_to action: "index"
     else
       render :new, status: :unprocessable_entity

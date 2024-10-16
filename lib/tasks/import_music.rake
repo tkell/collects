@@ -122,4 +122,11 @@ def make_release(collection, release_data)
     release.tracks << t
     t.save
   end
+
+  image_path = "https://tide-pool.ca/tessellates/#{collection.name.downcase}/images/#{release.external_id}"
+  variant = Variant.new(release_id: release.id, image_path: image_path)
+  release.variants << variant
+  variant.save
+  release.current_variant_id = variant.id
+  release.save
 end
