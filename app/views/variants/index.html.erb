@@ -31,7 +31,9 @@
   <h4>new variant</h4>
   <%= form_with model: @variant do |form| %>
     <div>
-      imag path: <%= form.text_field :image_path %> <%= form.submit %>
+      variant image upload:
+      <%= form.file_field :img, :class => 'image_upload' %>
+      <%= form.submit %>
     </div>
   <% end %>
 </div>

@@ -38,8 +38,9 @@ gem "tzinfo-data", platforms: %i[ windows jruby ]
 # Reduces boot times through caching; required in config/boot.rb
 gem "bootsnap", require: false
 
-# Use Active Storage variants [https://guides.rubyonrails.org/active_storage_overview.html#transforming-images]
-# gem "image_processing", "~> 1.2"
+# image resizing
+gem "image_processing", "~> 1.2"
+gem "miro", "~> 0.4.0"
 
 # Set up CORS
 gem 'rack-cors', '~> 0.3.1'

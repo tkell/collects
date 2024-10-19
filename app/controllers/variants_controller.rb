@@ -24,11 +24,23 @@ class VariantsController < ApplicationController
   def create
     variant_cost = 1
     @release = Release.find(params[:release_id])
+
+    img_data = variant_params[:img]
+    processed_image = ImageProcessing::MiniMagick
+      .source(img_data.path)
+      .resize_to_limit(350, 350)
+      .call
+
+    colors = Miro::DominantColors.new(processed_image.path)
+    puts(colors.to_hex.slice(0, 4))
+
     # it costs 1 point!
     if @release.points < variant_cost
       redirect_to action: "index"
+      puts("not enough points, exiting")
       return
     end
+
 
     @variant = Variant.new(variant_params)
     if @variant.save
@@ -58,6 +70,6 @@ class VariantsController < ApplicationController
   private
 
   def variant_params
-    params.permit(:release_id, :image_path)
+    params.permit(:release_id, :img, :commit)
   end
 end
