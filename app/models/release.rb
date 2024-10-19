@@ -4,8 +4,6 @@ class Release < ApplicationRecord
   has_many :tracks
   has_many :variants
 
-  serialize :colors, coder: JSON, type: Array
-
   def as_json(options={})
     super(:include => [:tracks, :variants])
   end
