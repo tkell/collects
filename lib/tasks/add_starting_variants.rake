@@ -22,8 +22,9 @@ task :copy_colors_to_variants => :environment do
   collections = Collection.all
   collections.each do |collection|
     collection.releases.each do |release|
-      release.current_variant.color = release.color
-      variant.save!
+      v = release.current_variant
+      v.colors = release.colors
+      v.save!
       end
     end
   end
