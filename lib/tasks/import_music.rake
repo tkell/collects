@@ -70,7 +70,6 @@ def update_release(collection, release_data, release)
       release_year: release_data["release_year"],
       purchase_date: release_data["purchase_date"] || Date.new(1982, 9, 23),
       folder:  release_data["folder"] || "",
-      colors: release_data["colors"]
     )
     release.save
   else
@@ -110,7 +109,6 @@ def make_release(collection, release_data)
     folder:  release_data["folder"] || "",
     release_year: release_data["release_year"],
     purchase_date: release_data["purchase_date"] || Date.new(1982, 9, 23),
-    colors: release_data["colors"],
     external_id: release_data["id"].to_s
   )
   collection.releases << release
@@ -124,7 +122,7 @@ def make_release(collection, release_data)
   end
 
   image_path = "https://tide-pool.ca/tessellates/#{collection.name.downcase}/images/#{release.external_id}"
-  variant = Variant.new(release_id: release.id, image_path: image_path)
+  variant = Variant.new(release_id: release.id, image_path: image_path, colors: release_data["colors"])
   release.variants << variant
   variant.save
   release.current_variant_id = variant.id

@@ -18,3 +18,13 @@ task :add_starting_variants => :environment do
 end
 
 
+task :copy_colors_to_variants => :environment do
+  collections = Collection.all
+  collections.each do |collection|
+    collection.releases.each do |release|
+      release.current_variant.color = release.color
+      variant.save!
+      end
+    end
+  end
+
