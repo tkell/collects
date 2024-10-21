@@ -1,3 +1,5 @@
+require "google/cloud/storage"
+
 class VariantsController < ApplicationController
 
   # per-release
@@ -33,6 +35,18 @@ class VariantsController < ApplicationController
 
     colors = Miro::DominantColors.new(processed_image.path)
     puts(colors.to_hex.slice(0, 4))
+
+
+    # upload it!
+    #
+    storage = Google::Cloud::Storage.new(
+      project_id: "collects-416256",
+      credentials: "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json"
+    )
+    bucket = storage.bucket("collects-images")
+    bucket.create_file(processed_image.path, "really-just-a-test.jpg")
+
+    puts("uploaded image to GCS?!?")
 
     # it costs 1 point!
     if @release.points < variant_cost
