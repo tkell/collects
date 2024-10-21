@@ -42,6 +42,9 @@ gem "bootsnap", require: false
 gem "image_processing", "~> 1.2"
 gem "miro", "~> 0.4.0"
 
+# GCS upload
+gem "google-cloud-storage", "~> 1.52.0"
+
 # Set up CORS
 gem 'rack-cors', '~> 0.3.1'
 
