@@ -24,51 +24,73 @@ class VariantsController < ApplicationController
   end
 
   def create
-    variant_cost = 1
+    variant_cost = -1 # heh
     @release = Release.find(params[:release_id])
 
+    # Step 0:  check if we have enough points
+    if @release.points < variant_cost
+      redirect_to action: "index"
+      puts("not enough points, exiting")
+      render :new, status: :unprocessable_entity
+    end
+
+    # Step 1:  convert.  If we fail, get out
     img_data = variant_params[:img]
-    processed_image = ImageProcessing::MiniMagick
+    jpg_image = ImageProcessing::MiniMagick
       .source(img_data.path)
-      .resize_to_limit(350, 350)
+      .format("jpg")
       .call
 
-    colors = Miro::DominantColors.new(processed_image.path)
-    puts(colors.to_hex.slice(0, 4))
+    small_image = ImageProcessing::MiniMagick
+      .source(jpg_image.path)
+      .resize_to_limit(350, 350)
+      .call
+    colors = Miro::DominantColors.new(small_image.path)
+
+    # Step 2:  save the variant.  If we fail, get out
+    variant_data = {
+      release_id: @release.id,
+      colors: colors.to_hex.slice(0, 2),
+      image_path: "temp"
+    }
+
+    begin
+      @variant = Variant.new(variant_data)
+      @variant.save!
+    rescue ActiveRecord::RecordInvalid => _
+      render :new, status: :unprocessable_entity
+    end
 
 
-    # upload it!
-    #
+    # Step 3:  upload the images.  If we fail, get out _and_ delete both the variant and the images on GCS
+    new_image_path = "https://storage.googleapis.com/collects-images/#{@release.external_id}-v#{@variant.id}"
+    img_ext = File.extname(img_data.tempfile.path)
+    image_name = "#{@release.external_id}-v#{@variant.id}#{img_ext}"
+    small_image_name = "#{@release.external_id}-v#{@variant.id}-small#{img_ext}"
+
     storage = Google::Cloud::Storage.new(
       project_id: "collects-416256",
       credentials: "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json"
     )
     bucket = storage.bucket("collects-images")
-    bucket.create_file(processed_image.path, "really-just-a-test.jpg")
 
-    puts("uploaded image to GCS?!?")
+    bucket.create_file(jpg_image.path, image_name)
+    bucket.create_file(small_image.path, small_image_name)
 
-    # it costs 1 point!
-    if @release.points < variant_cost
-      redirect_to action: "index"
-      puts("not enough points, exiting")
-      return
-    end
-
-
-    @variant = Variant.new(variant_params)
-    if @variant.save
+    begin
+      @variant.update(image_path: new_image_path)
+      @variant.save!
       @release = Release.find(params[:release_id])
       @release.variants << @variant
       @release.current_variant_id = @variant.id
       @release.points -= variant_cost
       @release.points_spent += variant_cost
       @release.save
-
       redirect_to action: "index"
-    else
+    rescue ActiveRecord::RecordInvalid => _
       render :new, status: :unprocessable_entity
     end
+
   end
 
   def destroy
