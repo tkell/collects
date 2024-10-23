@@ -64,9 +64,9 @@ class VariantsController < ApplicationController
 
     # Step 3:  upload the images.  If we fail, get out _and_ delete both the variant and the images on GCS
     new_image_path = "https://storage.googleapis.com/collects-images/#{@release.external_id}-v#{@variant.id}"
-    img_ext = File.extname(img_data.tempfile.path)
-    image_name = "#{@release.external_id}-v#{@variant.id}#{img_ext}"
-    small_image_name = "#{@release.external_id}-v#{@variant.id}-small#{img_ext}"
+    img_ext = File.extname(jpg_image.path)
+    image_name = "#{@release.external_id}-v#{@variant.id}.jpg"
+    small_image_name = "#{@release.external_id}-v#{@variant.id}-small.jpg"
 
     storage = Google::Cloud::Storage.new(
       project_id: "collects-416256",
@@ -97,8 +97,30 @@ class VariantsController < ApplicationController
     # will need some image stuff here / remove it from hosting, etc
     # also make sure we can't destroy the only remaining variant / reassign current
     # ... should this even be possible?
+    
+    @release = Release.find(params[:release_id])
     @variant = Variant.find(params[:id])
+
+    # delete the file first!
+    storage = Google::Cloud::Storage.new(
+      project_id: "collects-416256",
+      credentials: "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json"
+    )
+    bucket = storage.bucket("collects-images")
+    image_name = "#{@release.external_id}-v#{@variant.id}.jpg"
+    small_image_name = "#{@release.external_id}-v#{@variant.id}-small.jpg"
+
+    image_file = bucket.file(image_name)
+    image_file.delete
+    small_image_file = bucket.file(small_image_name)
+    small_image_file.delete
+
+    @release.current_variant_id = nil
+    @release.save
     @variant.destroy
+    @release.variants.delete(@variant)
+    @release.current_variant_id = @release.variants.last.id
+    @release.save
 
     redirect_to action: "index"
   end
