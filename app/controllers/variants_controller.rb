@@ -23,6 +23,16 @@ class VariantsController < ApplicationController
     @variant = Variant.new
   end
 
+  def update
+    @release = Release.find(params[:release_id])
+    @variant = Variant.find(params[:id])
+
+    @release.current_variant_id = @variant.id
+    @release.save
+
+    redirect_to action: "index"
+  end
+
   def create
     variant_cost = -1 # heh
     @release = Release.find(params[:release_id])
@@ -96,10 +106,12 @@ class VariantsController < ApplicationController
   def destroy
     # will need some image stuff here / remove it from hosting, etc
     # also make sure we can't destroy the only remaining variant / reassign current
-    # ... should this even be possible?
-    
     @release = Release.find(params[:release_id])
     @variant = Variant.find(params[:id])
+
+    if @variant.id == @release.current_variant_id
+      redirect_to action: "index"
+    end
 
     # delete the file first!
     storage = Google::Cloud::Storage.new(

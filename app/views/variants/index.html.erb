@@ -19,8 +19,9 @@
   <ul>
     <% @variants.each do |variant| %>
       <li>
-        <%= variant.id %> <br />
+        <%= variant.id %><%= @release.current_variant_id == variant.id ? " - current" : "" =%> <br />
         <%= button_to("delete variant", release_variant_path(variant.release_id, variant.id), method: :delete, data: {turbo_method: :delete}, class: "btn-small")%>
+        <%= button_to("pick as current variant", release_variant_path(variant.release_id, variant.id), method: :put, data: {turbo_method: :put}, class: "btn-small")%>
         <img src="<%= variant.image_path + ".jpg"%>">
       </li>
     <% end %>
