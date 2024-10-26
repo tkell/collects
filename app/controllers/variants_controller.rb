@@ -123,20 +123,20 @@ class VariantsController < ApplicationController
   def destroy
     @release = Release.find(params[:release_id])
     @variant = Variant.find(params[:id])
+    guard_release_owns_variant
 
     if @variant.id == @release.current_variant_id || @release.variants.length == 1 || @variant.is_standard
       redirect_to action: "index"
       return
     end
 
-    img_name, small_img_name = image_names(@release.external_id, @variant.id)
-    bucket = create_bucket_handle(
-      "collects-416256",
-      "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json",
-      "collects-images"
-    )
-    delete_image(bucket, img_name)
-    delete_image(bucket, small_img_name)
+    begin
+      delete_created_variant(@release, @variant)
+    rescue Exception => _
+      puts("failed to delete images for release #{params[:release_id]} and variant #{@variant.id}")
+      puts("retrying ...")
+      delete_created_variant(@release, @variant)
+    end
 
     @release.current_variant_id = nil
     @release.save
@@ -146,6 +146,17 @@ class VariantsController < ApplicationController
     @release.save
 
     redirect_to action: "index"
+  end
+
+  def delete_created_variant(release, variant)
+    img_name, small_img_name = image_names(@release.external_id, @variant.id)
+    bucket = create_bucket_handle(
+      "collects-416256",
+      "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json",
+      "collects-images"
+    )
+    delete_image(bucket, img_name)
+    delete_image(bucket, small_img_name)
   end
 
   private
