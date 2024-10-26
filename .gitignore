@@ -36,3 +36,6 @@
 
 # Ignore deploy scripts
 deploy_to_digital_ocean.sh
+
+# Ignore GCS keys
+/keys/
