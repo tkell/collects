@@ -1,7 +1,6 @@
 require "google/cloud/storage"
 
 class VariantsController < ApplicationController
-
   # per-release
   def index
     @release = Release.find(params[:release_id])
@@ -14,13 +13,17 @@ class VariantsController < ApplicationController
 
   end
 
-  def show
-    @variant = Variant.find(params[:id])
-    @release = Release.find(@variant.release_id)
+  def guard_release_owns_variant
     if !@release.variants.include?(@variant)
       redirect_to action: "index"
       return 
     end
+
+
+  def show
+    @variant = Variant.find(params[:id])
+    @release = Release.find(@variant.release_id)
+    guard_release_owns_variant
   end
 
   def new
@@ -30,10 +33,7 @@ class VariantsController < ApplicationController
   def update
     @release = Release.find(params[:release_id])
     @variant = Variant.find(params[:id])
-    if !@release.variants.include?(@variant)
-      redirect_to action: "index"
-      return
-    end
+    guard_release_owns_variant
 
     @release.current_variant_id = @variant.id
     @release.save
