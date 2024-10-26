@@ -13,11 +13,6 @@ class VariantsController < ApplicationController
 
   end
 
-  def guard_release_owns_variant
-    if !@release.variants.include?(@variant)
-      redirect_to action: "index"
-      return 
-    end
 
 
   def show
@@ -41,6 +36,7 @@ class VariantsController < ApplicationController
     redirect_to action: "index"
   end
 
+
   def create
     variant_cost = -1 # heh
     @release = Release.find(params[:release_id])
@@ -53,16 +49,8 @@ class VariantsController < ApplicationController
     end
 
     # Step 1:  convert.  If we fail, get out
-    img_data = variant_params[:img]
-    jpg_image = ImageProcessing::MiniMagick
-      .source(img_data.path)
-      .format("jpg")
-      .call
-
-    small_image = ImageProcessing::MiniMagick
-      .source(jpg_image.path)
-      .resize_to_limit(350, 350)
-      .call
+    jpg_image = convert_to_jpg(variant_params[:img])
+    small_image = make_small_image(jpg_image, 350)
     colors = Miro::DominantColors.new(small_image.path)
 
     # Step 2:  save the variant.  If we fail, get out
@@ -81,10 +69,8 @@ class VariantsController < ApplicationController
       render :new, status: :unprocessable_entity
     end
 
-
     # Step 3:  upload the images.  If we fail, get out _and_ delete both the variant and the images on GCS
     new_image_path = "https://storage.googleapis.com/collects-images/#{@release.external_id}-v#{@variant.id}"
-    img_ext = File.extname(jpg_image.path)
     image_name = "#{@release.external_id}-v#{@variant.id}.jpg"
     small_image_name = "#{@release.external_id}-v#{@variant.id}-small.jpg"
 
@@ -150,5 +136,31 @@ class VariantsController < ApplicationController
 
   def variant_params
     params.permit(:release_id, :img, :name, :commit)
+  end
+
+  def guard_release_owns_variant
+    if !@release.variants.include?(@variant)
+      redirect_to action: "index"
+      return
+    end
+  end
+
+  # Image things
+  def convert_to_jpg(img_data)
+    jpg_image = ImageProcessing::MiniMagick
+      .source(img_data.path)
+      .format("jpg")
+      .call
+
+    return jpg_image
+  end
+
+  def make_small_image(img_data, size)
+    small_image = ImageProcessing::MiniMagick
+      .source(img_data.path)
+      .resize_to_limit(size, size)
+      .call
+
+    return small_image
   end
 end
