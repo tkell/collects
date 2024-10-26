@@ -122,7 +122,13 @@ def make_release(collection, release_data)
   end
 
   image_path = "https://tide-pool.ca/tessellates/#{collection.name.downcase}/images/#{release.external_id}"
-  variant = Variant.new(release_id: release.id, image_path: image_path, colors: release_data["colors"])
+  variant = Variant.new(
+    release_id: release.id,
+    image_path: image_path,
+    colors: release_data["colors"],
+    name: "Standard",
+    is_standard: true
+  )
   release.variants << variant
   variant.save
   release.current_variant_id = variant.id

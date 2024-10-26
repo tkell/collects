@@ -19,9 +19,13 @@
   <ul>
     <% @variants.each do |variant| %>
       <li>
-        <%= variant.id %><%= @release.current_variant_id == variant.id ? " - current" : "" =%> <br />
+        <br />
+        <%= variant.id %><%= @release.current_variant_id == variant.id ? " - current" : "" %> - <%= variant.name %>
+        <br />
         <%= button_to("delete variant", release_variant_path(variant.release_id, variant.id), method: :delete, data: {turbo_method: :delete}, class: "btn-small")%>
+        <% if @release.current_variant_id != variant.id %>
         <%= button_to("pick as current variant", release_variant_path(variant.release_id, variant.id), method: :put, data: {turbo_method: :put}, class: "btn-small")%>
+        <% end %>
         <img src="<%= variant.image_path + ".jpg"%>">
       </li>
     <% end %>
@@ -32,8 +36,9 @@
   <h4>new variant</h4>
   <%= form_with model: @variant do |form| %>
     <div>
-      variant image upload:
-      <%= form.file_field :img, :class => 'image_upload' %>
+      name: <%= form.text_field :name %>
+      upload image: <%= form.file_field :img, :class => 'image_upload' %>
+      <br />
       <%= form.submit %>
     </div>
   <% end %>

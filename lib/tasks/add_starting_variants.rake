@@ -29,3 +29,11 @@ task :copy_colors_to_variants => :environment do
     end
   end
 
+
+task :add_name_and_is_standard_to_variants => :environment do
+  Variant.all.each do |v|
+    v.name = "Standard"
+    v.is_standard = true
+    v.save!
+  end
+end

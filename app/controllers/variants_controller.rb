@@ -17,6 +17,10 @@ class VariantsController < ApplicationController
   def show
     @variant = Variant.find(params[:id])
     @release = Release.find(@variant.release_id)
+    if !@release.variants.include?(@variant)
+      redirect_to action: "index"
+      return 
+    end
   end
 
   def new
@@ -26,6 +30,10 @@ class VariantsController < ApplicationController
   def update
     @release = Release.find(params[:release_id])
     @variant = Variant.find(params[:id])
+    if !@release.variants.include?(@variant)
+      redirect_to action: "index"
+      return
+    end
 
     @release.current_variant_id = @variant.id
     @release.save
@@ -61,11 +69,13 @@ class VariantsController < ApplicationController
     variant_data = {
       release_id: @release.id,
       colors: colors.to_hex.slice(0, 2),
-      image_path: "temp"
+      image_path: "temp",
+      name: variant_params[:name],
     }
 
     begin
       @variant = Variant.new(variant_data)
+      @variant.is_standard = false
       @variant.save!
     rescue ActiveRecord::RecordInvalid => _
       render :new, status: :unprocessable_entity
@@ -140,6 +150,6 @@ class VariantsController < ApplicationController
   private
 
   def variant_params
-    params.permit(:release_id, :img, :commit)
+    params.permit(:release_id, :img, :name, :commit)
   end
 end
