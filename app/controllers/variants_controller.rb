@@ -93,7 +93,7 @@ class VariantsController < ApplicationController
     end
 
     begin
-      new_image_path = "https://storage.googleapis.com/collects-images/#{@release.external_id}-v#{@variant.id}"
+      new_image_path = "https://storage.googleapis.com/collects-images/#{@release.external_id}-v#{@variant.id}.jpg"
       @variant.update(image_path: new_image_path)
       @variant.save!
     rescue ActiveRecord::RecordInvalid => _

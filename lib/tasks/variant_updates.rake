@@ -37,3 +37,10 @@ task :add_name_and_is_standard_to_variants => :environment do
     v.save!
   end
 end
+
+task :add_jpg_to_image_path => :environment do
+  Variant.all.each do |v|
+    v.image_path = v.image_path + ".jpg"
+    v.save!
+  end
+end
