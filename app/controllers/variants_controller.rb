@@ -203,7 +203,7 @@ class VariantsController < ApplicationController
   def create_bucket_handle(project_id, credentials_loc, bucket_name)
     storage = Google::Cloud::Storage.new(
       project_id: "collects-416256",
-      credentials: "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json"
+      credentials: "/home/rails/collects/keys/collects-416256-gcs-uploader-pk.json"
     )
     return storage.bucket("collects-images")
   end
