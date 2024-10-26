@@ -26,7 +26,7 @@
         <% if @release.current_variant_id != variant.id %>
         <%= button_to("pick as current variant", release_variant_path(variant.release_id, variant.id), method: :put, data: {turbo_method: :put}, class: "btn-small")%>
         <% end %>
-        <img src="<%= variant.image_path + ".jpg"%>">
+        <img src="<%= variant.image_path %>">
       </li>
     <% end %>
   </ul>
