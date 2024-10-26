@@ -105,12 +105,12 @@ class VariantsController < ApplicationController
 
   def destroy
     # will need some image stuff here / remove it from hosting, etc
-    # also make sure we can't destroy the only remaining variant / reassign current
     @release = Release.find(params[:release_id])
     @variant = Variant.find(params[:id])
 
-    if @variant.id == @release.current_variant_id
+    if @variant.id == @release.current_variant_id || @release.variants.length == 1
       redirect_to action: "index"
+      return
     end
 
     # delete the file first!
