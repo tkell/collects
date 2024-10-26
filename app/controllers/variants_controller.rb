@@ -10,10 +10,7 @@ class VariantsController < ApplicationController
     else
       @collection_name = 'vinyl'
     end
-
   end
-
-
 
   def show
     @variant = Variant.find(params[:id])
@@ -48,19 +45,23 @@ class VariantsController < ApplicationController
       render :new, status: :unprocessable_entity
     end
 
-    # Step 1:  convert.  If we fail, get out
-    jpg_image = convert_to_jpg(variant_params[:img])
-    small_image = make_small_image(jpg_image, 350)
-    colors = Miro::DominantColors.new(small_image.path)
+    # Step 1:  convert
+    begin
+      jpg_image = convert_to_jpg(variant_params[:img])
+      small_image = make_small_image(jpg_image, 350)
+      colors = Miro::DominantColors.new(small_image.path)
+    rescue Exception => _
+      puts("failed to convert image for release #{params[:release_id]}")
+      render :new, status: :unprocessable_entity
+    end
 
-    # Step 2:  save the variant.  If we fail, get out
+    # Step 2:  save the variant
     variant_data = {
       release_id: @release.id,
       colors: colors.to_hex.slice(0, 2),
       image_path: "temp",
       name: variant_params[:name],
     }
-
     begin
       @variant = Variant.new(variant_data)
       @variant.is_standard = false
@@ -70,20 +71,23 @@ class VariantsController < ApplicationController
     end
 
     # Step 3:  upload the images.  If we fail, get out _and_ delete both the variant and the images on GCS
-    new_image_path = "https://storage.googleapis.com/collects-images/#{@release.external_id}-v#{@variant.id}"
-    image_name = "#{@release.external_id}-v#{@variant.id}.jpg"
-    small_image_name = "#{@release.external_id}-v#{@variant.id}-small.jpg"
-
-    storage = Google::Cloud::Storage.new(
-      project_id: "collects-416256",
-      credentials: "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json"
-    )
-    bucket = storage.bucket("collects-images")
-
-    bucket.create_file(jpg_image.path, image_name)
-    bucket.create_file(small_image.path, small_image_name)
+    begin
+      bucket = create_bucket_handle(
+        "collects-416256",
+        "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json",
+        "collects-images"
+      )
+      img_name, small_img_name = image_names(@release.external_id, @variant.id)
+      bucket.create_file(jpg_image.path, img_name)
+      bucket.create_file(small_image.path, small_img_name)
+    rescue Exception => _
+      puts("failed to upload images for release #{params[:release_id]} and variant #{@variant.id}")
+      @variant.destroy
+      render :new, status: :unprocessable_entity
+    end
 
     begin
+      new_image_path = "https://storage.googleapis.com/collects-images/#{@release.external_id}-v#{@variant.id}"
       @variant.update(image_path: new_image_path)
       @variant.save!
       @release = Release.find(params[:release_id])
@@ -94,6 +98,12 @@ class VariantsController < ApplicationController
       @release.save
       redirect_to action: "index"
     rescue ActiveRecord::RecordInvalid => _
+      # release changes should be un-done by the transaction?
+      @variant.destroy
+      # delete images from GCS
+      delete_image(bucket, image_name)
+      delete_image(bucket, small_image_name)
+
       render :new, status: :unprocessable_entity
     end
 
@@ -108,19 +118,15 @@ class VariantsController < ApplicationController
       return
     end
 
-    # delete the file first!
-    storage = Google::Cloud::Storage.new(
-      project_id: "collects-416256",
-      credentials: "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json"
+    # delete the files first!
+    img_name, small_img_name = image_names(@release.external_id, @variant.id)
+    bucket = create_bucket_handle(
+      "collects-416256",
+      "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json",
+      "collects-images"
     )
-    bucket = storage.bucket("collects-images")
-    image_name = "#{@release.external_id}-v#{@variant.id}.jpg"
-    small_image_name = "#{@release.external_id}-v#{@variant.id}-small.jpg"
-
-    image_file = bucket.file(image_name)
-    image_file.delete
-    small_image_file = bucket.file(small_image_name)
-    small_image_file.delete
+    delete_image(bucket, img_name)
+    delete_image(bucket, small_img_name)
 
     @release.current_variant_id = nil
     @release.save
@@ -145,6 +151,13 @@ class VariantsController < ApplicationController
     end
   end
 
+  def image_names(release_id, variant_id)
+    image_name = "#{release_id}-v#{variant_id}.jpg"
+    small_image_name = "#{release_id}-v#{variant_id}-small.jpg"
+
+    return image_name, small_image_name
+  end
+
   # Image things
   def convert_to_jpg(img_data)
     jpg_image = ImageProcessing::MiniMagick
@@ -162,5 +175,20 @@ class VariantsController < ApplicationController
       .call
 
     return small_image
+  end
+
+
+  # GCS things
+  def create_bucket_handle(project_id, credentials_loc, bucket_name)
+    storage = Google::Cloud::Storage.new(
+      project_id: "collects-416256",
+      credentials: "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json"
+    )
+    return storage.bucket("collects-images")
+  end
+
+  def delete_image(bucket, image_name)
+    image_file = bucket.file(image_name)
+    image_file.delete
   end
 end
