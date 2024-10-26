@@ -45,7 +45,7 @@ class VariantsController < ApplicationController
       render :new, status: :unprocessable_entity
     end
 
-    # Step 1:  convert
+    # Step 1: convert
     begin
       jpg_image = convert_to_jpg(variant_params[:img])
       small_image = make_small_image(jpg_image, 350)
@@ -55,7 +55,7 @@ class VariantsController < ApplicationController
       render :new, status: :unprocessable_entity
     end
 
-    # Step 2:  save the variant
+    # Step 2: save the variant
     variant_data = {
       release_id: @release.id,
       colors: colors.to_hex.slice(0, 2),
@@ -70,7 +70,7 @@ class VariantsController < ApplicationController
       render :new, status: :unprocessable_entity
     end
 
-    # Step 3:  upload the images.  If we fail, get out _and_ delete both the variant and the images on GCS
+    # Step 3: upload the images
     begin
       bucket = create_bucket_handle(
         "collects-416256",
@@ -83,6 +83,12 @@ class VariantsController < ApplicationController
     rescue Exception => _
       puts("failed to upload images for release #{params[:release_id]} and variant #{@variant.id}")
       @variant.destroy
+      if bucket && bucket.file(img_name)
+        bucket.delete_file(img_name)
+      end
+      if bucket && bucket.file(small_img_name)
+        bucket.delete_file(small_img_name)
+      end
       render :new, status: :unprocessable_entity
     end
 
@@ -90,6 +96,14 @@ class VariantsController < ApplicationController
       new_image_path = "https://storage.googleapis.com/collects-images/#{@release.external_id}-v#{@variant.id}"
       @variant.update(image_path: new_image_path)
       @variant.save!
+    rescue ActiveRecord::RecordInvalid => _
+      @variant.destroy
+      delete_image(bucket, image_name)
+      delete_image(bucket, small_image_name)
+      render :new, status: :unprocessable_entity
+    end
+
+    begin
       @release = Release.find(params[:release_id])
       @release.variants << @variant
       @release.current_variant_id = @variant.id
@@ -98,12 +112,9 @@ class VariantsController < ApplicationController
       @release.save
       redirect_to action: "index"
     rescue ActiveRecord::RecordInvalid => _
-      # release changes should be un-done by the transaction?
       @variant.destroy
-      # delete images from GCS
       delete_image(bucket, image_name)
       delete_image(bucket, small_image_name)
-
       render :new, status: :unprocessable_entity
     end
 
@@ -118,7 +129,6 @@ class VariantsController < ApplicationController
       return
     end
 
-    # delete the files first!
     img_name, small_img_name = image_names(@release.external_id, @variant.id)
     bucket = create_bucket_handle(
       "collects-416256",
