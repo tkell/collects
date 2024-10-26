@@ -114,11 +114,10 @@ class VariantsController < ApplicationController
   end
 
   def destroy
-    # will need some image stuff here / remove it from hosting, etc
     @release = Release.find(params[:release_id])
     @variant = Variant.find(params[:id])
 
-    if @variant.id == @release.current_variant_id || @release.variants.length == 1
+    if @variant.id == @release.current_variant_id || @release.variants.length == 1 || @variant.is_standard
       redirect_to action: "index"
       return
     end
