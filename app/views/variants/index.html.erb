@@ -1,10 +1,22 @@
 
 <%= stylesheet_link_tag "application" %>
-
 <div class="centre">
   <h1 ><%= @release.artist %> - <%= @release.title %> [<%= @release.label %>]</h1>
   <div>
-    <p><%= @release.release_year %> // <%= @release.purchase_date %> | <%= @release.points_spent %> / <%= @release.points %></p>
+    <p>
+      <%= @release.release_year %> // <%= @release.purchase_date %>
+    </p>
+    <p>
+      <% if @can_make_variant %>
+        <span style="color:green">
+      <% else %>
+        <span style="color:red">
+      <% end %>
+        used: <%= @release.points_spent %>, remaining: <%= @release.points %>
+        </span>
+    </p>
+
+
   </div>
   <ul class="track-list">
     <% @release.tracks.each do |t| %>

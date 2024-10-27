@@ -1,7 +1,13 @@
 require "google/cloud/storage"
 
 class VariantsController < ApplicationController
-  # per-release
+  before_action :authenticate_user
+
+  @@variant_cost = 2.freeze
+  @@target_playbacks = 3.freeze
+  @@target_annotations = 1.freeze
+  @@collection_boost = 4.freeze
+
   def index
     @release = Release.find(params[:release_id])
     @variants = Variant.where(release_id: @release.id)
@@ -10,6 +16,8 @@ class VariantsController < ApplicationController
     else
       @collection_name = 'vinyl'
     end
+
+    @can_make_variant = can_make_variant?(@release, @current_user_id)
   end
 
   def show
@@ -34,15 +42,22 @@ class VariantsController < ApplicationController
   end
 
 
+  def can_make_variant?(release, user_id)
+    num_playbacks = Playback.where(user_id: user_id, release_id: release.id).count
+    num_annotations = Annotation.where(user_id: user_id, release_id: release.id).count
+
+    return release.points > @@variant_cost && num_playbacks > @@target_playbacks && num_annotations > @@target_annotations
+  end
+
+
   def create
-    variant_cost = -1 # heh
     @release = Release.find(params[:release_id])
 
     # Step 0:  check if we have enough points
-    if @release.points < variant_cost
+    if !can_make_variant?(@release, @current_user_id)
       redirect_to action: "index"
-      puts("not enough points, exiting")
-      render :new, status: :unprocessable_entity
+
+      return
     end
 
     # Step 1: convert
@@ -107,9 +122,14 @@ class VariantsController < ApplicationController
       @release = Release.find(params[:release_id])
       @release.variants << @variant
       @release.current_variant_id = @variant.id
-      @release.points -= variant_cost
-      @release.points_spent += variant_cost
+      @release.points -= @@variant_cost
+      @release.points_spent += @@variant_cost
       @release.save
+
+      @collection = Collection.find(@release.collection_id)
+      @collection.level += @@collection_boost
+      @collection.save
+
       redirect_to action: "index"
     rescue ActiveRecord::RecordInvalid => _
       @variant.destroy
