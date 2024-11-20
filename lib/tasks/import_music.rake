@@ -121,7 +121,7 @@ def make_release(collection, release_data)
     t.save
   end
 
-  image_path = "https://tide-pool.ca/tessellates/#{collection.name.downcase}/images/#{release.external_id}"
+  image_path = "https://tide-pool.ca/tessellates/#{collection.name.downcase}/images/#{release.external_id}.jpg"
   variant = Variant.new(
     release_id: release.id,
     image_path: image_path,
