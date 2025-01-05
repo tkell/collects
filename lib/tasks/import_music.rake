@@ -60,6 +60,7 @@ task :import_music, [:source_file, :collection_name, :overwrite_style] => [:envi
   end
 end
 
+
 def update_release(collection, release_data, release)
   if not release_data.except("tracks", "image_path", "id") < release.attributes
     puts("Updating #{release.title} with new data")
@@ -76,7 +77,6 @@ def update_release(collection, release_data, release)
     print("-")
   end
 
-
   # Trying to find if a single track has been changed is hard, so we look for an exact comparision
   # If we get a single thing different, we just re-load all the tracks.
   # This is cool because we don't use tracks as a reference for anything ... yet!
@@ -89,7 +89,7 @@ def update_release(collection, release_data, release)
     end
   end
 
-  if tracks_dirty
+  if tracks_dirty || release.tracks.size != tracks_data.size
     puts("Updating #{release.title} with new tracks")
     release.tracks.destroy_all
     tracks_data.each do |track|
@@ -97,6 +97,8 @@ def update_release(collection, release_data, release)
       release.tracks << t
       t.save
     end
+  else
+    print("not updating tracks for #{release.title}")
   end
 end
 
