@@ -62,15 +62,29 @@ end
 
 
 def update_release(collection, release_data, release)
-  if not release_data.except("tracks", "image_path", "id") < release.attributes
+  # I think this is wrong-o, and I need to do an explicit comparison
+
+  # folder too, if vinyl
+  fields_to_compare = ["title", "artist", "label", "release_year", "purchase_date"]
+  fields_to_compare << "folder" if collection.name == "Vinyl"
+
+  update_needed = false
+  fields_to_compare.each do |field|
+    if release_data[field] != release.send(field)
+      update_needed = true
+      break
+    end
+  end
+
+  if update_needed
     puts("Updating #{release.title} with new data")
     release.update(
       title: release_data["title"],
       artist: release_data["artist"],
       label: release_data["label"],
       release_year: release_data["release_year"],
-      purchase_date: release_data["purchase_date"] || Date.new(1982, 9, 23),
-      folder:  release_data["folder"] || "",
+      purchase_date: release_data["purchase_date"],
+      folder:  release_data["folder"] || ""
     )
     release.save
   else
