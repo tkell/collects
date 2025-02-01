@@ -62,15 +62,12 @@ end
 
 
 def update_release(collection, release_data, release)
-  # I think this is wrong-o, and I need to do an explicit comparison
-
-  # folder too, if vinyl
   fields_to_compare = ["title", "artist", "label", "release_year", "purchase_date"]
   fields_to_compare << "folder" if collection.name == "Vinyl"
 
   update_needed = false
   fields_to_compare.each do |field|
-    if release_data[field] != release.send(field)
+    if release_data[field].to_s != release.send(field).to_s
       update_needed = true
       break
     end
@@ -97,7 +94,8 @@ def update_release(collection, release_data, release)
   tracks_dirty = false
   tracks_data = release_data["tracks"]
   release.tracks.each_with_index do |track, index|
-    if not tracks_data[index].except("filepath") < track.attributes or tracks_data[index]["filepath"] != track.attributes["media_link"]
+    new_data = tracks_data[index]
+    if new_data["title"] != track.title || new_data["position"].to_s != track.position || new_data["filepath"] != track.media_link
       tracks_dirty = true
       break
     end
@@ -111,8 +109,6 @@ def update_release(collection, release_data, release)
       release.tracks << t
       t.save
     end
-  else
-    print("not updating tracks for #{release.title}")
   end
 end
 
