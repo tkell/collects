@@ -3,9 +3,14 @@ desc "Delete music objects from the db"
 
 task :delete_release, [:external_id, :collection_name] => :environment do |task, args|
   collection = Collection.find_by_name(args[:collection_name])
-  release = Release.find_by_external_id_and_collection_id(args[:external_id], collection.id)
+  release = Release.where(external_id: args[:external_id], collection_id: collection.id).first
 
-  puts("About to delete release: #{release}")
+  if release.nil?
+    puts("Release not found - check your external ID and collection name")
+    exit
+  end
+
+  puts("About to delete release: #{release.artist} - #{release.title} [#{release.label}]")
   puts("release has #{release.tracks.count} tracks, and #{release.variants.count} variants")
   puts("Are you sure? (y/n)")
   input = STDIN.gets.strip
@@ -23,7 +28,4 @@ task :delete_release, [:external_id, :collection_name] => :environment do |task,
     end
     release.destroy
   end
-
-
-
-
+end
