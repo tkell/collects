@@ -33,6 +33,34 @@ class UsersController < ApplicationController
     end
   end
 
+  def destroy
+    @user = User.find(params[:id])
+
+    ActiveRecord::Base.transaction do
+      @user.playbacks.destroy_all
+      @user.annotations.destroy_all
+
+      @user.collections.each do |collection|
+        collection.gardens.each do |garden|
+          garden.garden_releases.destroy_all
+          garden.destroy
+        end
+        collection.releases.destroy_all
+        collection.destroy
+      end
+
+      @user.destroy
+    end
+
+    respond_to do |format|
+      format.json { render json: { message: "User and all associated data deleted successfully" }, status: :ok }
+    end
+  rescue => e
+    respond_to do |format|
+      format.json { render json: { error: "Failed to delete user: #{e.message}" }, status: :unprocessable_entity }
+    end
+  end
+
   private
 
   def user_params

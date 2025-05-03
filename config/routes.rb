@@ -3,7 +3,7 @@ Rails.application.routes.draw do
 
   get 'login', to: 'authentication#new'
   post 'login', to: 'authentication#login'
-  resources :users, only: [:new, :create, :update]
+  resources :users, only: [:new, :create, :update, :destroy]
 
   # Collections are read-only, and are created and loaded from Rake tasks
   resources :collections, only: [:index, :show] do
