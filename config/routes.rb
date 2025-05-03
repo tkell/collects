@@ -1,8 +1,9 @@
 Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
+  get 'login', to: 'authentication#new'
   post 'login', to: 'authentication#login'
-  resources :users, only: [:create]
+  resources :users, only: [:new, :create]
 
   # Collections are read-only, and are created and loaded from Rake tasks
   resources :collections, only: [:index, :show] do
