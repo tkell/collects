@@ -19,6 +19,20 @@ class UsersController < ApplicationController
     end
   end
 
+  def update
+    @user = User.find(params[:id])
+
+    if @user.update(user_params)
+      respond_to do |format|
+        format.json { render json: { message: "User updated successfully" }, status: :ok }
+      end
+    else
+      respond_to do |format|
+        format.json { render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity }
+      end
+    end
+  end
+
   private
 
   def user_params
