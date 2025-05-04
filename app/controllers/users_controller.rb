@@ -16,6 +16,7 @@ class UsersController < ApplicationController
   end
 
   def update
+    authenticate_user
     @user = User.find(params[:id])
 
     if @user.update(user_params)
@@ -26,6 +27,7 @@ class UsersController < ApplicationController
   end
 
   def destroy
+    authenticate_user
     @user = User.find(params[:id])
 
     ActiveRecord::Base.transaction do
