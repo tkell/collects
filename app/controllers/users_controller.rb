@@ -1,6 +1,4 @@
 class UsersController < ApplicationController
-  skip_before_action :authenticate_user, only: [:new, :create], if: -> { method_defined?(:authenticate_user) }
-
   def new
     @user = User.new
   end
