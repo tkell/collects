@@ -9,13 +9,9 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
     
     if @user.save
-      respond_to do |format|
-        format.json { render json: { message: "User created successfully" }, status: :created }
-      end
+      render json: { message: "User created successfully" }, status: :created
     else
-      respond_to do |format|
-        format.json { render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity }
-      end
+      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -23,13 +19,9 @@ class UsersController < ApplicationController
     @user = User.find(params[:id])
 
     if @user.update(user_params)
-      respond_to do |format|
-        format.json { render json: { message: "User updated successfully" }, status: :ok }
-      end
+      render json: { message: "User updated successfully" }, status: :ok
     else
-      respond_to do |format|
-        format.json { render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity }
-      end
+      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
     end
   end
 
@@ -52,18 +44,14 @@ class UsersController < ApplicationController
       @user.destroy
     end
 
-    respond_to do |format|
-      format.json { render json: { message: "User and all associated data deleted successfully" }, status: :ok }
-    end
+    render json: { message: "User and all associated data deleted successfully" }, status: :ok
   rescue => e
-    respond_to do |format|
-      format.json { render json: { error: "Failed to delete user: #{e.message}" }, status: :unprocessable_entity }
-    end
+    render json: { error: "Failed to delete user: #{e.message}" }, status: :unprocessable_entity
   end
 
   private
 
   def user_params
-    params.require(:user).permit(:email, :username, :password, :password_confirmation)
+    params.permit(:email, :username, :password, :password_confirmation)
   end
 end

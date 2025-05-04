@@ -9,4 +9,6 @@ class ApplicationController < ActionController::API
       render json: { error: 'Unauthorized - Bad Token' }, status: :unauthorized
     end
   end
+
+  before_action :authenticate_user
 end
