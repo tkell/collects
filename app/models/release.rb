@@ -4,6 +4,43 @@ class Release < ApplicationRecord
   has_many :tracks
   has_many :variants
 
+  # class methods
+  class << self 
+    def make(release_data, collection)
+      release = Release.new(
+        title: release_data["title"],
+        artist: release_data["artist"],
+        label: release_data["label"],
+        folder:  release_data["folder"] || "",
+        release_year: release_data["release_year"],
+        purchase_date: release_data["purchase_date"] || Date.new(1982, 9, 23),
+        external_id: release_data["id"].to_s
+      )
+      collection.releases << release
+      release.save
+
+      tracks = release_data["tracks"]
+      tracks.each do |track|
+        t = Track.new(title: track["title"], position: track["position"].to_s, media_link: track["filepath"])
+        release.tracks << t
+        t.save
+      end
+
+      image_path = release_data["image_path"]
+      variant = Variant.new(
+        release_id: release.id,
+        image_path: image_path,
+        colors: release_data["colors"],
+        name: "Standard",
+        is_standard: true
+      )
+      release.variants << variant
+      variant.save
+      release.current_variant_id = variant.id
+      release.save
+    end
+  end
+
   def as_json(options={})
     super(:include => [:tracks, :variants])
   end

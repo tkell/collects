@@ -6,4 +6,10 @@ class Collection < ApplicationRecord
   has_one :linked_account # optional
 
   validates :user, presence: true
+
+  def update(overwrite_strategy)
+    release_sources.each do | rs |
+      rs.import_releases
+    end
+  end
 end

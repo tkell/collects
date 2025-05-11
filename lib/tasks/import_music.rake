@@ -20,6 +20,15 @@ task :import_vinyl_local do
   Rake::Task[:import_music].invoke(filepath, "Vinyl", "only_new")
 end
 
+task :import_music_new, [:collection_name, :overwrite_style] => [:environment] do |task, args|
+  collection = Collection.where(name: args[:collection_name]).first
+  if !collection
+    abort("Collection not found")
+  end
+
+  collection.update(args[:overwrite_style])
+end
+
 task :import_music, [:source_file, :collection_name, :overwrite_style] => [:environment] do |task, args|
   require "json"
 
