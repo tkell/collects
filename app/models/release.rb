@@ -25,7 +25,14 @@ class Release < ApplicationRecord
 
       tracks = release_data["tracks"]
       tracks.each do |track|
-        t = Track.new(title: track["title"], position: track["position"].to_s, media_link: track["filepath"])
+        track_id = release.external_id + "-" + track["position"].to_s
+        t = Track.new(
+          title: track["title"],
+          position: track["position"].to_s,
+          media_link: track["filepath"],
+          external_id: track_id,
+          purchase_date: release.purchase_date
+        )
         release.tracks << t
         t.save
       end
