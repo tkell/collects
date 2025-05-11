@@ -6,7 +6,7 @@ class Release < ApplicationRecord
 
   # class methods
   class << self 
-    def make(release_data, collection)
+    def make_from(release_data, collection_id)
       release = Release.new(
         title: release_data["title"],
         artist: release_data["artist"],
@@ -14,9 +14,9 @@ class Release < ApplicationRecord
         folder:  release_data["folder"] || "",
         release_year: release_data["release_year"],
         purchase_date: release_data["purchase_date"] || Date.new(1982, 9, 23),
-        external_id: release_data["id"].to_s
+        external_id: release_data["id"].to_s,
+        collection_id: collection_id
       )
-      collection.releases << release
       release.save
 
       tracks = release_data["tracks"]
