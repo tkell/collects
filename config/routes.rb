@@ -1,9 +1,15 @@
 Rails.application.routes.draw do
+  # OAuth routes
+  get 'oauth/authorize/:provider', to: 'o_auth#authorize', as: 'oauth_authorize'
+  get 'oauth/callback/:provider', to: 'o_auth#callback', as: 'oauth_callback'
+  
   get "up" => "rails/health#show", as: :rails_health_check
 
   get 'login', to: 'authentication#new'
   post 'login', to: 'authentication#login'
-  resources :users, only: [:new, :create, :update, :destroy]
+  resources :users, only: [:new, :create, :update, :destroy] do
+    resources :linked_accounts, only: [:index, :show, :destroy]
+  end
 
   # Collections are read-only, and are created and loaded from Rake tasks
   resources :collections, only: [:index, :show] do
