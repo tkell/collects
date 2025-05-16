@@ -1,6 +1,5 @@
 class LinkedAccount < ApplicationRecord
   belongs_to :user
-  belongs_to :collection
   
   # Provider types
   SPOTIFY = 'spotify'.freeze
