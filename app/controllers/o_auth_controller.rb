@@ -1,5 +1,5 @@
 class OAuthController < ApplicationController
-  before_action :authenticate_user!, except: [:callback]
+  before_action :authenticate_user!
   
   SPOTIFY_AUTH_URL = 'https://accounts.spotify.com/authorize'.freeze
   SPOTIFY_TOKEN_URL = 'https://accounts.spotify.com/api/token'.freeze
@@ -10,7 +10,6 @@ class OAuthController < ApplicationController
     
     case provider
     when 'spotify'
-      puts(spotify_auth_url)
       redirect_to spotify_auth_url, allow_other_host: true
     else
       render json: { error: 'Unsupported provider' }, status: :unprocessable_entity
@@ -72,10 +71,6 @@ class OAuthController < ApplicationController
       linked_account.access_token = token_data['access_token']
       linked_account.refresh_token = token_data['refresh_token']
       linked_account.expires_at = Time.current + token_data['expires_in'].to_i.seconds
-      
-      # Find or create associated collection if needed
-      collection_id = session[:collection_id] 
-      linked_account.collection_id = collection_id if collection_id
       
       if linked_account.save
         render json: { success: true, message: 'Successfully connected to Spotify' }

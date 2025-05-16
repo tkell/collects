@@ -1,6 +1,5 @@
 class Collection < ApplicationRecord
   belongs_to :user
-  has_one :linked_account
   has_many :gardens, dependent: :destroy
   has_many :releases, dependent: :destroy
   has_many :release_sources, dependent: :destroy

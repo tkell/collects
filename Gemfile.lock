@@ -101,6 +101,7 @@ GEM
     concurrent-ruby (1.2.2)
     connection_pool (2.4.1)
     crass (1.0.6)
+    csv (3.3.4)
     date (3.3.4)
     debug (1.8.0)
       irb (>= 1.5.0)
@@ -156,6 +157,10 @@ GEM
       multi_json (~> 1.11)
       os (>= 0.9, < 2.0)
       signet (>= 0.16, < 2.a)
+    httparty (0.23.1)
+      csv
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
     httpclient (2.8.3)
     i18n (1.14.1)
       concurrent-ruby (~> 1.0)
@@ -198,6 +203,8 @@ GEM
       oily_png
     msgpack (1.7.2)
     multi_json (1.15.0)
+    multi_xml (0.7.2)
+      bigdecimal (~> 3.1)
     mutex_m (0.2.0)
     net-http (0.4.1)
       uri
@@ -347,6 +354,7 @@ DEPENDENCIES
   capybara
   debug
   google-cloud-storage (~> 1.52.0)
+  httparty (~> 0.23)
   image_processing (~> 1.2)
   importmap-rails
   jbuilder

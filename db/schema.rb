@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2025_05_15_014341) do
+ActiveRecord::Schema[7.1].define(version: 2025_05_16_013100) do
   create_table "annotations", force: :cascade do |t|
     t.integer "user_id", null: false
     t.integer "release_id", null: false
@@ -50,7 +50,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_15_014341) do
 
   create_table "linked_accounts", force: :cascade do |t|
     t.integer "user_id", null: false
-    t.integer "collection_id", null: false
     t.string "type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -58,7 +57,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_15_014341) do
     t.string "access_token"
     t.string "refresh_token"
     t.datetime "expires_at"
-    t.index ["collection_id"], name: "index_linked_accounts_on_collection_id"
     t.index ["user_id"], name: "index_linked_accounts_on_user_id"
   end
 
@@ -135,7 +133,6 @@ ActiveRecord::Schema[7.1].define(version: 2025_05_15_014341) do
   add_foreign_key "garden_releases", "gardens"
   add_foreign_key "garden_releases", "releases"
   add_foreign_key "gardens", "collections"
-  add_foreign_key "linked_accounts", "collections"
   add_foreign_key "linked_accounts", "users"
   add_foreign_key "playbacks", "releases"
   add_foreign_key "playbacks", "users"
