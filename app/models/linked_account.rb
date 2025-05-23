@@ -1,17 +1,17 @@
 class LinkedAccount < ApplicationRecord
   belongs_to :user
-  
+
   # Provider types
   SPOTIFY = 'spotify'.freeze
-  
+
   validates :provider, presence: true
   validates :access_token, presence: true
-  
+
   # Check if the token is expired
   def expired?
     expires_at.present? && expires_at < Time.current
   end
-  
+
   # Refresh token methods can be implemented based on provider
   def refresh_spotify_token
     # This would be implemented with the Spotify API

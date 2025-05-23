@@ -1,12 +1,10 @@
 Rails.application.routes.draw do
-  # OAuth routes
-  get 'oauth/authorize/:provider', to: 'o_auth#authorize', as: 'oauth_authorize'
-  get 'oauth/callback/:provider', to: 'o_auth#callback', as: 'oauth_callback'
-  
   get "up" => "rails/health#show", as: :rails_health_check
 
   get 'login', to: 'authentication#new'
   post 'login', to: 'authentication#login'
+  get 'oauth/authorize/:provider', to: 'o_auth#authorize', as: 'oauth_authorize'
+  get 'oauth/callback/:provider', to: 'o_auth#callback', as: 'oauth_callback'
   resources :users, only: [:new, :create, :update, :destroy] do
     resources :linked_accounts, only: [:index, :show, :destroy]
   end
@@ -17,10 +15,6 @@ Rails.application.routes.draw do
     resources :gardens
   end
 
-  # playbacks can't be modified,
-  # maybe move these under releases someday
-  resources :playbacks, only: [:index, :show, :create ]
-
   # releases are also read-only,
   # annotations are under releases, so index shows all annotations for a release
   # hmm, release#show and annotations#index are awfully similar, oh well
@@ -28,4 +22,8 @@ Rails.application.routes.draw do
     resources :annotations, only: [:index, :create, :update, :destroy]
     resources :variants, only: [:index, :show, :create, :update, :destroy]
   end
+
+  # playbacks can't be modified,
+  # maybe move these under releases someday
+  resources :playbacks, only: [:index, :show, :create ]
 end
