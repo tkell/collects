@@ -8,8 +8,13 @@ class Collection < ApplicationRecord
 
   def update(overwrite_strategy)
     current_releases = releases.index_by(&:external_id)
+    total_added = 0
     release_sources.each do | rs |
-      rs.import_releases(overwrite_strategy, current_releases)
+      added = rs.import_releases(overwrite_strategy, current_releases)
+      total_added += added
     end
+
+    self.level += total_added
+    save!
   end
 end
