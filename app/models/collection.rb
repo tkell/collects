@@ -8,9 +8,13 @@ class Collection < ApplicationRecord
 
   def update_release_sources(overwrite_strategy)
     current_releases = releases.joins(:variants).pluck(:external_id, :colors).index_by {|r| r[0]}
-
+    total_added = 0
     release_sources.each do | rs |
-      rs.import_releases(overwrite_strategy, current_releases)
+      added = rs.import_releases(overwrite_strategy, current_releases)
+      total_added += added
     end
+
+    self.level += total_added
+    save!
   end
 end

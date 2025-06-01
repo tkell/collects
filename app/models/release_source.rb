@@ -53,11 +53,12 @@ class ReleaseSource < ApplicationRecord
           yield res if block_given?
         end
       end
-
       if overwrite_strategy == "update_existing" and existing_release
-        Release.update_from(release_data, existing_release)
+          Release.update_from(release_data, existing_release)
+          total_changes += 1
       end
     end
+
     new_level = collection.level + level_increase
     collection.update!(level: new_level)
   end

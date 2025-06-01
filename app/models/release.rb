@@ -126,6 +126,6 @@ class Release < ApplicationRecord
 
   def clean_up_variants
     update(current_variant_id: nil)
-    save
+    save!
   end
 end
