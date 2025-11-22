@@ -9,6 +9,7 @@ class PlaybacksController < ApplicationController
       .joins(:release)
       .where("playbacks.created_at >= ?", start_date).where("playbacks.created_at <= ?", end_date)
       .includes(:release)
+      .order(created_at: :desc)
 
     render json: @playbacks, include: [:release], status: :ok
   end
