@@ -1,9 +1,16 @@
 class PlaybacksController < ApplicationController
-  before_action :authenticate_user
+  ## before_action :authenticate_user
 
   def index
-    @playbacks = Playback.all
-    render json: @playbacks, status: :ok
+    p = playbacks_read_params
+    start_date = Date.parse(p[:start_date])
+    end_date = Date.parse(p[:end_date])
+    @playbacks = Playback
+      .joins(:release)
+      .where("playbacks.created_at >= ?", start_date).where("playbacks.created_at <= ?", end_date)
+      .includes(:release)
+
+    render json: @playbacks, include: [:release], status: :ok
   end
 
   def new
@@ -29,5 +36,13 @@ class PlaybacksController < ApplicationController
   private
   def playbacks_params
     params.require(:release_id)
+  end
+
+  def playbacks_read_params
+    today = Date.today.to_s
+    epoch = "1970-1-1"
+    params
+      .permit(:start_date, :end_date, "playback")
+      .with_defaults(start_date: epoch, end_date: today)
   end
 end
