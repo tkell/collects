@@ -40,10 +40,11 @@ class PlaybacksController < ApplicationController
   end
 
   def playbacks_read_params
-    today = Date.today.to_s
-    epoch = "1970-1-1"
+    today = Date.today + 1.day
+    today_str = today.to_s
+    epoch_str = "1970-1-1"
     params
       .permit(:start_date, :end_date, "playback")
-      .with_defaults(start_date: epoch, end_date: today)
+      .with_defaults(start_date: epoch_str, end_date: today_str)
   end
 end
