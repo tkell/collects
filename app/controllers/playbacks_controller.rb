@@ -1,5 +1,5 @@
 class PlaybacksController < ApplicationController
-  ## before_action :authenticate_user
+  before_action :authenticate_user
 
   def index
     p = playbacks_read_params
