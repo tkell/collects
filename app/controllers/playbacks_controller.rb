@@ -5,13 +5,21 @@ class PlaybacksController < ApplicationController
     p = playbacks_read_params
     start_date = Date.parse(p[:start_date])
     end_date = Date.parse(p[:end_date])
-    @playbacks = Playback
+    all_playbacks = Playback
       .joins(:release)
       .where("playbacks.created_at >= ?", start_date).where("playbacks.created_at <= ?", end_date)
       .includes(:release)
       .order(created_at: :desc)
 
-    render json: @playbacks, include: [:release], status: :ok
+    counts = Hash.new(0)
+    releases = Hash.new()
+    all_playbacks.each do |p|
+      releases[p.release.id] = p.release
+      counts[p.release.id] += 1
+    end
+    sorted_counts = counts.sort_by { |release_id, count| count }
+
+    render json: {playbacks: all_playbacks, counts: sorted_counts, releases: releases}, status: :ok
   end
 
   def new
