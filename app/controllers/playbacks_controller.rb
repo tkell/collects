@@ -29,7 +29,6 @@ class PlaybacksController < ApplicationController
         i = i + 1.send(grouping) # ruby magic!
     end
 
-    puts(groups)
     all_playbacks.each do |p|
       group_key = get_key(p.created_at, grouping)
       groups[group_key][p.release_id] += 1
@@ -37,6 +36,7 @@ class PlaybacksController < ApplicationController
     groups.keys.each do |k|
       groups[k] = groups[k].sort_by { |release_id, count| count }.reverse!
     end
+    groups = groups.sort.reverse.to_h
 
 
     render json: {playbacks: all_playbacks, counts: sorted_counts, releases: releases, groups: groups}, status: :ok
