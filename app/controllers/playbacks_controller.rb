@@ -17,7 +17,7 @@ class PlaybacksController < ApplicationController
       releases[p.release.id] = p.release
       counts[p.release.id] += 1
     end
-    sorted_counts = counts.sort_by { |release_id, count| count }
+    sorted_counts = counts.sort_by { |release_id, count| count }.reverse!
 
     render json: {playbacks: all_playbacks, counts: sorted_counts, releases: releases}, status: :ok
   end
