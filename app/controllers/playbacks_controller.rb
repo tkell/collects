@@ -20,7 +20,6 @@ class PlaybacksController < ApplicationController
     end
     sorted_counts = counts.sort_by { |release_id, count| count }.reverse!
 
-
     groups = Hash.new()
     i = start_date
     while i < end_date do
@@ -37,7 +36,6 @@ class PlaybacksController < ApplicationController
       groups[k] = groups[k].sort_by { |release_id, count| count }.reverse!
     end
     groups = groups.sort.reverse.to_h
-
 
     render json: {playbacks: all_playbacks, counts: sorted_counts, releases: releases, groups: groups}, status: :ok
   end
@@ -72,9 +70,10 @@ class PlaybacksController < ApplicationController
     end_date_str= end_date.to_s
     year = Date.today.year
     start_of_year_str = Date.new(year).to_s
+    grouping = "month"
     params
-      .permit(:start_date, :end_date, :g, "playback")
-      .with_defaults(start_date: start_of_year_str, end_date: end_date_str, g: "month")
+      .permit(:start_date, :end_date, :g, playback: {})
+      .with_defaults(start_date: start_of_year_str, end_date: end_date_str, g: grouping)
   end
 
   def get_key(date, grouping)
