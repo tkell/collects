@@ -49,8 +49,8 @@ class CollectionsController < ApplicationController
         end
       end
 
-      if p[:filter_string]
-        filter_string = "%" + Release.sanitize_sql_like(p[:filter_string]) + "%"
+      if p[:filter]
+        filter_string = "%" + Release.sanitize_sql_like(p[:filter]) + "%"
         data = data
           .where("artist LIKE :search_string OR title LIKE :search_string OR label LIKE :search_string", {search_string: filter_string})
       end
@@ -84,7 +84,7 @@ class CollectionsController < ApplicationController
 
   def tessellates_params
     params
-      .permit(:id, :serve_json, :limit, :offset, :filter_string, :folder, :release_year, :purchase_date, :sort)
+      .permit(:id, :serve_json, :limit, :offset, :filter, :folder, :release_year, :purchase_date, :sort)
       .with_defaults(limit: 100, offset: 0, filter_string: nil, folder: nil, release_year: nil, purchase_date: nil, sort: nil)
   end
 end
