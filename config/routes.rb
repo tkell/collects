@@ -3,6 +3,7 @@ Rails.application.routes.draw do
 
   get 'login', to: 'authentication#new'
   post 'login', to: 'authentication#login'
+  delete 'logout', to: 'authentication#logout'
   get 'oauth/authorize/:provider', to: 'o_auth#authorize', as: 'oauth_authorize'
   get 'oauth/callback/:provider', to: 'o_auth#callback', as: 'oauth_callback'
   resources :users, only: [:new, :create, :update, :destroy] do
