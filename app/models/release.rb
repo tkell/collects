@@ -125,8 +125,5 @@ class Release < ApplicationRecord
   def clean_up_variants
     update(current_variant_id: nil)
     save
-    puts("hmm")
-    puts(current_variant_id)
-    puts("hmm")
   end
 end
