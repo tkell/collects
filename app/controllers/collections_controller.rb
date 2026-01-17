@@ -57,8 +57,16 @@ class CollectionsController < ApplicationController
     end
 
     if p[:randomize]
-      data = data.order("RANDOM()")
+      random_key = p[:randomize][-1].to_i
+      data = data.order(Arel.sql("SUBSTRING(title, #{random_key}, 1)"))
+      data = data.order(Arel.sql("SUBSTRING(artist, #{random_key}, 1)"))
+      data = data.order(Arel.sql("SUBSTRING(label, #{random_key}, 1)"))
+
+      real_offset = p[:randomize].to_i % data.size # SQL calL!
+    else
+      real_offset = p[:offset]
     end
+
 
     # see above, options are artist, title, label, release_year, purchase_date
     if p[:sort] && p[:sort].length > 0 && p[:sort].size < 5
@@ -74,7 +82,7 @@ class CollectionsController < ApplicationController
 
     data = data
       .limit(p[:limit])
-      .offset(p[:offset])
+      .offset(real_offset)
       .includes(:tracks)
       .joins("LEFT JOIN variants ON variants.release_id = releases.id AND variants.id = releases.current_variant_id")
       .includes(:variants)
