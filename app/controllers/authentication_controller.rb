@@ -6,6 +6,11 @@ class AuthenticationController < ApplicationController
   def login
     user = User.find_by(email: params[:email].downcase)
     if user && user.authenticate(params[:password])
+      unless user.email_verified?
+        render json: {error: 'Please verify your email address before logging in'}, status: :unauthorized
+        return
+      end
+
       token = JWT.encode({user_id: user.id}, Rails.application.credentials.read)
       expires_at = Time.now + 300.days
       cookies.encrypted[:jwt] = {

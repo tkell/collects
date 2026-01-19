@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   delete 'logout', to: 'authentication#logout'
   get 'oauth/authorize/:provider', to: 'o_auth#authorize', as: 'oauth_authorize'
   get 'oauth/callback/:provider', to: 'o_auth#callback', as: 'oauth_callback'
+  get 'verify_email', to: 'users#verify_email'
   resources :users, only: [:new, :create, :update, :destroy] do
     resources :linked_accounts, only: [:index, :show, :destroy]
   end

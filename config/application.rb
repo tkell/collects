@@ -28,5 +28,8 @@ module Collects
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use ActionDispatch::Session::CookieStore, key: '_collects_session'
     config.api_only = false
+
+    # App host for email links (override in environment configs)
+    config.app_host = ENV.fetch("APP_HOST", "http://localhost:3000")
   end
 end
