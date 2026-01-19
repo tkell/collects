@@ -16,7 +16,7 @@ class AuthenticationController < ApplicationController
       }
       session[:user_id] = user.id
 
-      render json: {message: "Logged in", username: user.username, expires_at: expires_at}, status: :ok
+      render json: {message: "Logged in", user_id: user.id, username: user.username, expires_at: expires_at}, status: :ok
     else
       render json: {error: 'Invalid credentials'}, status: :unauthorized
     end

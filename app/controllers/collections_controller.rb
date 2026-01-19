@@ -90,6 +90,29 @@ class CollectionsController < ApplicationController
     render json: data
   end
 
+  def destroy
+    authenticate_user
+    collection = Collection.find_by(name: params[:id].capitalize)
+
+    if collection.nil?
+      render json: { error: "Collection not found" }, status: :not_found
+      return
+    end
+
+    ActiveRecord::Base.transaction do
+      collection.gardens.each do |garden|
+        garden.garden_releases.destroy_all
+        garden.destroy
+      end
+      collection.releases.destroy_all
+      collection.destroy
+    end
+
+    render json: { message: "Collection deleted successfully" }, status: :ok
+  rescue => e
+    render json: { error: "Failed to delete collection: #{e.message}" }, status: :unprocessable_entity
+  end
+
   private
 
   def tessellates_params

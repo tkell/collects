@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   end
 
   # Collections are read-only, and are created and loaded from Rake tasks
-  resources :collections, only: [:index, :show] do
+  resources :collections, only: [:index, :show, :destroy] do
     # Gardens will be / are fully REST-ful
     resources :gardens
   end
