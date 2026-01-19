@@ -11,8 +11,6 @@ class User < ApplicationRecord
   validates :email, presence: true, uniqueness: true
   validates :username, presence: true
 
-  before_create :generate_email_verification_token
-
   # Find a user's linked account for a specific provider
   def linked_account_for(provider)
     linked_accounts.find_by(provider: provider)
@@ -21,10 +19,6 @@ class User < ApplicationRecord
   # Check if user has a linked account for a provider
   def linked_to?(provider)
     linked_accounts.exists?(provider: provider)
-  end
-
-  def generate_email_verification_token
-    self.email_verification_token = SecureRandom.urlsafe_base64(32)
   end
 
   def verify_email!
