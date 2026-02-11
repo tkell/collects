@@ -20,6 +20,19 @@ test:
   <<: *default
   database: storage/test.sqlite3
 
+# PostgreSQL. Versions 9.3 and up are supported.
+#
+# Install the pg driver:
+#   gem install pg
+# On macOS with Homebrew:
+#   gem install pg -- --with-pg-config=/usr/local/bin/pg_config
+#
+# Configure Using Gemfile
+# gem "pg"
+
+# Only on DigitalOcean, not on my local!
 production:
   <<: *default
-  database: storage/production.sqlite3
+  database: collects_production
+  username: collects-pg
+  password: <%= ENV['COLLECTS_DATABASE_PASSWORD'] %>
