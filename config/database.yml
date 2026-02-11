@@ -33,6 +33,7 @@ test:
 # Only on DigitalOcean, not on my local!
 production:
   <<: *default
+  adapter: postgresql
   database: collects_production
   username: collects-pg
   password: <%= ENV['COLLECTS_DATABASE_PASSWORD'] %>
