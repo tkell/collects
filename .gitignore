@@ -34,8 +34,9 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
-# Ignore deploy scripts
+# Ignore deploy scripts and prod env files
 deploy_to_digital_ocean.sh
+digital-ocean.profile
 
 # Ignore GCS keys
 /keys/

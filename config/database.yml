@@ -34,6 +34,7 @@ test:
 production:
   <<: *default
   adapter: postgresql
+  host: localhost
   database: collects_production
   username: collects-pg
   password: <%= ENV['COLLECTS_DATABASE_PASSWORD'] %>
