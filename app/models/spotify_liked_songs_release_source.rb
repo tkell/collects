@@ -32,7 +32,6 @@ class SpotifyLikedSongsReleaseSource < ReleaseSource
   def refresh_spotify_token(spotify_account)
     client = SpotifyClient.new(nil)
     token_data = client.refresh_token(spotify_account.refresh_token)
-    
     spotify_account.update!(
       access_token: token_data['access_token'],
       expires_at: Time.current + token_data['expires_in'].to_i.seconds
@@ -46,7 +45,7 @@ class SpotifyLikedSongsReleaseSource < ReleaseSource
       track = item['track']
       album = track['album']
       album_id = album['id']
-      
+
       unless releases_by_album[album_id]
         releases_by_album[album_id] = {
           'external_id' => album_id,
@@ -79,7 +78,6 @@ class SpotifyLikedSongsReleaseSource < ReleaseSource
   def add_labels(releases_by_album, client)
     album_ids = releases_by_album.keys
     albums = client.fetch_albums(album_ids)
-    
     albums.each do |album|
       if album && releases_by_album[album['id']]
         releases_by_album[album['id']]['label'] = album['label'] || nil
