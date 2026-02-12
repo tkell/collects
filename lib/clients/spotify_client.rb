@@ -11,7 +11,6 @@ class SpotifyClient
 
   def refresh_token(refresh_token)
     config = OAuthConfig.get_provider_config('spotify')
-    
     response = HTTParty.post(TOKEN_URL, {
       body: {
         grant_type: 'refresh_token',
@@ -58,10 +57,9 @@ class SpotifyClient
 
   def fetch_albums(album_ids)
     albums = []
-    
     album_ids.each_slice(ALBUM_BATCH_SIZE) do |id_batch|
       ids_param = id_batch.join(',')
-      
+
       response = HTTParty.get("#{BASE_URL}/albums", {
         query: { ids: ids_param },
         headers: { 'Authorization' => "Bearer #{@access_token}" }
