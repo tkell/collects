@@ -8,6 +8,10 @@ task :import_vinyl do
   Rake::Task[:import_music].invoke("Vinyl", "only_new")
 end
 
+task :import_productions do
+  Rake::Task[:import_music].invoke("Productions", "only_new")
+end
+
 task :import_music, [:collection_name, :overwrite_style] => [:environment] do |task, args|
   collection = Collection.where(name: args[:collection_name]).first
   if !collection

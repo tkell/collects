@@ -3,14 +3,16 @@ Rails.application.routes.draw do
 
   get 'login', to: 'authentication#new'
   post 'login', to: 'authentication#login'
+  delete 'logout', to: 'authentication#logout'
   get 'oauth/authorize/:provider', to: 'o_auth#authorize', as: 'oauth_authorize'
   get 'oauth/callback/:provider', to: 'o_auth#callback', as: 'oauth_callback'
+  get 'verify_email', to: 'users#verify_email'
   resources :users, only: [:new, :create, :update, :destroy] do
     resources :linked_accounts, only: [:index, :show, :destroy]
   end
 
   # Collections are read-only, and are created and loaded from Rake tasks
-  resources :collections, only: [:index, :show] do
+  resources :collections, only: [:index, :show, :destroy] do
     # Gardens will be / are fully REST-ful
     resources :gardens
   end

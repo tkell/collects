@@ -54,6 +54,9 @@ gem 'jwt', '~> 2.2'
 # http party for oauth
 gem 'httparty', '~> 0.23'
 
+# postgres
+gem 'pg'
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
