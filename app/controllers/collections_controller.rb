@@ -53,7 +53,7 @@ class CollectionsController < ApplicationController
     if p[:filter]
       filter_string = "%" + Release.sanitize_sql_like(p[:filter]) + "%"
       data = data
-        .where("artist LIKE :search_string OR title LIKE :search_string OR label LIKE :search_string", {search_string: filter_string})
+        .where("artist ILIKE :search_string OR title ILIKE :search_string OR label ILIKE :search_string", {search_string: filter_string})
     end
 
     if p[:randomize]
