@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/tessellates/main.css">
+    <script src="/tessellates/api-state.js"></script>
+    <script src="/tessellates/login.js"></script>
+  </head>
+  <body>
+    <div class="centre" id="text">tessellates</div>
+
+    <div class="centre" id="hexagons-container">
+    </div>
+    <div class="centre" id="collections-container" style="display: none;">
+      <div>collections:</div>
+      <ul id="collections-list">
+      </ul>
+    </div>
+
+    <div class="centre" id="login-fields">login:
+      <input type="text" id="login-input" name="login" size="16" placeholder="email">
+      |
+      <input type="password" id="password-input" name="password" size="16" placeholder="password">
+      <button type="button" id="login-submit">&#x1f6aa;</button>
+    </div>
+
+
+    <div class="centre" id="create-user-container">
+      <div>create account:</div>
+      <input type="text" id="create-username" name="username" size="16" placeholder="username">
+      <input type="text" id="create-email" name="email" size="16" placeholder="email">
+      <input type="password" id="create-password" name="password" size="16" placeholder="password">
+      <input type="password" id="create-password-confirm" name="password_confirmation" size="16" placeholder="confirm password">
+      <button type="button" id="create-user-submit">&#x1F680;</button>
+    </div>
+
+    <div class="centre" id="settings-toggle-container">
+        settings + states <button type="button" id="settings-toggle">&#x2314;</button>
+    </div>
+    <div id="settings-container">
+      <div class="centre" id="logout-fields">
+        logout: <button type="button" id="logout-button">&#128075;</button>
+      </div>
+
+      <div class="centre" id="update-user-container" style="display: none;">
+        <div>update account:</div>
+        <input type="text" id="update-username" name="username" size="16" placeholder="new username">
+        <input type="password" id="update-password" name="password" size="16" placeholder="new password">
+        <input type="password" id="update-password-confirm" name="password_confirmation" size="16" placeholder="confirm password">
+        <button type="button" id="update-user-submit">&#x1F4DD;</button>
+      </div>
+
+      <div class="centre" id="delete-collection-container" style="display: none;">
+        <div>delete collection:</div>
+        <input type="text" id="delete-collection-name" name="collection_name" size="15" placeholder="collection name">
+        <button type="button" id="delete-collection-submit">&#x1F5D1;</button>
+      </div>
+    </div>
+  </body>
+</html>

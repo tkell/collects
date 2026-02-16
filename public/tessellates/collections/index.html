@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/tessellates/main.css">
+    <script src="/tessellates/params.js"></script>
+    <script src="/tessellates/api-state.js"></script>
+    <script src="/tessellates/api-helpers.js"></script>
+    <script src="/tessellates/ui/animation-helpers.js"></script>
+    <script src="/tessellates/ui/image-helpers.js"></script>
+    <script src="/tessellates/ui/ui-helpers.js"></script>
+    <script src="/tessellates/ui/render-helpers.js"></script>
+    <script src="/tessellates/vlc-helpers.js"></script>
+    <script src="/tessellates/tessellations/timeout-functions.js"></script>
+    <script src="/tessellates/tessellations/triangle.js"></script>
+    <script src="/tessellates/tessellations/square.js"></script>
+    <script src="/tessellates/tessellations/circle.js"></script>
+    <script src="/tessellates/tessellations/rhombus.js"></script>
+    <script src="/tessellates/main.js"></script>
+  </head>
+  <body>
+    <div class="centre" id="text">tessellates</div>
+    <div class="centre" id="track-text">-</div>
+    
+    <div class="tessellation-container">
+      <div id="image-grid" class="image-grid">
+      </div>
+      <div id="big-image-container" class="big-image-container">
+        <div id="big-image-wrapper" class="big-image-wrapper">
+        </div>
+      </div>
+    </div>
+    
+    <div class="centre">
+      <button id="back-big" type="button"> &#x21C7; </button>
+      <button id="back-medium" type="button"> &#x21A4; </button>
+      <button id="back-small" type="button"> &lt; </button>
+      <button id="forward-small" type="button"> &gt; </button>
+      <button id="forward-medium" type="button"> &#x21A6; </button>
+      <button id="forward-big" type="button"> &#x21C9; </button>
+      <span id="annotation-span">
+        /
+        <a id="annotation-link" href="https://tide-pool.ca" target="_blank"><button> &#128214; </button></a>
+        <a id="variants-link" href="https://tide-pool.ca" target="_blank"><button> &#127912; </button></a>
+      </span>
+    </div>
+    <div class="centre">
+      <input type="text" id="release-year-input" name="release-year" size="12" placeholder="release-year">
+      |
+      <input type="text" id="purchase-date-input" name="purchase-date" size="12" placeholder="purchase-year">
+      |
+      <input type="text" id="filter-input" name="filter" size="15" placeholder="artist-title-label">
+      |
+      <input type="text" id="sort-input" name="sort" size="10" placeholder="sort (atlyp)">
+      |
+      <button type="button" id="filter-submit">filter =></button>
+      ?
+      <button type="button" id="random">anywhere</button>
+      <button type="button" id="collection-flip">&#x21CB;</button>
+      &#x21CC;
+    </div>
+    <div id="folders-div" class="centre">
+      <button class="emoji-button" id="balearic" type="button"> &#127796; &#127466;&#127480; </button>
+      <button class="emoji-button" id="world" type="button"> &#128506; &#127760; </button>
+      <button class="emoji-button" id="seven-inches" type="button"> &#55;  &#128207;</button>
+      <button class="emoji-button" id="battletech" type="button"> &#9876; &#128640; </button>
+      <button class="emoji-button" id="breaks" type="button"> &#128679; &#129345; </button>
+      <button class="emoji-button" id="classical" type="button"> &#127931; &#127932; </button>
+      <button class="emoji-button" id="disco" type="button"> &#128378; &#128111; </button>
+      <button class="emoji-button" id="ambient-albums" type="button"> &#128191; &#128444;&#65039;</button>
+      <button class="emoji-button" id="house-tech-dance" type="button"> &#127968; &#127750; </button>
+      <button class="emoji-button" id="progressive" type="button"> &#127754; &#128302; </button>
+      <button class="emoji-button" id="swing-rock-albums" type="button"> &#127897;&#65039; &#128251;</button>
+      <button class="emoji-button" id="techno" type="button"> &#127898; &#127899; </button>
+      <button class="emoji-button" id="trance" type="button"> &#127749; &#10024; </button>
+      <button class="emoji-button" id="wall-records" type="button"> &#129521; </button>
+      <button class="emoji-button" id="all" type="button"> &#10060; </button>
+    </div>
+    <div id="playback-div" class="centre" style="visibility: hidden;">
+      <button id="enable-local-playback">&#x1F4FB;</button>
+      <button id="pause-local-playback" disabled>&#x23f8; / &#x25b6;</button>
+      <button id="clear-local-playback" disabled>&#x23f9; + &#x1f191;</button>
+    </div>
+    
+    <div class="centre">
+      <a href="login">
+        <button type="button" id="settings-button">&#x3A3;etttings</button>
+      </a>
+    </div>
+  </body>
+</html>
