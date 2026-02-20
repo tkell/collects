@@ -442,7 +442,7 @@ function displayCollections(collections) {
     collections.forEach(collection => {
       const li = document.createElement('li');
       const link = document.createElement('a');
-      link.href = `/tessellates/collections?c=${collection.name.toLowerCase()}`;
+      link.href = `/collections?c=${collection.name.toLowerCase()}`;
       link.textContent = collection.name;
       li.appendChild(link);
       li.appendChild(document.createTextNode(`: ${collection.level}`));
