@@ -56,10 +56,9 @@ class CollectionsController < ApplicationController
         .where("artist ILIKE :search_string OR title ILIKE :search_string OR label ILIKE :search_string", {search_string: filter_string})
     end
 
-    # We "inject" a sort and pick an offset here, if we're randomizing
+    # We use the front-end's "random" sort and pick an offset here, if we're randomizing
     if p[:randomize]
-      random_sort = SORT_KEYS.keys.sample(2).join("")
-      p[:sort] = random_sort
+      p[:sort] = p[:randomize]
       real_offset = (rand() * data.size).floor # SQL call to get the size of the data!
     else
       real_offset = p[:offset]

@@ -183,7 +183,15 @@ function buildUrl(apiState, offset, limit, params) {
 function setRandomView(params) {
   params['filter'] = undefined;
   params['release_year'] = undefined;
-  params['randomize'] = true
+
+  const sortKeys = ['a', 't', 'l', 'y', 'p'];
+  const firstIndex = Math.floor(Math.random() * sortKeys.length);
+  const firstSortKey = sortKeys[firstIndex];
+  const nextKeys = sortKeys.slice(0, firstIndex).concat(sortKeys.slice(firstIndex +1))
+  const secondIndex = Math.floor(Math.random() * nextKeys.length);
+  const secondSortKey = nextKeys[secondIndex];
+  params['randomize'] = firstSortKey + secondSortKey;
+
   params['min_offset'] = 0
   params['max_offset'] = tess.defaultItems * 3;
   delete params.offsetDelta;
