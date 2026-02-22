@@ -181,10 +181,9 @@ function buildUrl(apiState, offset, limit, params) {
  * @returns {Object} - Updated parameters
  */
 function setRandomView(params) {
-  const randomKey = Math.floor(Math.random() * 100_000)
   params['filter'] = undefined;
   params['release_year'] = undefined;
-  params['randomize'] = randomKey;
+  params['randomize'] = true
   params['min_offset'] = 0
   params['max_offset'] = tess.defaultItems * 3;
   delete params.offsetDelta;

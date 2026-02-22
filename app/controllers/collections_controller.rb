@@ -56,17 +56,14 @@ class CollectionsController < ApplicationController
         .where("artist ILIKE :search_string OR title ILIKE :search_string OR label ILIKE :search_string", {search_string: filter_string})
     end
 
+    # We "inject" a sort and pick an offset here, if we're randomizing
     if p[:randomize]
-      random_key = p[:randomize][-1].to_i
-      data = data.order(Arel.sql("SUBSTRING(title, #{random_key}, 1)"))
-      data = data.order(Arel.sql("SUBSTRING(artist, #{random_key}, 1)"))
-      data = data.order(Arel.sql("SUBSTRING(label, #{random_key}, 1)"))
-
-      real_offset = p[:randomize].to_i % data.size # SQL calL!
+      random_sort = SORT_KEYS.keys.sample(2).join("")
+      p[:sort] = random_sort
+      real_offset = (rand() * data.size).floor # SQL call to get the size of the data!
     else
       real_offset = p[:offset]
     end
-
 
     # see above, options are artist, title, label, release_year, purchase_date
     if p[:sort] && p[:sort].length > 0 && p[:sort].size < 5
