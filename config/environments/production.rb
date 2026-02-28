@@ -79,11 +79,21 @@ Rails.application.configure do
   #   location: '/usr/sbin/sendmail',
   #   arguments: %w[ -i ]
   # }
-  config.action_mailer.delivery_method = :sendmail
+  config.action_mailer.delivery_method = :smtp
   config.action_mailer.perform_caching = false
   config.action_mailer.perform_deliveries = true
-  config.action_mailer.raise_delivery_errors = false
-  config.action_mailer.default_options = { from: "no-reply@tessellates.app" }
+  config.action_mailer.raise_delivery_errors = true  # Changed to catch errors
+  config.action_mailer.default_options = { from: "no-reply@tessellates.space" }
+
+  config.action_mailer.smtp_settings = {
+    address: 'smtp.mailgun.org',
+    port: 587,
+    domain: ENV.fetch('MAILGUN_DOMAIN'),
+    user_name: ENV.fetch('MAILGUN_SMTP_LOGIN'),
+    password: ENV.fetch('MAILGUN_SMTP_PASSWORD'),
+    authentication: :plain,
+    enable_starttls_auto: true
+  }
 
   # Enable locale fallbacks for I18n (makes lookups for any locale fall back to
   # the I18n.default_locale when a translation cannot be found).
