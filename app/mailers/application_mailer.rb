@@ -1,4 +1,11 @@
 class ApplicationMailer < ActionMailer::Base
-  default from: ENV.fetch("MAILER_FROM", "noreply@tessellates.app")
+  RESPONSE_EMOJIS = ['🩵','💓', '🎵', '🛸', '🔊'].freeze
+  TEXT_ARTS = [
+    '>§»',
+    '¤⁀℮⁀⎀',
+    '⁁⁂Ɲ‱ܐ',
+  ].freeze
+
+  default from: ENV.fetch("MAILER_FROM", "noreply@tessellates.space")
   layout "mailer"
 end

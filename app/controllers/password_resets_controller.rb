@@ -1,11 +1,12 @@
 class PasswordResetsController < ApplicationController
+
   def create
     user = User.find_by(email: params[:email]&.downcase)
     if user && user.email_verified?
       user.generate_password_reset_token!
       UserMailer.password_reset_email(user).deliver_later
     end
-    # Always return success to prevent email enumeration
+    # return success to prevent email enumeration
     render json: { message: "If that email exists, a reset link has been sent." }, status: :ok
   end
 

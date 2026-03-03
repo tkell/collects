@@ -4,9 +4,11 @@
     <meta content="text/html; charset=UTF-8" http-equiv="Content-Type" />
   </head>
   <body>
-    <h1>Welcome to Tessellates, <%= @user.username %>!</h1>
-    <p>Please verify your email address by clicking the link below:</p>
-    <p><a href="<%= @verification_url %>">Verify my email</a></p>
-    <p>If you didn't create an account, you can ignore this email.</p>
+    <p><%= @text_art %></p>
+    <h1>Hello Tessellates, <%= @user.username %>!</h1>
+    <p>Verify email address by visiting:</p>
+    <p><a href="<%= @verification_url %>">Verify Tessellates</a></p>
+    <p>If you didn't create this account, pleae ignore this email.</p>
+    <p>Thanks from Tessellates, <%= @emoji %></p>
   </body>
 </html>
