@@ -28,4 +28,19 @@ class User < ApplicationRecord
   def email_verified?
     email_verified_at.present?
   end
+
+  def generate_password_reset_token!
+    update!(
+      password_reset_token: SecureRandom.urlsafe_base64(32),
+      password_reset_sent_at: Time.current
+    )
+  end
+
+  def password_reset_expired?
+    password_reset_sent_at.nil? || password_reset_sent_at < 2.hours.ago
+  end
+
+  def clear_password_reset_token!
+    update!(password_reset_token: nil, password_reset_sent_at: nil)
+  end
 end

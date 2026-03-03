@@ -30,6 +30,6 @@ module Collects
     config.api_only = false
 
     # App host for email links (override in environment configs)
-    config.app_host = ENV.fetch("APP_HOST", "http://localhost:3000")
+    config.app_host = ENV.fetch("APP_HOST", "http://localhost:8000")
   end
 end

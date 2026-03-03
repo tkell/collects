@@ -10,137 +10,143 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_01_19_000000) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_02_000000) do
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "annotations", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.integer "release_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "body"
-    t.integer "annotation_type"
-    t.index ["release_id"], name: "index_annotations_on_release_id"
-    t.index ["user_id"], name: "index_annotations_on_user_id"
+    t.bigint "user_id"
+    t.bigint "release_id"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.text "body"
+    t.bigint "annotation_type"
+    t.index ["release_id"], name: "idx_16436_index_annotations_on_release_id"
+    t.index ["user_id"], name: "idx_16436_index_annotations_on_user_id"
   end
 
   create_table "collections", force: :cascade do |t|
-    t.string "name"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "user_id"
-    t.integer "level"
-    t.index ["user_id"], name: "index_collections_on_user_id"
+    t.text "name"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.bigint "user_id"
+    t.bigint "level"
+    t.index ["user_id"], name: "idx_16424_index_collections_on_user_id"
   end
 
   create_table "garden_releases", force: :cascade do |t|
-    t.integer "release_id", null: false
-    t.integer "garden_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["garden_id"], name: "index_garden_releases_on_garden_id"
-    t.index ["release_id"], name: "index_garden_releases_on_release_id"
+    t.bigint "release_id"
+    t.bigint "garden_id"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.index ["garden_id"], name: "idx_16412_index_garden_releases_on_garden_id"
+    t.index ["release_id"], name: "idx_16412_index_garden_releases_on_release_id"
   end
 
   create_table "gardens", force: :cascade do |t|
-    t.string "name"
-    t.integer "collection_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["collection_id"], name: "index_gardens_on_collection_id"
+    t.text "name"
+    t.bigint "collection_id"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.index ["collection_id"], name: "idx_16398_index_gardens_on_collection_id"
   end
 
   create_table "linked_accounts", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "provider"
-    t.string "access_token"
-    t.string "refresh_token"
-    t.datetime "expires_at"
-    t.index ["user_id"], name: "index_linked_accounts_on_user_id"
+    t.bigint "user_id"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.text "provider"
+    t.text "access_token"
+    t.text "refresh_token"
+    t.timestamptz "expires_at"
+    t.index ["user_id"], name: "idx_16466_index_linked_accounts_on_user_id"
   end
 
   create_table "playbacks", force: :cascade do |t|
-    t.integer "user_id", null: false
-    t.integer "release_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["release_id"], name: "index_playbacks_on_release_id"
-    t.index ["user_id"], name: "index_playbacks_on_user_id"
+    t.bigint "user_id"
+    t.bigint "release_id"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.index ["release_id"], name: "idx_16431_index_playbacks_on_release_id"
+    t.index ["user_id"], name: "idx_16431_index_playbacks_on_user_id"
   end
 
   create_table "release_sources", force: :cascade do |t|
-    t.integer "collection_id", null: false
-    t.string "type"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "local_file_path"
-    t.index ["collection_id"], name: "index_release_sources_on_collection_id"
+    t.bigint "collection_id"
+    t.text "type"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.text "local_file_path"
+    t.index ["collection_id"], name: "idx_16459_index_release_sources_on_collection_id"
   end
 
   create_table "releases", force: :cascade do |t|
-    t.string "artist"
-    t.string "title"
-    t.string "label"
-    t.integer "collection_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "external_id"
-    t.string "folder"
-    t.integer "release_year"
+    t.text "artist"
+    t.text "title"
+    t.text "label"
+    t.bigint "collection_id"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.text "external_id"
+    t.text "folder"
+    t.bigint "release_year"
     t.date "purchase_date"
-    t.integer "points", default: 0
-    t.integer "points_spent", default: 0
-    t.integer "current_variant_id"
-    t.index ["collection_id"], name: "index_releases_on_collection_id"
-    t.index ["external_id"], name: "index_releases_on_external_id", unique: true
+    t.bigint "points", default: 0
+    t.bigint "points_spent", default: 0
+    t.bigint "current_variant_id"
+    t.index ["collection_id"], name: "idx_16450_index_releases_on_collection_id"
+    t.index ["external_id"], name: "idx_16450_index_releases_on_external_id", unique: true
   end
 
   create_table "tracks", force: :cascade do |t|
-    t.string "title"
-    t.string "media_link"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.integer "release_id", null: false
-    t.string "position"
+    t.text "title"
+    t.text "media_link"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.bigint "release_id"
+    t.text "position"
     t.date "purchase_date"
-    t.string "external_id"
-    t.index ["release_id"], name: "index_tracks_on_release_id"
+    t.text "external_id"
+    t.index ["release_id"], name: "idx_16405_index_tracks_on_release_id"
   end
 
   create_table "users", force: :cascade do |t|
-    t.string "email"
-    t.string "username"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "password_digest"
-    t.string "email_verification_token"
-    t.datetime "email_verified_at"
-    t.index ["email_verification_token"], name: "index_users_on_email_verification_token", unique: true
+    t.text "email"
+    t.text "username"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.text "password_digest"
+    t.text "email_verification_token"
+    t.timestamptz "email_verified_at"
+    t.string "password_reset_token"
+    t.datetime "password_reset_sent_at"
+    t.index ["email_verification_token"], name: "idx_16417_index_users_on_email_verification_token", unique: true
+    t.index ["password_reset_token"], name: "index_users_on_password_reset_token", unique: true
   end
 
   create_table "variants", force: :cascade do |t|
-    t.string "image_path"
-    t.integer "release_id", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.string "colors"
-    t.string "name"
+    t.text "image_path"
+    t.bigint "release_id"
+    t.timestamptz "created_at"
+    t.timestamptz "updated_at"
+    t.text "colors"
+    t.text "name"
     t.boolean "is_standard"
-    t.index ["release_id"], name: "index_variants_on_release_id"
+    t.index ["release_id"], name: "idx_16443_index_variants_on_release_id"
   end
 
-  add_foreign_key "annotations", "releases"
-  add_foreign_key "annotations", "users"
-  add_foreign_key "collections", "users"
-  add_foreign_key "garden_releases", "gardens"
-  add_foreign_key "garden_releases", "releases"
-  add_foreign_key "gardens", "collections"
-  add_foreign_key "linked_accounts", "users"
-  add_foreign_key "playbacks", "releases"
-  add_foreign_key "playbacks", "users"
-  add_foreign_key "release_sources", "collections"
-  add_foreign_key "releases", "collections"
-  add_foreign_key "releases", "variants", column: "current_variant_id"
-  add_foreign_key "tracks", "releases"
-  add_foreign_key "variants", "releases"
+  add_foreign_key "annotations", "releases", name: "annotations_release_id_fkey"
+  add_foreign_key "annotations", "users", name: "annotations_user_id_fkey"
+  add_foreign_key "collections", "users", name: "collections_user_id_fkey"
+  add_foreign_key "garden_releases", "gardens", name: "garden_releases_garden_id_fkey"
+  add_foreign_key "garden_releases", "releases", name: "garden_releases_release_id_fkey"
+  add_foreign_key "gardens", "collections", name: "gardens_collection_id_fkey"
+  add_foreign_key "linked_accounts", "users", name: "linked_accounts_user_id_fkey"
+  add_foreign_key "playbacks", "releases", name: "playbacks_release_id_fkey"
+  add_foreign_key "playbacks", "users", name: "playbacks_user_id_fkey"
+  add_foreign_key "release_sources", "collections", name: "release_sources_collection_id_fkey"
+  add_foreign_key "releases", "collections", name: "releases_collection_id_fkey"
+  add_foreign_key "releases", "variants", column: "current_variant_id", name: "releases_current_variant_id_fkey"
+  add_foreign_key "tracks", "releases", name: "tracks_release_id_fkey"
+  add_foreign_key "variants", "releases", name: "variants_release_id_fkey"
 end

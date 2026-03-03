@@ -59,6 +59,90 @@ function bounceHexagons() {
 }
 
 /**
+ * Request a password reset email
+ * @param {string} elementId - Element ID for the button or input
+ * @param {string} eventType - Event type (click or keypress)
+ */
+function addResetPasswordRequestInteraction(elementId, eventType) {
+  document.getElementById(elementId).addEventListener(eventType, async (e) => {
+    if (eventType === "keypress" && e.key !== "Enter") return;
+
+    const email = document.getElementById('forgot-password-email').value;
+    if (!email) {
+      alert('Please enter your email address');
+      return;
+    }
+
+    bounceHexagons();
+
+    try {
+      const url = `${apiState.protocol}://${apiState.host}/password_resets`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+        credentials: 'include'
+      });
+
+      const data = await response.json();
+      alert(data.message || 'If that email exists, a reset link has been sent.');
+    } catch (error) {
+      alert('Error requesting password reset: ' + error.message);
+    }
+  });
+}
+
+/**
+ * Submit a new password using the reset token from the URL
+ * @param {string} elementId - Element ID for the button or input
+ * @param {string} eventType - Event type (click or keypress)
+ */
+function addResetPasswordSubmitInteraction(elementId, eventType) {
+  document.getElementById(elementId).addEventListener(eventType, async (e) => {
+    if (eventType === "keypress" && e.key !== "Enter") return;
+
+    const password = document.getElementById('reset-new-password').value;
+    const password_confirmation = document.getElementById('reset-new-password-confirm').value;
+
+    if (!password || !password_confirmation) {
+      alert('Please fill in both password fields');
+      return;
+    }
+
+    if (password !== password_confirmation) {
+      alert('Passwords do not match');
+      return;
+    }
+
+    const token = new URLSearchParams(window.location.search).get('reset_token');
+
+    bounceHexagons();
+
+    try {
+      const url = `${apiState.protocol}://${apiState.host}/password_resets/${token}`;
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password, password_confirmation }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || (data.errors && data.errors.join(', ')) || 'Reset failed');
+      }
+
+      alert('Password updated! You can now log in.');
+      window.history.replaceState({}, document.title, window.location.pathname);
+      document.getElementById('reset-password-container').style.display = 'none';
+      document.getElementById('login-fields').style.display = '';
+    } catch (error) {
+      alert('Error resetting password: ' + error.message);
+    }
+  });
+}
+
+/**
  * Add login interaction
  * @param {string} elementId - Element ID for the button or input
  * @param {string} eventType - Event type (click or keypress)
@@ -355,13 +439,15 @@ function displayLoggedOut() {
     document.getElementById('logout-button').disabled = true;
 
     document.getElementById('login-submit').style.display = '';
+    document.getElementById('reset-password-container').style.display = 'none';
     document.getElementById('collections-container').style.display = 'none';
     document.getElementById('collections-list').innerHTML = '';
     document.getElementById('create-user-container').style.display = '';
+    document.getElementById('forgot-password-container').style.display = '';
     document.getElementById('update-user-container').style.display = 'none';
     document.getElementById('delete-collection-container').style.display = 'none';
 
-    document.getElementById('settings-toggle').style.display = 'none';
+    document.getElementById('settings-toggle-container').style.display = 'none';
     document.getElementById('settings-container').style.display = 'none';
   }
 }
@@ -380,6 +466,7 @@ function displayLoggedIn() {
     document.getElementById('logout-button').disabled = false;
 
     document.getElementById('create-user-container').style.display = 'none';
+    document.getElementById('forgot-password-container').style.display = 'none';
     document.getElementById('update-user-container').style.display = '';
     document.getElementById('delete-collection-container').style.display = '';
 
@@ -388,7 +475,7 @@ function displayLoggedIn() {
     document.getElementById('settings-container').style.display = 'none';
     fetchAndDisplayCollections();
   } else {
-    document.getElementById('settings-toggle').style.display = 'none';
+    document.getElementById('settings-toggle-container').style.display = 'none';
     document.getElementById('settings-container').style.display = 'none';
   }
 }
@@ -504,6 +591,18 @@ window.addEventListener("load", (event) => {
   addDeleteCollectionInteraction("delete-collection-submit", "click");
   addSettingsToggleInteraction("settings-toggle", "click");
   addSettingsToggleInteraction("settings-toggle", "keypress");
+  addResetPasswordRequestInteraction("forgot-password-submit", "click");
+  addResetPasswordRequestInteraction("forgot-password-email", "keypress");
+  addResetPasswordSubmitInteraction("reset-new-password-confirm", "keypress");
+  addResetPasswordSubmitInteraction("reset-password-submit", "click");
+
+  const resetToken = new URLSearchParams(window.location.search).get('reset_token');
+  if (resetToken) {
+    document.getElementById('login-fields').style.display = 'none';
+    document.getElementById('create-user-container').style.display = 'none';
+    document.getElementById('forgot-password-container').style.display = 'none';
+    document.getElementById('reset-password-container').style.display = '';
+  }
 
   displayLoggedIn();
 });
