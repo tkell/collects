@@ -86,6 +86,51 @@ class CollectionsController < ApplicationController
     render json: data
   end
 
+  def create
+    authenticate_user
+    return if performed?
+
+    collection = Collection.new(name: collection_params[:name], user: @current_user)
+    unless collection.save
+      render json: { error: collection.errors }, status: :unprocessable_entity
+      return
+    end
+
+    release_source = LocalJsonReleaseSource.new(
+      collection: collection,
+      local_file_path: collection_params[:local_file_path]
+    )
+    unless release_source.save
+      collection.destroy
+      render json: { error: release_source.errors }, status: :unprocessable_entity
+      return
+    end
+
+    release_source.import_releases("only_new", {})
+
+    render json: collection, status: :created
+  rescue => e
+    render json: { error: "Failed to create collection: #{e.message}" }, status: :unprocessable_entity
+  end
+
+  def update
+    authenticate_user
+    return if performed?
+
+    collection = Collection.find_by(id: params[:id])
+    if collection.nil?
+      render json: { error: "Collection not found" }, status: :not_found
+      return
+    end
+
+    overwrite_strategy = params.fetch(:overwrite_strategy, "only_new")
+    collection.update(overwrite_strategy)
+
+    render json: collection
+  rescue => e
+    render json: { error: "Failed to update collection: #{e.message}" }, status: :unprocessable_entity
+  end
+
   def destroy
     authenticate_user
     collection = Collection.find_by(name: params[:id].capitalize)
@@ -110,6 +155,10 @@ class CollectionsController < ApplicationController
   end
 
   private
+
+  def collection_params
+    params.permit(:name, :local_file_path, :overwrite_strategy)
+  end
 
   def tessellates_params
     params

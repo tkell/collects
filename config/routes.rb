@@ -14,13 +14,12 @@ Rails.application.routes.draw do
     resources :linked_accounts, only: [:index, :show, :destroy]
   end
 
-  # Collections are read-only, and are created and loaded from Rake tasks
-  resources :collections, only: [:index, :show, :destroy] do
+  resources :collections, only: [:index, :show, :create, :update, :destroy] do
     # Gardens will be / are fully REST-ful
     resources :gardens
   end
 
-  # releases are also read-only,
+  # releases are also read-only, they're created via collections
   # annotations are under releases, so index shows all annotations for a release
   # hmm, release#show and annotations#index are awfully similar, oh well
   resources :releases, only: [:show] do
