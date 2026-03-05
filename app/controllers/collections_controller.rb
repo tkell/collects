@@ -96,16 +96,14 @@ class CollectionsController < ApplicationController
       return
     end
 
-    release_source = LocalJsonReleaseSource.new(
-      collection: collection,
-      local_file_path: collection_params[:local_file_path]
-    )
+    release_source = RubyHashReleaseSource.new(collection: collection)
     unless release_source.save
       collection.destroy
       render json: { error: release_source.errors }, status: :unprocessable_entity
       return
     end
 
+    release_source.raw_releases = params[:releases] || []
     release_source.import_releases("only_new", {})
 
     render json: collection, status: :created
@@ -122,12 +120,20 @@ class CollectionsController < ApplicationController
       render json: { error: "Collection not found" }, status: :not_found
       return
     end
+    puts('in update, got collection')
 
     overwrite_strategy = params.fetch(:overwrite_strategy, "only_new")
-    collection.update(overwrite_strategy)
+    ## aha, I need to delete the old release source from the prod db and add a new RubyHash one
+    ## and then put a big Switch here to look for the right param for the right release source type
+    ## but that can wait until I have my stuff working!
+    release_source = collection.release_sources.first ||
+      RubyHashReleaseSource.create(collection: collection)
+    release_source.raw_releases = params[:releases] || []
+    release_source.import_releases(overwrite_strategy, collection.releases.index_by(&:external_id))
 
     render json: collection
   rescue => e
+    puts(e)
     render json: { error: "Failed to update collection: #{e.message}" }, status: :unprocessable_entity
   end
 
@@ -157,7 +163,7 @@ class CollectionsController < ApplicationController
   private
 
   def collection_params
-    params.permit(:name, :local_file_path, :overwrite_strategy)
+    params.permit(:name, :overwrite_strategy, releases: {})
   end
 
   def tessellates_params

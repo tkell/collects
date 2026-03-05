@@ -66,6 +66,17 @@
         <input type="text" id="delete-collection-name" name="collection_name" size="15" placeholder="collection name">
         <button type="button" id="delete-collection-submit">&#x1F5D1;</button>
       </div>
+
+      <div class="centre" id="update-collection-container" style="display: none;">
+        <div>update collection:</div>
+        <select id="update-collection-name"></select>
+        <select id="update-overwrite-strategy">
+          <option value="only_new">only new</option>
+          <option value="update_existing">update existing</option>
+        </select>
+        <input type="file" id="update-collection-file" accept=".json">
+        <button type="button" id="update-collection-submit">&#x1F4E6;</button>
+      </div>
     </div>
   </body>
 </html>
