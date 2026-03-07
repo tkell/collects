@@ -123,11 +123,9 @@ class CollectionsController < ApplicationController
     puts('in update, got collection')
 
     overwrite_strategy = params.fetch(:overwrite_strategy, "only_new")
-    ## aha, I need to delete the old release source from the prod db and add a new RubyHash one
     ## and then put a big Switch here to look for the right param for the right release source type
     ## but that can wait until I have my stuff working!
-    release_source = collection.release_sources.first ||
-      RubyHashReleaseSource.create(collection: collection)
+    release_source = collection.release_sources.first
     release_source.raw_releases = params[:releases] || []
     release_source.import_releases(overwrite_strategy, collection.releases.index_by(&:external_id))
 
