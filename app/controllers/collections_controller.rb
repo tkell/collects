@@ -86,6 +86,55 @@ class CollectionsController < ApplicationController
     render json: data
   end
 
+  def create
+    authenticate_user
+    return if performed?
+
+    collection = Collection.new(name: collection_params[:name], user: @current_user)
+    unless collection.save
+      render json: { error: collection.errors }, status: :unprocessable_entity
+      return
+    end
+
+    release_source = RubyHashReleaseSource.new(collection: collection)
+    unless release_source.save
+      collection.destroy
+      render json: { error: release_source.errors }, status: :unprocessable_entity
+      return
+    end
+
+    release_source.raw_releases = params[:releases] || []
+    release_source.import_releases("only_new", {})
+
+    render json: collection, status: :created
+  rescue => e
+    render json: { error: "Failed to create collection: #{e.message}" }, status: :unprocessable_entity
+  end
+
+  def update
+    authenticate_user
+    return if performed?
+
+    collection = Collection.find_by(id: params[:id])
+    if collection.nil?
+      render json: { error: "Collection not found" }, status: :not_found
+      return
+    end
+    puts('in update, got collection')
+
+    overwrite_strategy = params.fetch(:overwrite_strategy, "only_new")
+    ## and then put a big Switch here to look for the right param for the right release source type
+    ## but that can wait until I have my stuff working!
+    release_source = collection.release_sources.first
+    release_source.raw_releases = params[:releases] || []
+    release_source.import_releases(overwrite_strategy, collection.releases.index_by(&:external_id))
+
+    render json: collection
+  rescue => e
+    puts(e)
+    render json: { error: "Failed to update collection: #{e.message}" }, status: :unprocessable_entity
+  end
+
   def destroy
     authenticate_user
     collection = Collection.find_by(name: params[:id].capitalize)
@@ -110,6 +159,10 @@ class CollectionsController < ApplicationController
   end
 
   private
+
+  def collection_params
+    params.permit(:name, :overwrite_strategy, releases: {})
+  end
 
   def tessellates_params
     params

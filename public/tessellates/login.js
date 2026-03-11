@@ -388,6 +388,66 @@ function addDeleteCollectionInteraction(elementId, eventType) {
 }
 
 /**
+ * Add update collection interaction
+ * @param {string} elementId - Element ID for the button or input
+ * @param {string} eventType - Event type (click or keypress)
+ */
+function addUpdateCollectionInteraction(elementId, eventType) {
+  document.getElementById(elementId).addEventListener(eventType, async (e) => {
+    if (eventType === "keypress" && e.key !== "Enter") {
+      return;
+    }
+
+    const collectionName = document.getElementById('update-collection-name').value;
+    const overwriteStrategy = document.getElementById('update-overwrite-strategy').value;
+    const fileInput = document.getElementById('update-collection-file');
+    const file = fileInput.files[0];
+
+    if (!collectionName) {
+      alert('Please select a collection');
+      return;
+    }
+
+    if (!file) {
+      alert('Please select a JSON file');
+      return;
+    }
+
+    const collection = userCollections.find(c => c.name.toLowerCase() === collectionName.toLowerCase());
+    if (!collection) {
+      alert('Collection not found');
+      return;
+    }
+
+    bounceHexagons();
+
+    try {
+      const text = await file.text();
+      const releases = JSON.parse(text);
+
+      const url = `${apiState.protocol}://${apiState.host}/collections/${collection.id}`;
+      const response = await fetch(url, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ releases, overwrite_strategy: overwriteStrategy }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Update failed');
+      }
+
+      alert('Collection updated!');
+      fileInput.value = '';
+      fetchAndDisplayCollections();
+    } catch (error) {
+      alert('Error updating collection: ' + error.message);
+    }
+  });
+}
+
+/**
  * Add logout interaction
  * @param {string} elementId - Element ID for the logout button
  * @param {string} eventType - Event type (click or keypress)
@@ -446,6 +506,7 @@ function displayLoggedOut() {
     document.getElementById('forgot-password-container').style.display = '';
     document.getElementById('update-user-container').style.display = 'none';
     document.getElementById('delete-collection-container').style.display = 'none';
+    document.getElementById('update-collection-container').style.display = 'none';
 
     document.getElementById('settings-toggle-container').style.display = 'none';
     document.getElementById('settings-container').style.display = 'none';
@@ -469,6 +530,7 @@ function displayLoggedIn() {
     document.getElementById('forgot-password-container').style.display = 'none';
     document.getElementById('update-user-container').style.display = '';
     document.getElementById('delete-collection-container').style.display = '';
+    document.getElementById('update-collection-container').style.display = '';
 
     displaySettings = false;
     document.getElementById('settings-toggle').style.display = '';
@@ -522,8 +584,10 @@ function getCookieValue(cookie_name) {
 function displayCollections(collections) {
   const collectionsList = document.getElementById('collections-list');
   const collectionsContainer = document.getElementById('collections-container');
+  const updateCollectionSelect = document.getElementById('update-collection-name');
 
   collectionsList.innerHTML = '';
+  updateCollectionSelect.innerHTML = '';
 
   if (collections && collections.length > 0) {
     collections.forEach(collection => {
@@ -534,6 +598,11 @@ function displayCollections(collections) {
       li.appendChild(link);
       li.appendChild(document.createTextNode(`: ${collection.level}`));
       collectionsList.appendChild(li);
+
+      const option = document.createElement('option');
+      option.value = collection.name;
+      option.textContent = collection.name;
+      updateCollectionSelect.appendChild(option);
     });
     collectionsContainer.style.display = '';
   } else {
@@ -589,6 +658,7 @@ window.addEventListener("load", (event) => {
   addUpdateUserInteraction("update-user-submit", "click");
   addDeleteCollectionInteraction("delete-collection-name", "keypress");
   addDeleteCollectionInteraction("delete-collection-submit", "click");
+  addUpdateCollectionInteraction("update-collection-submit", "click");
   addSettingsToggleInteraction("settings-toggle", "click");
   addSettingsToggleInteraction("settings-toggle", "keypress");
   addResetPasswordRequestInteraction("forgot-password-submit", "click");
