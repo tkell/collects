@@ -262,6 +262,43 @@ function addCreateUserInteraction(elementId, eventType) {
 }
 
 /**
+ * Add new collection interaction
+ * @param {string} elementId - Element ID for the button or input
+ * @param {string} eventType - Event type (click or keypress)
+ */
+function addNewCollectionInteraction(elementId, eventType) {
+  document.getElementById(elementId).addEventListener(eventType, async (e) => {
+    if (eventType === "keypress" && e.key !== "Enter") {
+      return;
+    }
+
+    const name = document.getElementById('new-collection-name').value;
+    const releaseSource = document.getElementById('new-collection-source').value;
+
+    bounceHexagons();
+
+    try {
+      const url = `${apiState.protocol}://${apiState.host}/collections`;
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({name: name, release_source: releaseSource }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Collection creation failed');
+      }
+
+      fetchAndDisplayCollections();
+    } catch (error) {
+      alert('Error creating collection: ' + error.message);
+    }
+  });
+}
+
+/**
  * Add update user interaction
  * @param {string} elementId - Element ID for the button or input
  * @param {string} eventType - Event type (click or keypress)
@@ -331,61 +368,6 @@ function addUpdateUserInteraction(elementId, eventType) {
   });
 }
 
-/**
- * Add delete collection interaction
- * @param {string} elementId - Element ID for the button or input
- * @param {string} eventType - Event type (click or keypress)
- */
-function addDeleteCollectionInteraction(elementId, eventType) {
-  document.getElementById(elementId).addEventListener(eventType, async (e) => {
-    if (eventType === "keypress" && e.key !== "Enter") {
-      return;
-    }
-    const collectionName = document.getElementById('delete-collection-name').value;
-
-    if (!collectionName) {
-      alert('Please enter a collection name');
-      return;
-    }
-
-    const collectionExists = userCollections.some(
-      c => c.name.toLowerCase() === collectionName.toLowerCase()
-    );
-    if (!collectionExists) {
-      alert('That collection does not exist');
-      return;
-    }
-
-    const confirmed = confirm(`Are you sure you want to delete the collection "${collectionName}"? This will delete all releases and gardens in this collection. This action cannot be undone.`);
-    if (!confirmed) {
-      return;
-    }
-
-    bounceHexagons();
-
-    try {
-      const url = `${apiState.protocol}://${apiState.host}/collections/${collectionName.toLowerCase()}`;
-      const response = await fetch(url, {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Delete failed');
-      }
-
-      alert('Collection deleted!');
-      document.getElementById('delete-collection-name').value = '';
-      fetchAndDisplayCollections();
-    } catch (error) {
-      alert('Error deleting collection: ' + error.message);
-    }
-  });
-}
 
 /**
  * Add update collection interaction
@@ -448,6 +430,62 @@ function addUpdateCollectionInteraction(elementId, eventType) {
 }
 
 /**
+ * Add delete collection interaction
+ * @param {string} elementId - Element ID for the button or input
+ * @param {string} eventType - Event type (click or keypress)
+ */
+function addDeleteCollectionInteraction(elementId, eventType) {
+  document.getElementById(elementId).addEventListener(eventType, async (e) => {
+    if (eventType === "keypress" && e.key !== "Enter") {
+      return;
+    }
+    const collectionName = document.getElementById('delete-collection-name').value;
+
+    if (!collectionName) {
+      alert('Please enter a collection name');
+      return;
+    }
+
+    const collectionExists = userCollections.some(
+      c => c.name.toLowerCase() === collectionName.toLowerCase()
+    );
+    if (!collectionExists) {
+      alert('That collection does not exist');
+      return;
+    }
+
+    const confirmed = confirm(`Are you sure you want to delete the collection "${collectionName}"? This will delete all releases and gardens in this collection. This action cannot be undone.`);
+    if (!confirmed) {
+      return;
+    }
+
+    bounceHexagons();
+
+    try {
+      const url = `${apiState.protocol}://${apiState.host}/collections/${collectionName.toLowerCase()}`;
+      const response = await fetch(url, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || 'Delete failed');
+      }
+
+      alert('Collection deleted!');
+      document.getElementById('delete-collection-name').value = '';
+      fetchAndDisplayCollections();
+    } catch (error) {
+      alert('Error deleting collection: ' + error.message);
+    }
+  });
+}
+
+/**
  * Add logout interaction
  * @param {string} elementId - Element ID for the logout button
  * @param {string} eventType - Event type (click or keypress)
@@ -505,6 +543,7 @@ function displayLoggedOut() {
     document.getElementById('create-user-container').style.display = '';
     document.getElementById('forgot-password-container').style.display = '';
     document.getElementById('update-user-container').style.display = 'none';
+    document.getElementById('new-collection-container').style.display = 'none';
     document.getElementById('delete-collection-container').style.display = 'none';
     document.getElementById('update-collection-container').style.display = 'none';
 
@@ -529,8 +568,9 @@ function displayLoggedIn() {
     document.getElementById('create-user-container').style.display = 'none';
     document.getElementById('forgot-password-container').style.display = 'none';
     document.getElementById('update-user-container').style.display = '';
-    document.getElementById('delete-collection-container').style.display = '';
+    document.getElementById('new-collection-container').style.display = '';
     document.getElementById('update-collection-container').style.display = '';
+    document.getElementById('delete-collection-container').style.display = '';
 
     displaySettings = false;
     document.getElementById('settings-toggle').style.display = '';
@@ -652,19 +692,23 @@ window.addEventListener("load", (event) => {
   addLoginInteraction("login-submit", "click");
   addLogoutInteraction("logout-button", "click");
   addLogoutInteraction("logout-button", "keypress");
+
   addCreateUserInteraction("create-password-confirm", "keypress");
   addCreateUserInteraction("create-user-submit", "click");
   addUpdateUserInteraction("update-password-confirm", "keypress");
   addUpdateUserInteraction("update-user-submit", "click");
-  addDeleteCollectionInteraction("delete-collection-name", "keypress");
-  addDeleteCollectionInteraction("delete-collection-submit", "click");
+
+  addNewCollectionInteraction("new-collection-submit", "click");
   addUpdateCollectionInteraction("update-collection-submit", "click");
-  addSettingsToggleInteraction("settings-toggle", "click");
-  addSettingsToggleInteraction("settings-toggle", "keypress");
+  addDeleteCollectionInteraction("delete-collection-submit", "click");
+
   addResetPasswordRequestInteraction("forgot-password-submit", "click");
   addResetPasswordRequestInteraction("forgot-password-email", "keypress");
   addResetPasswordSubmitInteraction("reset-new-password-confirm", "keypress");
   addResetPasswordSubmitInteraction("reset-password-submit", "click");
+
+  addSettingsToggleInteraction("settings-toggle", "click");
+  addSettingsToggleInteraction("settings-toggle", "keypress");
 
   const resetToken = new URLSearchParams(window.location.search).get('reset_token');
   if (resetToken) {

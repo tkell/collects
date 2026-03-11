@@ -15,8 +15,8 @@ class CollectionsController < ApplicationController
 
   def show
     p = tessellates_params
-    collection_name = p[:id].capitalize
-    data = Collection.where(name: collection_name).first.releases
+    name = params[:id]
+    data = Collection.where('lower(name) = ?', name.downcase).first.releases
 
     if p[:folder]
       data = data.where(folder: p[:folder])
@@ -90,21 +90,24 @@ class CollectionsController < ApplicationController
     authenticate_user
     return if performed?
 
-    collection = Collection.new(name: collection_params[:name], user: @current_user)
+    collection = Collection.new(name: collection_params[:name], user: @current_user, level:0 )
     unless collection.save
       render json: { error: collection.errors }, status: :unprocessable_entity
       return
     end
 
-    release_source = RubyHashReleaseSource.new(collection: collection)
+    if collection_params[:release_source] == 'json_file'
+      release_source = RubyHashReleaseSource.new(collection: collection)
+    else
+      render json: { error: "Only JSON collections are currently supported!" }, status: :unprocessable_entity
+      return
+    end
+
     unless release_source.save
       collection.destroy
       render json: { error: release_source.errors }, status: :unprocessable_entity
       return
     end
-
-    release_source.raw_releases = params[:releases] || []
-    release_source.import_releases("only_new", {})
 
     render json: collection, status: :created
   rescue => e
@@ -115,7 +118,8 @@ class CollectionsController < ApplicationController
     authenticate_user
     return if performed?
 
-    collection = Collection.find_by(id: params[:id])
+    name = params[:id]
+    collection = Collection.where('lower(name) = ?', name.downcase).first
     if collection.nil?
       render json: { error: "Collection not found" }, status: :not_found
       return
@@ -135,7 +139,8 @@ class CollectionsController < ApplicationController
 
   def destroy
     authenticate_user
-    collection = Collection.find_by(name: params[:id].capitalize)
+    name = params[:id]
+    collection = Collection.where('lower(name) = ?', name.downcase).first
 
     if collection.nil?
       render json: { error: "Collection not found" }, status: :not_found
@@ -159,7 +164,7 @@ class CollectionsController < ApplicationController
   private
 
   def collection_params
-    params.permit(:name, :overwrite_strategy, releases: {})
+    params.permit(:name, :release_source, :overwrite_strategy, releases: {}, )
   end
 
   def tessellates_params

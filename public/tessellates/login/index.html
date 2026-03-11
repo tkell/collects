@@ -61,10 +61,14 @@
         <button type="button" id="update-user-submit">&#x1F4DD;</button>
       </div>
 
-      <div class="centre" id="delete-collection-container" style="display: none;">
-        <div>delete collection:</div>
-        <input type="text" id="delete-collection-name" name="collection_name" size="15" placeholder="collection name">
-        <button type="button" id="delete-collection-submit">&#x1F5D1;</button>
+      <div class="centre" id="new-collection-container" style="display: none;">
+        <div>new collection:</div>
+        <input type="text" id="new-collection-name" size="16" placeholder="collection name">
+        <select id="new-collection-source">
+          <option value="json_file">json file upload</option>
+          <option value="spotify_liked_songs">spotify liked songs</option>
+        </select>
+        <button type="button" id="new-collection-submit">&#x1F333;</button>
       </div>
 
       <div class="centre" id="update-collection-container" style="display: none;">
@@ -76,6 +80,12 @@
         </select>
         <input type="file" id="update-collection-file" accept=".json">
         <button type="button" id="update-collection-submit">&#x1F4E6;</button>
+      </div>
+
+      <div class="centre" id="delete-collection-container" style="display: none;">
+        <div>delete collection:</div>
+        <input type="text" id="delete-collection-name" name="collection_name" size="15" placeholder="collection name">
+        <button type="button" id="delete-collection-submit">&#x1F5D1;</button>
       </div>
     </div>
   </body>
