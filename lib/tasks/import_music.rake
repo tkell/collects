@@ -18,7 +18,7 @@ task :import_music, [:collection_name, :overwrite_style] => [:environment] do |t
     abort("Collection not found")
   end
 
-  collection.update(args[:overwrite_style])
+  collection.update_release_sources(args[:overwrite_style])
 end
 
 task :delete_collection, [:collection_name] => [:environment] do |task, args|

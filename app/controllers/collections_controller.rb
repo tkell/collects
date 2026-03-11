@@ -120,7 +120,6 @@ class CollectionsController < ApplicationController
       render json: { error: "Collection not found" }, status: :not_found
       return
     end
-    puts('in update, got collection')
 
     overwrite_strategy = params.fetch(:overwrite_strategy, "only_new")
     ## and then put a big Switch here to look for the right param for the right release source type
@@ -131,7 +130,6 @@ class CollectionsController < ApplicationController
 
     render json: collection
   rescue => e
-    puts(e)
     render json: { error: "Failed to update collection: #{e.message}" }, status: :unprocessable_entity
   end
 

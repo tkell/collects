@@ -6,7 +6,7 @@ class Collection < ApplicationRecord
 
   validates :user, presence: true
 
-  def update(overwrite_strategy)
+  def update_release_sources(overwrite_strategy)
     current_releases = releases.index_by(&:external_id)
     release_sources.each do | rs |
       rs.import_releases(overwrite_strategy, current_releases)

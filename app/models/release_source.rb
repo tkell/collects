@@ -7,7 +7,7 @@ class ReleaseSource < ApplicationRecord
 
   def convert_well_formatted(raw_releases)
     all_releases = []
-    raw_release.each do | release_data |
+    raw_releases.each do | release_data |
       release_data["release_year"] = release_data["year"]
       release_data["external_id"] = release_data["id"].to_s
       release_data["image_path"] = release_data["image_url"]
@@ -32,6 +32,6 @@ class ReleaseSource < ApplicationRecord
       end
     end
     new_level = collection.level + level_increase
-    collection.update(level: new_level)
+    collection.update!(level: new_level)
   end
 end
