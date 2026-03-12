@@ -194,11 +194,13 @@ function addSettingsToggleInteraction(elementId, eventType) {
     }
 
     if (displaySettings === false) {
-      document.getElementById("settings-container").style.display = '';
+      document.getElementById("settings-container").classList.remove("is-hidden");
+      document.getElementById("settings-container").classList.add("is-visible");
       document.getElementById("settings-toggle").innerHTML = "&#x25B2;";
       displaySettings = true;
     } else {
-      document.getElementById("settings-container").style.display = 'none';
+      document.getElementById("settings-container").classList.add("is-hidden");
+      document.getElementById("settings-container").classList.remove("is-visible");
       document.getElementById("settings-toggle").innerHTML = "&#x2314;";
       displaySettings = false;
     }
@@ -548,7 +550,7 @@ function displayLoggedOut() {
     document.getElementById('update-collection-container').style.display = 'none';
 
     document.getElementById('settings-toggle-container').style.display = 'none';
-    document.getElementById('settings-container').style.display = 'none';
+    document.getElementById('settings-container').classList.add("is-hidden")
   }
 }
 
@@ -573,12 +575,14 @@ function displayLoggedIn() {
     document.getElementById('delete-collection-container').style.display = '';
 
     displaySettings = false;
-    document.getElementById('settings-toggle').style.display = '';
-    document.getElementById('settings-container').style.display = 'none';
+    document.getElementById('settings-toggle-container').style.display = '';
+    document.getElementById('settings-container').classList.add("is-hidden")
+    document.getElementById("settings-container").classList.remove("is-visible");
     fetchAndDisplayCollections();
   } else {
     document.getElementById('settings-toggle-container').style.display = 'none';
-    document.getElementById('settings-container').style.display = 'none';
+    document.getElementById('settings-container').classList.add("is-hidden")
+    document.getElementById("settings-container").classList.remove("is-visible");
   }
 }
 

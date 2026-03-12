@@ -48,12 +48,12 @@
     <div class="centre" id="settings-toggle-container">
         settings + states <button type="button" id="settings-toggle">&#x2314;</button>
     </div>
-    <div id="settings-container">
+    <div id="settings-container" class="transition-fades is-hidden">
       <div class="centre" id="logout-fields">
         logout: <button type="button" id="logout-button">&#128075;</button>
       </div>
 
-      <div class="centre" id="update-user-container" style="display: none;">
+      <div class="centre" id="update-user-container">
         <div>update account:</div>
         <input type="text" id="update-username" name="username" size="16" placeholder="new username">
         <input type="password" id="update-password" name="password" size="16" placeholder="new password">
@@ -61,7 +61,7 @@
         <button type="button" id="update-user-submit">&#x1F4DD;</button>
       </div>
 
-      <div class="centre" id="new-collection-container" style="display: none;">
+      <div class="centre" id="new-collection-container">
         <div>new collection:</div>
         <input type="text" id="new-collection-name" size="16" placeholder="collection name">
         <select id="new-collection-source">
@@ -71,7 +71,7 @@
         <button type="button" id="new-collection-submit">&#x1F333;</button>
       </div>
 
-      <div class="centre" id="update-collection-container" style="display: none;">
+      <div class="centre" id="update-collection-container">
         <div>update collection:</div>
         <select id="update-collection-name"></select>
         <select id="update-overwrite-strategy">
@@ -82,7 +82,7 @@
         <button type="button" id="update-collection-submit">&#x1F4E6;</button>
       </div>
 
-      <div class="centre" id="delete-collection-container" style="display: none;">
+      <div class="centre" id="delete-collection-container">
         <div>delete collection:</div>
         <input type="text" id="delete-collection-name" name="collection_name" size="15" placeholder="collection name">
         <button type="button" id="delete-collection-submit">&#x1F5D1;</button>
