@@ -4,6 +4,18 @@
     <link rel="stylesheet" href="/main.css">
     <script src="/params.js"></script>
     <script src="/api-state.js"></script>
+    <script>
+    (function () {
+        console.log("???");
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark-mode') {
+          console.log(savedTheme);
+          document.documentElement.setAttribute('data-theme', 'dark-mode');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light-mode');
+        }
+    })();
+  </script>
     <script src="/api-helpers.js"></script>
     <script src="/ui/animation-helpers.js"></script>
     <script src="/ui/image-helpers.js"></script>

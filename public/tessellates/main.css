@@ -6,11 +6,42 @@
   --item-size: calc(var(--grid-size) / var(--grid-columns));
   --animation-duration-slow: 725ms;
   --animation-duration-fast: 350ms;
+  --color-text: #212121;
+  --color-bg: #FDFDFD;
+  --input-bg: #FDFDFD;
+  --input-text: #212121;
+  color-scheme: light-mode dark-mode;
 }
 
+[data-theme="dark-mode"] {
+    --color-bg: #212121;
+    --color-text: #FDFDFD;
+    --input-bg: #121212;
+    --input-text: white;
+}
+
+/* The body having size 600%, 600% is needed for my odd gradient fades! */
 body {
   background-size: 600% 600%;
+  color: var(--color-text);
+  background-color: var(--color-bg);
   font-family: 'Inconsolata', "Courier New", Courier, monospace;
+}
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  /* Ensure borders and placeholders also look good */
+  border: 1px solid var(--color-text);
+}
+
+select {
+  background-color: var(--input-bg);
+  color: var(--input-text);
+  /* Ensure borders and placeholders also look good */
+  border: 1px solid var(--color-text);
 }
 
 /* Layout and controls */
@@ -74,7 +105,9 @@ button {
   border-style: solid;
   border-width: .075rem;
   box-sizing: border-box;
-  color: #212121;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  border-color: var (--color-text);
   cursor: pointer;
   display: inline-block;
   font-family: 'Inconsolata', "Courier New", Courier, monospace;

@@ -4,6 +4,17 @@
     <link rel="stylesheet" href="/main.css">
     <script src="/api-state.js"></script>
     <script src="/login.js"></script>
+    <script>
+    (function () {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark-mode') {
+            document.documentElement.setAttribute('data-theme', 'dark-mode');
+        } else {
+            document.documentElement.setAttribute('data-theme', 'light-mode');
+        }
+    })();
+  </script>
+
   </head>
   <body>
     <div class="centre" id="text">tessellates</div>
@@ -49,6 +60,11 @@
         settings + states <button type="button" id="settings-toggle">&#x2314;</button>
     </div>
     <div id="settings-container" class="transition-fades is-hidden">
+
+      <div class="centre" id="dark-mode-container">
+        dark mode: <button type="button" id="dark-mode-button">&#x1F4A1;</button>
+      </div>
+
       <div class="centre" id="logout-fields">
         logout: <button type="button" id="logout-button">&#128075;</button>
       </div>

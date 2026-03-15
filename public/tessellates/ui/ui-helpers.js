@@ -139,9 +139,15 @@ uiHelper.runBackgroundGradient = function(record) {
   const angles = [0, 90, 180, 270];
   const starts = ["0% 0%", "0% 0%", "0% 100%", "100% 0%"];
   const ends = ["0% 100%", "100% 0%", "0% 0%", "0% 0%"];
+  // const backgroundColor = "#FDFDFD";
+
+  const rootElement = document.documentElement;
+  const computedStyle = window.getComputedStyle(rootElement);
+  const backgroundColor = computedStyle.getPropertyValue('--color-bg').trim();
+  console.log(backgroundColor);
   
   // This depends on the body having size 600%, 600%!
-  const gradientString = `linear-gradient(${angles[index]}deg, #FFF, #FFF, ${record.currentVariant.colors[0]}, ${record.currentVariant.colors[1]}, #FFF, #FFF)`;
+  const gradientString = `linear-gradient(${angles[index]}deg, ${backgroundColor}, ${backgroundColor}, ${record.currentVariant.colors[0]}, ${record.currentVariant.colors[1]}, ${backgroundColor}, ${backgroundColor})`;
   bodyElement.style.backgroundImage = gradientString;
   
   const keyFrames = [

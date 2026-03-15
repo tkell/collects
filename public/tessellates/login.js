@@ -488,6 +488,28 @@ function addDeleteCollectionInteraction(elementId, eventType) {
 }
 
 /**
+ * Add dark mode / light mode toggle 
+ * @param {string} elementId - Element ID for the logout button
+ * @param {string} eventType - Event type (click or keypress)
+ */
+function addModeChangeInteraction(elementId, eventType) {
+  document.getElementById(elementId).addEventListener(eventType, async (e) => {
+    if (eventType === "keypress" && e.key !== "Enter") {
+      return;
+    }
+    var currentTheme = localStorage.getItem('theme') || "light-mode";
+
+    if (currentTheme === "light-mode") {
+      currentTheme = "dark-mode";
+    } else {
+      currentTheme = "light-mode";
+    }
+    document.documentElement.setAttribute('data-theme', currentTheme);
+    localStorage.setItem('theme', currentTheme);
+  });
+}
+
+/**
  * Add logout interaction
  * @param {string} elementId - Element ID for the logout button
  * @param {string} eventType - Event type (click or keypress)
@@ -497,7 +519,6 @@ function addLogoutInteraction(elementId, eventType) {
     if (eventType === "keypress" && e.key !== "Enter") {
       return;
     }
-    console.log("logging out?");
 
     try {
       const url= `${apiState.protocol}://${apiState.host}/logout`;
@@ -515,7 +536,6 @@ function addLogoutInteraction(elementId, eventType) {
     } catch (error) {
       alert('Logout error: ' + error);
     }
-    console.log("logged out");
 
     document.cookie = "loggedInUser=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
     document.cookie = "loggedInUserId=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
@@ -696,6 +716,9 @@ window.addEventListener("load", (event) => {
   addLoginInteraction("login-submit", "click");
   addLogoutInteraction("logout-button", "click");
   addLogoutInteraction("logout-button", "keypress");
+
+  addModeChangeInteraction("dark-mode-button", "click");
+  addModeChangeInteraction("dark-mode-button", "keypress");
 
   addCreateUserInteraction("create-password-confirm", "keypress");
   addCreateUserInteraction("create-user-submit", "click");
