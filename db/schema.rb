@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_03_02_000000) do
+ActiveRecord::Schema[7.1].define(version: 2026_03_29_020445) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -95,7 +95,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_03_02_000000) do
     t.bigint "points_spent", default: 0
     t.bigint "current_variant_id"
     t.index ["collection_id"], name: "idx_16450_index_releases_on_collection_id"
-    t.index ["external_id"], name: "idx_16450_index_releases_on_external_id", unique: true
   end
 
   create_table "tracks", force: :cascade do |t|
