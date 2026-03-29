@@ -120,8 +120,8 @@ class CollectionsController < ApplicationController
     authenticate_user
     return if performed?
 
-    name = params[:id]
-    collection = Collection.where('lower(name) = ?', name.downcase).first
+    id = collection_update_params[:id]
+    collection = @current_user.collections.find(id)
     if collection.nil?
       render json: { error: "Collection not found" }, status: :not_found
       return
@@ -141,7 +141,7 @@ class CollectionsController < ApplicationController
   def destroy
     authenticate_user
     name = params[:id]
-    collection = Collection.where('lower(name) = ?', name.downcase).first
+    collection = @current_user.collections.where('lower(name) = ?', name.downcase).first
 
     if collection.nil?
       render json: { error: "Collection not found" }, status: :not_found
@@ -166,6 +166,10 @@ class CollectionsController < ApplicationController
 
   def collection_params
     params.permit(:name, :release_source, :overwrite_strategy, releases: {}, )
+  end
+
+  def collection_update_params
+    params.permit(:id, releases: {}, )
   end
 
   def tessellates_params

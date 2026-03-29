@@ -218,25 +218,6 @@ function setRandomView(params) {
 }
 
 /**
- * Add collection flip handler
- * @param {string} elementId - Element ID for the button
- */
-function addCollectionFlip(elementId) {
-  document.getElementById(elementId).addEventListener("click", function(e) {
-    if (uiState.bigImage.isShowing) {
-      return;
-    }
-
-    let nextName = "vinyl";
-    if (apiState.collectionName === "vinyl") {
-      nextName = "digital";
-    }
-    const url = `https://tide-pool.ca/tessellates/collections?c=${nextName}&t=${params['t']}`;
-    window.location.href = url;
-  });
-}
-
-/**
  * Add random view interaction
  * @param {string} elementId - Element ID for the button
  */
@@ -555,7 +536,6 @@ fetchWithCredentials(queryUrl)
     addFilterInteraction("filter-submit", "click");
     addFilterInteraction("filter-submit", "keypress");
     addRandomInteraction("random");
-    addCollectionFlip("collection-flip");
 
     // If we have folders, add some folder filters!
     let testItem = releaseData[0];

@@ -488,6 +488,49 @@ function addDeleteCollectionInteraction(elementId, eventType) {
 }
 
 /**
+ * Add delete user interaction
+ * @param {string} elementId - Element ID for the button or input
+ * @param {string} eventType - Event type (click or keypress)
+ */
+function addDeleteUserInteraction(elementId, eventType) {
+  document.getElementById(elementId).addEventListener(eventType, async (e) => {
+    if (eventType === "keypress" && e.key !== "Enter") {
+      return;
+    }
+
+    const user_id = getCookieValue('loggedInUserId');
+    if (!user_id) {
+      alert('Not logged in');
+      return;
+    }
+
+    if (!window.confirm("Are you sure you want to delete this user and all of their data?  There is no undo !")) {
+      return;
+    }
+
+    if (!window.confirm("Seriously, there's no undo, you're about to delete everything.  Are you *sure* ??")) {
+      return;
+    }
+
+    try {
+      const url = `${apiState.protocol}://${apiState.host}/users/${user_id}`;
+      const response = await fetch(url, {
+        method: 'DELETE',
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.errors ? data.errors.join(', ') : 'User Delete failed');
+      }
+
+      alert('User deleted, we will miss you!');
+    } catch (error) {
+      alert('Error deleting account: ' + error.message);
+    }
+  });
+}
+/**
  * Add dark mode / light mode toggle 
  * @param {string} elementId - Element ID for the logout button
  * @param {string} eventType - Event type (click or keypress)
@@ -527,7 +570,7 @@ function addLogoutInteraction(elementId, eventType) {
         headers: {
           'Content-Type': 'application/json',
         },
-        credentials: 'include' // need this for cookies
+        credentials: 'include'
       });
 
       if (!response.ok) {
@@ -724,6 +767,7 @@ window.addEventListener("load", (event) => {
   addCreateUserInteraction("create-user-submit", "click");
   addUpdateUserInteraction("update-password-confirm", "keypress");
   addUpdateUserInteraction("update-user-submit", "click");
+  addDeleteUserInteraction("delete-user-submit", "click");
 
   addNewCollectionInteraction("new-collection-submit", "click");
   addUpdateCollectionInteraction("update-collection-submit", "click");
