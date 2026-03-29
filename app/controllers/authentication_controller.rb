@@ -1,6 +1,5 @@
 class AuthenticationController < ApplicationController
   def new
-    # Just render the login form
   end
 
   def login
