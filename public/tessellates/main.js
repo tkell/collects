@@ -2,6 +2,28 @@
  * Main application file
  */
 
+
+/**
+ * Call fetch for JSON, with credentials, and return the JSON
+ */
+function fetchWithCredentials(url) {
+  return fetch(url, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    credentials: 'include'
+  })
+  .then(response => {
+    if (response.ok) {
+      return response.json();
+    } else {
+      console.error('Failed to fetch:', response.status);
+      return {}
+    }
+  })
+}
+
 /**
  * Render the tessellation with the given data
  * @param {Object} tess - Tessellation configuration object
@@ -37,8 +59,7 @@ function addPagingClick(elementId, offsetDelta) {
       if (offsetDelta > 0 && potentialNewMax > params['max_offset']) {
         const limit = potentialNewMax - params['max_offset'];
         const queryUrl = buildUrl(apiState, params['max_offset'], limit, params);
-        fetch(queryUrl)
-          .then(response => response.json())
+        fetchWithCredentials(queryUrl)
           .then(newReleaseData => {
             params['max_offset'] = potentialNewMax;
             releaseData = releaseData.concat(newReleaseData);
@@ -46,8 +67,7 @@ function addPagingClick(elementId, offsetDelta) {
       } else if (offsetDelta < 0 & potentialNewMin < params['min_offset']) {
         const limit = params['min_offset'] - potentialNewMin;
         const queryUrl = buildUrl(apiState, potentialNewMin, limit, params);
-        fetch(queryUrl)
-          .then(response => response.json())
+        fetchWithCredentials(queryUrl)
           .then(newReleaseData => {
             params['min_offset'] = potentialNewMin;
             releaseData = newReleaseData.concat(releaseData);
@@ -101,8 +121,7 @@ function addFolderClick(elementId, folder) {
       params['max_offset'] - params['min_offset'],
       params
     );
-    fetch(queryUrl)
-      .then(response => response.json())
+    fetchWithCredentials(queryUrl)
       .then(newReleaseData => {
         releaseData = newReleaseData;
         uiHelper.clearText();
@@ -238,8 +257,7 @@ function addRandomInteraction(elementId) {
       params['max_offset'] - params['min_offset'],
       params
     );
-    fetch(queryUrl)
-      .then(response => response.json())
+    fetchWithCredentials(queryUrl)
       .then(newReleaseData => {
         releaseData = newReleaseData;
         uiHelper.clearText();
@@ -317,7 +335,7 @@ function addFilterInteraction(elementId, eventType) {
         params['max_offset'] - params['min_offset'],
         params
       );
-      fetch(queryUrl)
+      fetchWithCredentials(queryUrl)
         .then(response => response.json())
         .then(newReleaseData => {
           releaseData = newReleaseData;
@@ -511,8 +529,7 @@ const queryUrl = buildUrl(apiState,
   params
 );
 
-fetch(queryUrl)
-  .then(response => response.json())
+fetchWithCredentials(queryUrl)
   .then(data => {
     releaseData = data;
     renderTessellation(tess, releaseData, params);

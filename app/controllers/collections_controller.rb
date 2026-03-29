@@ -8,16 +8,18 @@ class CollectionsController < ApplicationController
   }
 
   def index
-    @collections = Collection.all
+    authenticate_user
+    @collections = @current_user.collections
 
     render json: @collections
   end
 
   def show
+    authenticate_user
+
     p = tessellates_params
     name = params[:id]
-    data = Collection.where('lower(name) = ?', name.downcase).first.releases
-
+    data = @current_user.collections.where('lower(name) = ?', name.downcase).first.releases
     if p[:folder]
       data = data.where(folder: p[:folder])
     end
@@ -125,9 +127,8 @@ class CollectionsController < ApplicationController
       return
     end
 
+    # will need to set up a switch based on release source type here
     overwrite_strategy = params.fetch(:overwrite_strategy, "only_new")
-    ## and then put a big Switch here to look for the right param for the right release source type
-    ## but that can wait until I have my stuff working!
     release_source = collection.release_sources.first
     release_source.raw_releases = params[:releases] || []
     release_source.import_releases(overwrite_strategy, collection.releases.index_by(&:external_id))

@@ -7,14 +7,14 @@ class ApplicationController < ActionController::API
       jwt_user_id = decoded_token.first['user_id']
 
       if session[:user_id] != jwt_user_id
-        logger.info("Login failed, invalid session")
+        logger.info("Auth failed, invalid session")
         render json: { error: 'Unauthorized' }, status: :unauthorized
         return
       end
 
       user = User.find_by(id: jwt_user_id)
       if not user
-        logger.info("Login failed, invalid user")
+        logger.info("Auth failed, invalid user")
         render json: { error: 'Unauthorized' }, status: :unauthorized
         return
       end
@@ -23,10 +23,10 @@ class ApplicationController < ActionController::API
       @current_user = user
 
     rescue JWT::ExpiredSignature
-      logger.info("Login failed, token expired")
+      logger.info("Auth failed, token expired")
       render json: { error: 'Unauthorized' }, status: :unauthorized
     rescue JWT::DecodeError
-      logger.info("Login failed, invalid JSON")
+      logger.info("Auth failed, invalid JSON")
       render json: { error: 'Unauthorized' }, status: :unauthorized
     end
   end
