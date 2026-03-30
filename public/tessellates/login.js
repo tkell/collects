@@ -372,34 +372,16 @@ function addUpdateUserInteraction(elementId, eventType) {
 
 
 /**
- * Add update collection interaction
- * @param {string} elementId - Element ID for the button or input
- * @param {string} eventType - Event type (click or keypress)
+ * Add per-collection update interaction to a button element
+ * @param {HTMLElement} button - The update button element
+ * @param {HTMLElement} fileInput - The file input element for this collection
+ * @param {Object} collection - The collection object with id, name, etc.
  */
-function addUpdateCollectionInteraction(elementId, eventType) {
-  document.getElementById(elementId).addEventListener(eventType, async (e) => {
-    if (eventType === "keypress" && e.key !== "Enter") {
-      return;
-    }
-
-    const collectionName = document.getElementById('update-collection-name').value;
-    const overwriteStrategy = document.getElementById('update-overwrite-strategy').value;
-    const fileInput = document.getElementById('update-collection-file');
+function addCollectionItemUpdateInteraction(button, fileInput, collection) {
+  button.addEventListener('click', async () => {
     const file = fileInput.files[0];
-
-    if (!collectionName) {
-      alert('Please select a collection');
-      return;
-    }
-
     if (!file) {
       alert('Please select a JSON file');
-      return;
-    }
-
-    const collection = userCollections.find(c => c.name.toLowerCase() === collectionName.toLowerCase());
-    if (!collection) {
-      alert('Collection not found');
       return;
     }
 
@@ -413,7 +395,7 @@ function addUpdateCollectionInteraction(elementId, eventType) {
       const response = await fetch(url, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ releases, overwrite_strategy: overwriteStrategy }),
+        body: JSON.stringify({ releases, overwrite_strategy: 'only_new' }),
         credentials: 'include'
       });
 
@@ -610,7 +592,6 @@ function displayLoggedOut() {
     document.getElementById('update-user-container').style.display = 'none';
     document.getElementById('new-collection-container').style.display = 'none';
     document.getElementById('delete-collection-container').style.display = 'none';
-    document.getElementById('update-collection-container').style.display = 'none';
 
     document.getElementById('settings-toggle-container').style.display = 'none';
     document.getElementById('settings-container').classList.add("is-hidden")
@@ -634,7 +615,6 @@ function displayLoggedIn() {
     document.getElementById('forgot-password-container').style.display = 'none';
     document.getElementById('update-user-container').style.display = '';
     document.getElementById('new-collection-container').style.display = '';
-    document.getElementById('update-collection-container').style.display = '';
     document.getElementById('delete-collection-container').style.display = '';
 
     displaySettings = false;
@@ -691,38 +671,46 @@ function getCookieValue(cookie_name) {
 function displayCollections(collections) {
   const collectionsList = document.getElementById('collections-list');
   const collectionsContainer = document.getElementById('collections-container');
-  const updateCollectionSelect = document.getElementById('update-collection-name');
 
   collectionsList.innerHTML = '';
-  updateCollectionSelect.innerHTML = '';
 
   if (collections && collections.length > 0) {
     collections.forEach(collection => {
       const li = document.createElement('li');
       const link = document.createElement('a');
+
+      const expandButton = document.createElement('button');
+      expandButton.innerHTML = '&#x2314;';
+      expandButton.title = 'Expand';
+
+      const updateControls = document.createElement('span');
+      updateControls.style.display = 'none';
+
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
 
       const updateButton = document.createElement('button');
       updateButton.innerText = 'Update';
-      updateButton.addEventListener('click', () => {
-        console.log('Button was clicked!');
+      addCollectionItemUpdateInteraction(updateButton, fileInput, collection);
+
+      updateControls.appendChild(updateButton);
+      updateControls.appendChild(document.createTextNode(` -- `));
+      updateControls.appendChild(fileInput);
+
+      expandButton.addEventListener('click', () => {
+        const expanded = updateControls.style.display !== 'none';
+        updateControls.style.display = expanded ? 'none' : '';
+        expandButton.innerHTML = expanded ? '&#x2314;' : '&#x25B2;';
       });
 
       link.href = `/collections?c=${collection.name.toLowerCase()}`;
       link.textContent = collection.name;
       li.appendChild(link);
-      li.appendChild(document.createTextNode(` / level ${collection.level}`));
+      li.appendChild(document.createTextNode(` / level ${collection.level} `));
+      li.appendChild(expandButton);
       li.appendChild(document.createElement('br'));
-      li.appendChild(updateButton)
-      li.appendChild(document.createTextNode(` -- `));
-      li.appendChild(fileInput)
+      li.appendChild(updateControls);
       collectionsList.appendChild(li);
-
-      const option = document.createElement('option');
-      option.value = collection.name;
-      option.textContent = collection.name;
-      updateCollectionSelect.appendChild(option);
     });
     collectionsContainer.style.display = '';
   } else {
@@ -783,7 +771,6 @@ window.addEventListener("load", (event) => {
   addDeleteUserInteraction("delete-user-submit", "click");
 
   addNewCollectionInteraction("new-collection-submit", "click");
-  addUpdateCollectionInteraction("update-collection-submit", "click");
   addDeleteCollectionInteraction("delete-collection-submit", "click");
 
   addResetPasswordRequestInteraction("forgot-password-submit", "click");
