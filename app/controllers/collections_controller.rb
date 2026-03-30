@@ -9,7 +9,7 @@ class CollectionsController < ApplicationController
 
   def index
     authenticate_user
-    @collections = @current_user.collections
+    @collections = @current_user.collections.order(:created_at)
 
     render json: @collections
   end
@@ -135,6 +135,8 @@ class CollectionsController < ApplicationController
 
     render json: collection
   rescue => e
+    puts(e)
+    puts(e.message)
     render json: { error: "Failed to update collection: #{e.message}" }, status: :unprocessable_entity
   end
 
@@ -165,11 +167,13 @@ class CollectionsController < ApplicationController
   private
 
   def collection_params
-    params.permit(:name, :release_source, :overwrite_strategy, releases: {}, )
+    ## will need the same up here
+    params.permit(:name, :release_source, :overwrite_strategy, releases: [])
   end
 
   def collection_update_params
-    params.permit(:id, releases: {}, )
+    ## I hate this, there must be a way to generate them, hmm
+    params.permit(:id, :overwrite_strategy, releases: [:id, :title, :artist, :label, :image_path, :year, :purchase_date, tracks: [:position, :title, :filepath]], collection: {})
   end
 
   def tessellates_params
