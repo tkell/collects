@@ -700,10 +700,23 @@ function displayCollections(collections) {
     collections.forEach(collection => {
       const li = document.createElement('li');
       const link = document.createElement('a');
+      const fileInput = document.createElement('input');
+      fileInput.type = 'file';
+
+      const updateButton = document.createElement('button');
+      updateButton.innerText = 'Update';
+      updateButton.addEventListener('click', () => {
+        console.log('Button was clicked!');
+      });
+
       link.href = `/collections?c=${collection.name.toLowerCase()}`;
       link.textContent = collection.name;
       li.appendChild(link);
-      li.appendChild(document.createTextNode(`: ${collection.level}`));
+      li.appendChild(document.createTextNode(` / level ${collection.level}`));
+      li.appendChild(document.createElement('br'));
+      li.appendChild(updateButton)
+      li.appendChild(document.createTextNode(` -- `));
+      li.appendChild(fileInput)
       collectionsList.appendChild(li);
 
       const option = document.createElement('option');

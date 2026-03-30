@@ -25,7 +25,27 @@
       <div>collections:</div>
       <ul id="collections-list">
       </ul>
+      <div class="centre" id="new-collection-container">
+        <div>new collection:</div>
+        <input type="text" id="new-collection-name" size="16" placeholder="collection name">
+        <select id="new-collection-source">
+          <option value="json_file">json file upload</option>
+        </select>
+        <button type="button" id="new-collection-submit">&#x1F333;</button>
+      </div>
+
+      <div class="centre" id="update-collection-container">
+        <div>update collection:</div>
+        <select id="update-collection-name"></select>
+        <select id="update-overwrite-strategy">
+          <option value="only_new">only new</option>
+          <option value="update_existing">update existing</option>
+        </select>
+        <input type="file" id="update-collection-file" accept=".json">
+        <button type="button" id="update-collection-submit">&#x1F4E6;</button>
+      </div>
     </div>
+
 
     <div class="centre" id="login-fields">login:
       <input type="text" id="login-input" name="login" size="16" placeholder="email">
@@ -60,32 +80,6 @@
         settings + states <button type="button" id="settings-toggle">&#x2314;</button>
     </div>
     <div id="settings-container" class="transition-fades is-hidden">
-      <div class="centre" id="update-collection-container">
-        <div>update collection:</div>
-        <select id="update-collection-name"></select>
-        <select id="update-overwrite-strategy">
-          <option value="only_new">only new</option>
-          <option value="update_existing">update existing</option>
-        </select>
-        <input type="file" id="update-collection-file" accept=".json">
-        <button type="button" id="update-collection-submit">&#x1F4E6;</button>
-      </div>
-
-      <div class="centre" id="new-collection-container">
-        <div>new collection:</div>
-        <input type="text" id="new-collection-name" size="16" placeholder="collection name">
-        <select id="new-collection-source">
-          <option value="json_file">json file upload</option>
-        </select>
-        <button type="button" id="new-collection-submit">&#x1F333;</button>
-      </div>
-
-      <div class="centre" id="delete-collection-container">
-        <div>delete collection:</div>
-        <input type="text" id="delete-collection-name" name="collection_name" size="15" placeholder="collection name">
-        <button type="button" id="delete-collection-submit">&#x1F5D1;</button>
-      </div>
-
       <div class="centre" id="dark-mode-container">
         dark mode: <button type="button" id="dark-mode-button">&#x1F4A1;</button>
       </div>
@@ -100,6 +94,12 @@
         <input type="password" id="update-password" name="password" size="16" placeholder="new password">
         <input type="password" id="update-password-confirm" name="password_confirmation" size="16" placeholder="confirm password">
         <button type="button" id="update-user-submit">&#x1F4DD;</button>
+      </div>
+
+      <div class="centre" id="delete-collection-container">
+        <div>delete collection:</div>
+        <input type="text" id="delete-collection-name" name="collection_name" size="15" placeholder="collection name">
+        <button type="button" id="delete-collection-submit">&#x1F5D1;</button>
       </div>
 
       <div class="centre" id="delete-user-container">
