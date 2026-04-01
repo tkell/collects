@@ -317,7 +317,6 @@ function addFilterInteraction(elementId, eventType) {
         params
       );
       fetchWithCredentials(queryUrl)
-        .then(response => response.json())
         .then(newReleaseData => {
           releaseData = newReleaseData;
           uiHelper.clearText();
