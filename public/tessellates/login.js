@@ -269,6 +269,8 @@ function addCreateUserInteraction(elementId, eventType) {
  * @param {string} eventType - Event type (click or keypress)
  */
 function addNewCollectionInteraction(elementId, eventType) {
+  let fileStepActive = false;
+
   document.getElementById(elementId).addEventListener(eventType, async (e) => {
     if (eventType === "keypress" && e.key !== "Enter") {
       return;
@@ -276,15 +278,39 @@ function addNewCollectionInteraction(elementId, eventType) {
 
     const name = document.getElementById('new-collection-name').value;
     const releaseSource = document.getElementById('new-collection-source').value;
+    const fileInput = document.getElementById('new-collection-file');
+
+    if (!name) {
+      alert('Please enter a collection name');
+      return;
+    }
+
+    if (releaseSource === 'json_file' && !fileStepActive) {
+      fileInput.style.display = '';
+      fileStepActive = true;
+      return;
+    }
 
     bounceHexagons();
 
     try {
       const url = `${apiState.protocol}://${apiState.host}/collections`;
+      const body = { name, release_source: releaseSource };
+
+      if (releaseSource === 'json_file') {
+        const file = fileInput.files[0];
+        if (!file) {
+          alert('Please select a JSON file');
+          return;
+        }
+        const text = await file.text();
+        body.releases = JSON.parse(text);
+      }
+
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({name: name, release_source: releaseSource }),
+        body: JSON.stringify(body),
         credentials: 'include'
       });
 
@@ -292,6 +318,11 @@ function addNewCollectionInteraction(elementId, eventType) {
         const data = await response.json();
         throw new Error(data.error || 'Collection creation failed');
       }
+
+      fileInput.style.display = 'none';
+      fileInput.value = '';
+      fileStepActive = false;
+      document.getElementById('new-collection-name').value = '';
 
       fetchAndDisplayCollections();
     } catch (error) {

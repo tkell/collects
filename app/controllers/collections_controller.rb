@@ -111,6 +111,11 @@ class CollectionsController < ApplicationController
       return
     end
 
+    if params[:releases].present?
+      release_source.raw_releases = params[:releases]
+      release_source.import_releases('only_new', {})
+    end
+
     render json: collection, status: :created
   rescue => e
     render json: { error: "Failed to create collection: #{e.message}" }, status: :unprocessable_entity
@@ -167,8 +172,7 @@ class CollectionsController < ApplicationController
   private
 
   def collection_params
-    ## will need the same up here
-    params.permit(:name, :release_source, :overwrite_strategy, releases: [])
+    params.permit(:name, :release_source)
   end
 
   def collection_update_params
