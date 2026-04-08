@@ -378,10 +378,29 @@ function displayLogin() {
   if (checkCookieExistence('loggedInUser')) {
     document.getElementById('annotation-span').style.visibility = 'visible';
     const playbackDiv = document.getElementById('playback-div');
-    if (playbackDiv) {
+    const userId = checkCookieValue('loggedInUserId');
+    if (playbackDiv && userId === '1') {
       playbackDiv.style.visibility = 'visible';
     }
   }
+}
+
+/**
+ * Check a cookie's value
+ * @param {string} cookie_name - Name of the cookie to check
+ * @returns {string} - the cookie's value, or undefinedif the cookie is not found
+ */
+function checkCookieValue(cookie_name) {
+  let decodedCookie = decodeURIComponent(document.cookie);
+  let cookies = decodedCookie.split(';');
+  for (let i = 0; i < cookies.length; i++) {
+    const name = cookies[i].split('=')[0].trim();
+    const value = cookies[i].split('=')[1].trim();
+    if (name === cookie_name) {
+      return value
+    }
+  }
+  return undefined;
 }
 
 /**
