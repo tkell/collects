@@ -386,8 +386,9 @@ function connectCollectionImportSocket(collectionId, onRelease) {
   const ws = new WebSocket(`${wsProtocol}://${apiState.host}/cable`);
   const identifier = JSON.stringify({ channel: 'CollectionImportChannel', collection_id: collectionId });
 
-  let resolveReady;
+  let resolveReady, resolveDone;
   const ready = new Promise((resolve) => { resolveReady = resolve; });
+  const done = new Promise((resolve) => { resolveDone = resolve; });
 
   ws.onopen = () => {
     ws.send(JSON.stringify({ command: 'subscribe', identifier }));
@@ -397,11 +398,11 @@ function connectCollectionImportSocket(collectionId, onRelease) {
     const data = JSON.parse(event.data);
     if (data.type === 'welcome' || data.type === 'ping') return;
     if (data.type === 'confirm_subscription') { resolveReady(); return; }
-    if (data.message?.type === 'done') { ws.close(); return; }
+    if (data.message?.type === 'done') { ws.close(); resolveDone(); return; }
     if (data.message) onRelease(data.message);
   };
 
-  return { ws, ready };
+  return { ws, ready, done };
 }
 
 /**
@@ -410,7 +411,7 @@ function connectCollectionImportSocket(collectionId, onRelease) {
  * @param {HTMLElement} fileInput - The file input element for this collection
  * @param {Object} collection - The collection object with id, name, etc.
  */
-function addCollectionItemUpdateInteraction(button, fileInput, collection) {
+function addCollectionItemUpdateInteraction(button, fileInput, collection, updateControls, releaseTickerDiv) {
   button.addEventListener('click', async () => {
     const file = fileInput.files[0];
     if (!file) {
@@ -424,11 +425,24 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection) {
       const text = await file.text();
       const releases = JSON.parse(text);
 
-      const { ws, ready } = connectCollectionImportSocket(collection.id, (release) => {
+      const { ws, ready, done } = connectCollectionImportSocket(collection.id, (release) => {
         console.log('New release added:', release);
+        updateControls.style.display = 'none';
+        releaseTickerDiv.style.display = '';
+        releaseTickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
       });
 
       await ready;
+
+      done.then(() => {
+        setTimeout(() => {
+          releaseTickerDiv.textContent = 'Collection updated!';
+          setTimeout(() => {
+            releaseTickerDiv.style.display = 'none';
+            releaseTickerDiv.textContent = '';
+          }, 2000);
+        }, 1000);
+      });
 
       const url = `${apiState.protocol}://${apiState.host}/collections/${collection.id}`;
       const response = await fetch(url, {
@@ -443,9 +457,8 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection) {
         throw new Error(data.error || 'Update failed');
       }
 
-      alert('Collection updated!');
       fileInput.value = '';
-      fetchAndDisplayCollections();
+      // fetchAndDisplayCollections();
     } catch (error) {
       alert('Error updating collection: ' + error.message);
     }
@@ -728,9 +741,12 @@ function displayCollections(collections) {
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
 
+      const releaseTickerDiv = document.createElement('div');
+      releaseTickerDiv.style.display = 'none';
+
       const updateButton = document.createElement('button');
       updateButton.innerText = 'Update';
-      addCollectionItemUpdateInteraction(updateButton, fileInput, collection);
+      addCollectionItemUpdateInteraction(updateButton, fileInput, collection, updateControls, releaseTickerDiv);
 
       updateControls.appendChild(updateButton);
       updateControls.appendChild(document.createTextNode(` -- `));
@@ -749,6 +765,7 @@ function displayCollections(collections) {
       li.appendChild(expandButton);
       li.appendChild(document.createElement('br'));
       li.appendChild(updateControls);
+      li.appendChild(releaseTickerDiv);
       collectionsList.appendChild(li);
     });
     collectionsContainer.style.display = '';
