@@ -398,7 +398,7 @@ function connectCollectionImportSocket(collectionId, onRelease) {
     const data = JSON.parse(event.data);
     if (data.type === 'welcome' || data.type === 'ping') return;
     if (data.type === 'confirm_subscription') { resolveReady(); return; }
-    if (data.message?.type === 'done') { ws.close(); resolveDone(); return; }
+    if (data.message?.type === 'done') { ws.close(); resolveDone(data.message.level); return; }
     if (data.message) onRelease(data.message);
   };
 
@@ -411,7 +411,7 @@ function connectCollectionImportSocket(collectionId, onRelease) {
  * @param {HTMLElement} fileInput - The file input element for this collection
  * @param {Object} collection - The collection object with id, name, etc.
  */
-function addCollectionItemUpdateInteraction(button, fileInput, collection, updateControls, releaseTickerDiv) {
+function addCollectionItemUpdateInteraction(button, fileInput, collection, updateControls, releaseTickerDiv, levelSpan) {
   button.addEventListener('click', async () => {
     const file = fileInput.files[0];
     if (!file) {
@@ -434,9 +434,10 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
 
       await ready;
 
-      done.then(() => {
+      done.then((newLevel) => {
         setTimeout(() => {
           releaseTickerDiv.textContent = 'Collection updated!';
+          if (newLevel !== undefined) levelSpan.textContent = ` / level ${newLevel} `;
           setTimeout(() => {
             releaseTickerDiv.style.display = 'none';
             releaseTickerDiv.textContent = '';
@@ -744,9 +745,12 @@ function displayCollections(collections) {
       const releaseTickerDiv = document.createElement('div');
       releaseTickerDiv.style.display = 'none';
 
+      const levelSpan = document.createElement('span');
+      levelSpan.textContent = ` / level ${collection.level} `;
+
       const updateButton = document.createElement('button');
       updateButton.innerText = 'Update';
-      addCollectionItemUpdateInteraction(updateButton, fileInput, collection, updateControls, releaseTickerDiv);
+      addCollectionItemUpdateInteraction(updateButton, fileInput, collection, updateControls, releaseTickerDiv, levelSpan);
 
       updateControls.appendChild(updateButton);
       updateControls.appendChild(document.createTextNode(` -- `));
@@ -761,7 +765,7 @@ function displayCollections(collections) {
       link.href = `/collections?c=${collection.name.toLowerCase()}`;
       link.textContent = collection.name;
       li.appendChild(link);
-      li.appendChild(document.createTextNode(` / level ${collection.level} `));
+      li.appendChild(levelSpan);
       li.appendChild(expandButton);
       li.appendChild(document.createElement('br'));
       li.appendChild(updateControls);

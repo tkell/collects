@@ -134,7 +134,8 @@ class CollectionsController < ApplicationController
     release_source.import_releases(overwrite_strategy, collection.releases.index_by(&:external_id)) do |release_data|
       ActionCable.server.broadcast("collection_import_#{collection.id}", release_data)
     end
-    ActionCable.server.broadcast("collection_import_#{collection.id}", { type: "done" })
+    collection.reload
+    ActionCable.server.broadcast("collection_import_#{collection.id}", { type: "done", level: collection.level })
 
     render json: collection
   rescue => e
