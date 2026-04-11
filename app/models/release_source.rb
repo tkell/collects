@@ -1,3 +1,6 @@
+require "open-uri"
+require "tempfile"
+
 class ReleaseSource < ApplicationRecord
   belongs_to :collection
 
@@ -7,12 +10,17 @@ class ReleaseSource < ApplicationRecord
 
   def convert_well_formatted(raw_releases)
     all_releases = []
-    raw_releases.each do | release_data |
+    raw_releases.each do |release_data|
       release_data["release_year"] = release_data["year"]
       release_data["external_id"] = release_data["id"].to_s
       release_data["image_path"] = release_data["image_url"]
       release_data.delete("id")
       release_data.delete("year")
+
+      if release_data["colors"].blank?
+        release_data["colors"] = extract_image_colors(release_data["image_path"])
+      end
+
       all_releases << release_data
     end
 
@@ -34,5 +42,25 @@ class ReleaseSource < ApplicationRecord
     end
     new_level = collection.level + level_increase
     collection.update!(level: new_level)
+  end
+
+  private
+
+  def extract_image_colors(image_url)
+    return [] if image_url.blank?
+
+    tmpfile = Tempfile.new(["release_image", ".jpg"])
+    begin
+      URI.open(image_url) { |f| tmpfile.write(f.read) }
+      tmpfile.flush
+      Miro.options[:palette_size] = 4
+      Miro::Colours.new(tmpfile.path).to_hex.first(2).map(&:upcase)
+    rescue => e
+      Rails.logger.error("Failed to extract colors from #{image_url}: #{e.message}")
+      []
+    ensure
+      tmpfile.close
+      tmpfile.unlink
+    end
   end
 end
