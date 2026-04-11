@@ -372,6 +372,39 @@ function addUpdateUserInteraction(elementId, eventType) {
 
 
 /**
+ * Open a native WebSocket to the Action Cable endpoint and subscribe to
+ * CollectionImportChannel for the given collection id.  Calls onRelease for
+ * each broadcast message, then resolves the returned promise once the
+ * subscription is confirmed so callers can sequence work after it.
+ *
+ * @param {number|string} collectionId
+ * @param {function} onRelease - called with each incoming release object
+ * @returns {{ ws: WebSocket, ready: Promise<void> }}
+ */
+function connectCollectionImportSocket(collectionId, onRelease) {
+  const wsProtocol = apiState.protocol === 'https' ? 'wss' : 'ws';
+  const ws = new WebSocket(`${wsProtocol}://${apiState.host}/cable`);
+  const identifier = JSON.stringify({ channel: 'CollectionImportChannel', collection_id: collectionId });
+
+  let resolveReady;
+  const ready = new Promise((resolve) => { resolveReady = resolve; });
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ command: 'subscribe', identifier }));
+  };
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === 'welcome' || data.type === 'ping') return;
+    if (data.type === 'confirm_subscription') { resolveReady(); return; }
+    if (data.message?.type === 'done') { ws.close(); return; }
+    if (data.message) onRelease(data.message);
+  };
+
+  return { ws, ready };
+}
+
+/**
  * Add per-collection update interaction to a button element
  * @param {HTMLElement} button - The update button element
  * @param {HTMLElement} fileInput - The file input element for this collection
@@ -390,6 +423,12 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection) {
     try {
       const text = await file.text();
       const releases = JSON.parse(text);
+
+      const { ws, ready } = connectCollectionImportSocket(collection.id, (release) => {
+        console.log('New release added:', release);
+      });
+
+      await ready;
 
       const url = `${apiState.protocol}://${apiState.host}/collections/${collection.id}`;
       const response = await fetch(url, {

@@ -131,12 +131,15 @@ class CollectionsController < ApplicationController
     overwrite_strategy = params.fetch(:overwrite_strategy, "only_new")
     release_source = collection.release_sources.first
     release_source.raw_releases = params[:releases] || []
-    release_source.import_releases(overwrite_strategy, collection.releases.index_by(&:external_id))
+    release_source.import_releases(overwrite_strategy, collection.releases.index_by(&:external_id)) do |release_data|
+      puts("got a new release")
+      puts(release_data)
+      ActionCable.server.broadcast("collection_import_#{collection.id}", release_data)
+    end
+    ActionCable.server.broadcast("collection_import_#{collection.id}", { type: "done" })
 
     render json: collection
   rescue => e
-    puts(e)
-    puts(e.message)
     render json: { error: "Failed to update collection: #{e.message}" }, status: :unprocessable_entity
   end
 
