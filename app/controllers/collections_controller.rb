@@ -132,8 +132,6 @@ class CollectionsController < ApplicationController
     release_source = collection.release_sources.first
     release_source.raw_releases = params[:releases] || []
     release_source.import_releases(overwrite_strategy, collection.releases.index_by(&:external_id)) do |release_data|
-      puts("got a new release")
-      puts(release_data)
       ActionCable.server.broadcast("collection_import_#{collection.id}", release_data)
     end
     ActionCable.server.broadcast("collection_import_#{collection.id}", { type: "done" })
