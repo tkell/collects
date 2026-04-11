@@ -19,6 +19,8 @@ class ReleaseSource < ApplicationRecord
 
       if release_data["colors"].blank?
         release_data["colors"] = extract_image_colors(release_data["image_path"])
+        puts("new colors??")
+        puts(release_data)
       end
 
       all_releases << release_data
