@@ -179,7 +179,7 @@ class CollectionsController < ApplicationController
 
   def collection_update_params
     ## I hate this, there must be a way to generate them, hmm
-    params.permit(:id, :overwrite_strategy, releases: [:id, :title, :artist, :label, :image_path, :year, :purchase_date, tracks: [:position, :title, :filepath]], collection: {})
+    params.permit(:id, :overwrite_strategy, releases: [:id, :title, :artist, :label, :image_path, :image_url, :year, :purchase_date, tracks: [:position, :title, :filepath]], collection: {})
   end
 
   def tessellates_params

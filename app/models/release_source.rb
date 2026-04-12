@@ -49,20 +49,14 @@ class ReleaseSource < ApplicationRecord
   private
 
   def extract_image_colors(image_url)
-    return [] if image_url.blank?
+    colors = []
+    return colors if image_url.blank?
 
-    tmpfile = Tempfile.new(["release_image", ".jpg"])
-    begin
-      URI.open(image_url) { |f| tmpfile.write(f.read) }
-      tmpfile.flush
-      Miro.options[:palette_size] = 4
-      Miro::Colours.new(tmpfile.path).to_hex.first(2).map(&:upcase)
-    rescue => e
-      Rails.logger.error("Failed to extract colors from #{image_url}: #{e.message}")
-      []
-    ensure
-      tmpfile.close
-      tmpfile.unlink
+    Tempfile.create(["release_image", ".jpg"], binmode: true) do |temp_file|
+      URI.open(image_url) { |f| temp_file.write(f.read) }
+      colors = Miro::DominantColors.new(temp_file.path).to_hex.first(2).map(&:upcase)
     end
+
+    colors
   end
 end
