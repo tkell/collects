@@ -403,24 +403,92 @@ function addUpdateUserInteraction(elementId, eventType) {
 
 
 /**
+ * Open a native WebSocket to the Action Cable endpoint and subscribe to
+ * CollectionImportChannel for the given collection id.  Calls onRelease for
+ * each broadcast message, then resolves the returned promise once the
+ * subscription is confirmed so callers can sequence work after it.
+ *
+ * @param {number|string} collectionId
+ * @param {function} onRelease - called with each incoming release object
+ * @returns {{ ws: WebSocket, ready: Promise<void> }}
+ */
+function connectCollectionImportSocket(collectionId, onRelease) {
+  const wsProtocol = apiState.protocol === 'https' ? 'wss' : 'ws';
+  const ws = new WebSocket(`${wsProtocol}://${apiState.host}/cable`);
+  const identifier = JSON.stringify({ channel: 'CollectionImportChannel', collection_id: collectionId });
+
+  let resolveReady, resolveDone;
+  const ready = new Promise((resolve) => { resolveReady = resolve; });
+  const done = new Promise((resolve) => { resolveDone = resolve; });
+
+  ws.onopen = () => {
+    ws.send(JSON.stringify({ command: 'subscribe', identifier }));
+  };
+
+  ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    if (data.type === 'welcome' || data.type === 'ping') return;
+    if (data.type === 'confirm_subscription') { resolveReady(); return; }
+    if (data.message?.type === 'done') { ws.close(); resolveDone(data.message.level); return; }
+    if (data.message) onRelease(data.message);
+  };
+
+  return { ws, ready, done };
+}
+
+/**
  * Add per-collection update interaction to a button element
  * @param {HTMLElement} button - The update button element
  * @param {HTMLElement} fileInput - The file input element for this collection
  * @param {Object} collection - The collection object with id, name, etc.
  */
-function addCollectionItemUpdateInteraction(button, fileInput, collection) {
+function addCollectionItemUpdateInteraction(button, fileInput, collection, updateControls, releaseTickerDiv, levelSpan) {
   button.addEventListener('click', async () => {
     const file = fileInput.files[0];
     if (!file) {
       alert('Please select a JSON file');
       return;
     }
-
     bounceHexagons();
 
     try {
       const text = await file.text();
       const releases = JSON.parse(text);
+
+      const releaseQueue = [];
+      let tickerActive = false;
+      let drainPromise = Promise.resolve();
+
+      function showNextRelease() {
+        return new Promise(resolve => {
+          function tick() {
+            if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
+            const release = releaseQueue.shift();
+            releaseTickerDiv.style.display = '';
+            releaseTickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
+            setTimeout(tick, 500);
+          }
+          tick();
+        });
+      }
+
+      const { ws, ready, done } = connectCollectionImportSocket(collection.id, (release) => {
+        console.log('New release added:', release);
+        updateControls.style.display = 'none';
+        releaseQueue.push(release);
+        if (!tickerActive) { tickerActive = true; drainPromise = showNextRelease(); }
+      });
+      await ready;
+
+      done.then(async (newLevel) => {
+        await drainPromise;
+        releaseTickerDiv.textContent = 'Collection updated!';
+        if (newLevel !== undefined) levelSpan.textContent = ` / level ${newLevel} `;
+        setTimeout(() => {
+          releaseTickerDiv.style.display = 'none';
+          releaseTickerDiv.textContent = '';
+        }, 2000);
+      });
 
       const url = `${apiState.protocol}://${apiState.host}/collections/${collection.id}`;
       const response = await fetch(url, {
@@ -435,9 +503,8 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection) {
         throw new Error(data.error || 'Update failed');
       }
 
-      alert('Collection updated!');
       fileInput.value = '';
-      fetchAndDisplayCollections();
+      // fetchAndDisplayCollections();
     } catch (error) {
       alert('Error updating collection: ' + error.message);
     }
@@ -720,9 +787,15 @@ function displayCollections(collections) {
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
 
+      const releaseTickerDiv = document.createElement('div');
+      releaseTickerDiv.style.display = 'none';
+
+      const levelSpan = document.createElement('span');
+      levelSpan.textContent = ` / level ${collection.level} `;
+
       const updateButton = document.createElement('button');
       updateButton.innerText = 'Update';
-      addCollectionItemUpdateInteraction(updateButton, fileInput, collection);
+      addCollectionItemUpdateInteraction(updateButton, fileInput, collection, updateControls, releaseTickerDiv, levelSpan);
 
       updateControls.appendChild(updateButton);
       updateControls.appendChild(document.createTextNode(` -- `));
@@ -737,10 +810,11 @@ function displayCollections(collections) {
       link.href = `/collections?c=${collection.name.toLowerCase()}`;
       link.textContent = collection.name;
       li.appendChild(link);
-      li.appendChild(document.createTextNode(` / level ${collection.level} `));
+      li.appendChild(levelSpan);
       li.appendChild(expandButton);
       li.appendChild(document.createElement('br'));
       li.appendChild(updateControls);
+      li.appendChild(releaseTickerDiv);
       collectionsList.appendChild(li);
     });
     collectionsContainer.style.display = '';
