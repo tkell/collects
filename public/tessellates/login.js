@@ -418,31 +418,45 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
       alert('Please select a JSON file');
       return;
     }
-
     bounceHexagons();
 
     try {
       const text = await file.text();
       const releases = JSON.parse(text);
 
+      const releaseQueue = [];
+      let tickerActive = false;
+      let drainPromise = Promise.resolve();
+
+      function showNextRelease() {
+        return new Promise(resolve => {
+          function tick() {
+            if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
+            const release = releaseQueue.shift();
+            releaseTickerDiv.style.display = '';
+            releaseTickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
+            setTimeout(tick, 500);
+          }
+          tick();
+        });
+      }
+
       const { ws, ready, done } = connectCollectionImportSocket(collection.id, (release) => {
         console.log('New release added:', release);
         updateControls.style.display = 'none';
-        releaseTickerDiv.style.display = '';
-        releaseTickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
+        releaseQueue.push(release);
+        if (!tickerActive) { tickerActive = true; drainPromise = showNextRelease(); }
       });
-
       await ready;
 
-      done.then((newLevel) => {
+      done.then(async (newLevel) => {
+        await drainPromise;
+        releaseTickerDiv.textContent = 'Collection updated!';
+        if (newLevel !== undefined) levelSpan.textContent = ` / level ${newLevel} `;
         setTimeout(() => {
-          releaseTickerDiv.textContent = 'Collection updated!';
-          if (newLevel !== undefined) levelSpan.textContent = ` / level ${newLevel} `;
-          setTimeout(() => {
-            releaseTickerDiv.style.display = 'none';
-            releaseTickerDiv.textContent = '';
-          }, 2000);
-        }, 1000);
+          releaseTickerDiv.style.display = 'none';
+          releaseTickerDiv.textContent = '';
+        }, 2000);
       });
 
       const url = `${apiState.protocol}://${apiState.host}/collections/${collection.id}`;
