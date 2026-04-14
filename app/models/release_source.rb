@@ -17,12 +17,6 @@ class ReleaseSource < ApplicationRecord
       release_data.delete("id")
       release_data.delete("year")
 
-      if release_data["colors"].blank?
-        release_data["colors"] = extract_image_colors(release_data["image_path"])
-        puts("new colors??")
-        puts(release_data)
-      end
-
       all_releases << release_data
     end
 
@@ -35,6 +29,11 @@ class ReleaseSource < ApplicationRecord
       external_id = release_data["external_id"]
       existing_release = current_releases[external_id]
       if overwrite_strategy == "only_new" && existing_release.nil?
+        # only add colors to new releases!
+        if release_data["colors"].blank?
+          release_data["colors"] = extract_image_colors(release_data["image_path"])
+        end
+
         Release.make_from(release_data, collection.id)
         yield release_data if block_given?
         level_increase += 1
