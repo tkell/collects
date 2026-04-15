@@ -28,16 +28,24 @@ class ReleaseSource < ApplicationRecord
     all_releases.each do | release_data |
       external_id = release_data["external_id"]
       existing_release = current_releases[external_id]
-      if overwrite_strategy == "only_new" && existing_release.nil?
-        # only add colors to new releases!
-        if release_data["colors"].blank?
-          release_data["colors"] = extract_image_colors(release_data["image_path"])
-        end
 
-        Release.make_from(release_data, collection.id)
-        yield release_data if block_given?
-        level_increase += 1
-      elsif overwrite_strategy == "update_existing" and existing_release
+      if overwrite_strategy == "only_new"
+        if existing_release.nil?
+          # only add colors to new releases!
+          if release_data["colors"].blank?
+            release_data["colors"] = extract_image_colors(release_data["image_path"])
+          end
+
+          Release.make_from(release_data, collection.id)
+          yield release_data if block_given?
+          level_increase += 1
+        else
+          res = { colors: existing_release.current_variant.colors }
+          yield res if block_given?
+        end
+      end
+
+      if overwrite_strategy == "update_existing" and existing_release
         Release.update_from(release_data, existing_release)
       end
     end

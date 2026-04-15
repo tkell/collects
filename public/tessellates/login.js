@@ -43,6 +43,17 @@ function drawLoginHexagons() {
 }
 
 /**
+ * Update login hexagon gradients to match release colors
+ * @param {string[]} colors - Array of hex color strings [color1, color2]
+ */
+function updateHexagonColors(colors) {
+  const hexLoaders = document.querySelectorAll('#hexagons-container .hex-loader');
+  const hexLoader = hexLoaders[Math.floor(Math.random() * hexLoaders.length)];
+  hexLoader.style.setProperty('--color1', colors[0]);
+  hexLoader.style.setProperty('--color2', colors[1]);
+}
+
+/**
  * Animate hexagons bouncing in different directions
  */
 function bounceHexagons() {
@@ -473,6 +484,10 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
       }
 
       const { ws, ready, done } = connectCollectionImportSocket(collection.id, (release) => {
+        if (release.colors && !release.artist) {
+          updateHexagonColors(release.colors);
+          return;
+        }
         console.log('New release added:', release);
         updateControls.style.display = 'none';
         releaseQueue.push(release);
