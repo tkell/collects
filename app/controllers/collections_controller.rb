@@ -136,7 +136,8 @@ class CollectionsController < ApplicationController
     overwrite_strategy = params.fetch(:overwrite_strategy, "only_new")
     release_source = collection.release_sources.first
     release_source.raw_releases = params[:releases] || []
-    release_source.import_releases(overwrite_strategy, collection.releases.index_by(&:external_id)) do |release_data|
+    current_releases = collection.releases.joins(:variants).pluck(:external_id, :colors).index_by {|r| r[0]}
+    release_source.import_releases(overwrite_strategy, current_releases) do |release_data|
       ActionCable.server.broadcast("collection_import_#{collection.id}", release_data)
     end
     collection.reload

@@ -7,7 +7,8 @@ class Collection < ApplicationRecord
   validates :user, presence: true
 
   def update_release_sources(overwrite_strategy)
-    current_releases = releases.index_by(&:external_id)
+    current_releases = releases.joins(:variants).pluck(:external_id, :colors).index_by {|r| r[0]}
+
     release_sources.each do | rs |
       rs.import_releases(overwrite_strategy, current_releases)
     end

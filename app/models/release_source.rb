@@ -40,7 +40,8 @@ class ReleaseSource < ApplicationRecord
           yield release_data if block_given?
           level_increase += 1
         else
-          res = { colors: existing_release.current_variant.colors }
+          colors = existing_release[1]
+          res = { colors: colors }
           yield res if block_given?
         end
       end
