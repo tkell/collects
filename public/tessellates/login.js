@@ -64,6 +64,8 @@ function bounceHexagons() {
     const timeout = Math.floor(Math.random() * 500) + 100;
     const direction = bounceDirections[i % bounceDirections.length];
     setTimeout(() => {
+      hexWrapper.classList.remove(...bounceDirections);
+      void hexWrapper.offsetWidth;
       hexWrapper.classList.add(direction);
     }, timeout);
   });
@@ -506,15 +508,14 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
       done.then(async (newLevel) => {
         await drainPromise;
         releaseTickerDiv.textContent = 'Collection updated!';
-        bounceHexagons();
         if (newLevel !== undefined) levelSpan.textContent = ` / level ${newLevel} `;
-        console.log("move the hexes?");
         setTimeout(() => {
+          bounceHexagons();
           releaseTickerDiv.style.display = 'none';
           releaseTickerDiv.textContent = '';
           updateControls.style.display = 'none';
           expandButton.innerHTML = '&#x2314;';
-        }, 2000);
+        }, 1000);
       });
 
       const url = `${apiState.protocol}://${apiState.host}/collections/${collection.id}`;
