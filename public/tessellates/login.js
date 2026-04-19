@@ -423,7 +423,7 @@ function addUpdateUserInteraction(elementId, eventType) {
  * @param {function} onRelease - called with each incoming release object
  * @returns {{ ws: WebSocket, ready: Promise<void> }}
  */
-function connectCollectionImportSocket(collectionId, onRelease) {
+function connectCollectionImportSocket(collectionId, onRelease, onStart) {
   const wsProtocol = apiState.protocol === 'https' ? 'wss' : 'ws';
   const ws = new WebSocket(`${wsProtocol}://${apiState.host}/cable`);
   const identifier = JSON.stringify({ channel: 'CollectionImportChannel', collection_id: collectionId });
@@ -441,7 +441,7 @@ function connectCollectionImportSocket(collectionId, onRelease) {
     if (data.type === 'welcome' || data.type === 'ping') return;
     if (data.type === 'confirm_subscription') { resolveReady(); return; }
     if (data.message?.type === 'done') { ws.close(); resolveDone(data.message.level); return; }
-    if (data.message?.type === 'start') { console.log('Start message', data.message); return; }
+    if (data.message?.type === 'start') { if (onStart) onStart(data.message); return; }
     if (data.message) onRelease(data.message);
   };
 
@@ -470,6 +470,7 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
       const releaseQueue = [];
       let tickerActive = false;
       let drainPromise = Promise.resolve();
+      let tickerTimeout = 500;
 
       function showNextRelease() {
         return new Promise(resolve => {
@@ -478,7 +479,7 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
             const release = releaseQueue.shift();
             releaseTickerDiv.style.display = '';
             releaseTickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
-            setTimeout(tick, 500);
+            setTimeout(tick, tickerTimeout);
           }
           tick();
         });
@@ -493,13 +494,21 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
         updateControls.style.display = 'none';
         releaseQueue.push(release);
         if (!tickerActive) { tickerActive = true; drainPromise = showNextRelease(); }
+      }, (startMsg) => {
+        const inputCount = startMsg.input_count || 0;
+        const newCount = inputCount - (startMsg.existing || 0);
+        if (newCount > 0) tickerTimeout = Math.max(50, Math.min(500, 2000 / newCount));
+        releaseTickerDiv.style.display = '';
+        releaseTickerDiv.textContent = `Loading ${newCount} new release${newCount === 1 ? '' : 's'} out of ${inputCount} total uploaded`;
       });
       await ready;
 
       done.then(async (newLevel) => {
         await drainPromise;
         releaseTickerDiv.textContent = 'Collection updated!';
+        bounceHexagons();
         if (newLevel !== undefined) levelSpan.textContent = ` / level ${newLevel} `;
+        console.log("move the hexes?");
         setTimeout(() => {
           releaseTickerDiv.style.display = 'none';
           releaseTickerDiv.textContent = '';
