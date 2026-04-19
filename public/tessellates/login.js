@@ -53,6 +53,13 @@ function updateHexagonColors(colors) {
   hexLoader.style.setProperty('--color2', colors[1]);
 }
 
+function updateAllHexagonColors(colors) {
+  document.querySelectorAll('#hexagons-container .hex-loader').forEach(hexLoader => {
+    hexLoader.style.setProperty('--color1', colors[0]);
+    hexLoader.style.setProperty('--color2', colors[1]);
+  });
+}
+
 /**
  * Animate hexagons bouncing in different directions
  */
@@ -479,6 +486,8 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
           function tick() {
             if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
             const release = releaseQueue.shift();
+            console.log(release)
+            updateAllHexagonColors(release.colors);
             releaseTickerDiv.style.display = '';
             releaseTickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
             setTimeout(tick, tickerTimeout);
@@ -492,14 +501,13 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
           updateHexagonColors(release.colors);
           return;
         }
-        console.log('New release added:', release);
-        updateControls.style.display = 'none';
         releaseQueue.push(release);
         if (!tickerActive) { tickerActive = true; drainPromise = showNextRelease(); }
       }, (startMsg) => {
         const inputCount = startMsg.input_count || 0;
         const newCount = inputCount - (startMsg.existing || 0);
         if (newCount > 0) tickerTimeout = Math.max(50, Math.min(500, 2000 / newCount));
+        updateControls.style.display = 'none';
         releaseTickerDiv.style.display = '';
         releaseTickerDiv.textContent = `Loading ${newCount} new release${newCount === 1 ? '' : 's'} out of ${inputCount} total uploaded`;
       });
