@@ -441,6 +441,7 @@ function connectCollectionImportSocket(collectionId, onRelease) {
     if (data.type === 'welcome' || data.type === 'ping') return;
     if (data.type === 'confirm_subscription') { resolveReady(); return; }
     if (data.message?.type === 'done') { ws.close(); resolveDone(data.message.level); return; }
+    if (data.message?.type === 'start') { console.log('Start message', data.message); return; }
     if (data.message) onRelease(data.message);
   };
 

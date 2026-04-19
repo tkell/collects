@@ -137,6 +137,7 @@ class CollectionsController < ApplicationController
     release_source = collection.release_sources.first
     release_source.raw_releases = params[:releases] || []
     current_releases = collection.releases.joins(:variants).pluck(:external_id, :colors).index_by {|r| r[0]}
+    ActionCable.server.broadcast("collection_import_#{collection.id}", { type: "start", input_count: release_source.raw_releases.length , existing: current_releases.length})
     release_source.import_releases(overwrite_strategy, current_releases) do |release_data|
       ActionCable.server.broadcast("collection_import_#{collection.id}", release_data)
     end
