@@ -453,7 +453,7 @@ function connectCollectionImportSocket(collectionId, onRelease) {
  * @param {HTMLElement} fileInput - The file input element for this collection
  * @param {Object} collection - The collection object with id, name, etc.
  */
-function addCollectionItemUpdateInteraction(button, fileInput, collection, updateControls, releaseTickerDiv, levelSpan) {
+function addCollectionItemUpdateInteraction(button, fileInput, collection, updateControls, releaseTickerDiv, levelSpan, expandButton) {
   button.addEventListener('click', async () => {
     const file = fileInput.files[0];
     if (!file) {
@@ -502,6 +502,8 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
         setTimeout(() => {
           releaseTickerDiv.style.display = 'none';
           releaseTickerDiv.textContent = '';
+          updateControls.style.display = 'none';
+          expandButton.innerHTML = '&#x2314;';
         }, 2000);
       });
 
@@ -810,7 +812,7 @@ function displayCollections(collections) {
 
       const updateButton = document.createElement('button');
       updateButton.innerText = 'Update';
-      addCollectionItemUpdateInteraction(updateButton, fileInput, collection, updateControls, releaseTickerDiv, levelSpan);
+      addCollectionItemUpdateInteraction(updateButton, fileInput, collection, updateControls, releaseTickerDiv, levelSpan, expandButton);
 
       updateControls.appendChild(fileInput);
       updateControls.appendChild(updateButton);
