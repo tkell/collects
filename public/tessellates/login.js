@@ -812,9 +812,8 @@ function displayCollections(collections) {
       updateButton.innerText = 'Update';
       addCollectionItemUpdateInteraction(updateButton, fileInput, collection, updateControls, releaseTickerDiv, levelSpan);
 
-      updateControls.appendChild(updateButton);
-      updateControls.appendChild(document.createTextNode(` -- `));
       updateControls.appendChild(fileInput);
+      updateControls.appendChild(updateButton);
 
       expandButton.addEventListener('click', () => {
         const expanded = updateControls.style.display !== 'none';
