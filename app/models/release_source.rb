@@ -60,9 +60,14 @@ class ReleaseSource < ApplicationRecord
     colors = []
     return colors if image_url.blank?
 
-    Tempfile.create(["release_image", ".jpg"], binmode: true) do |temp_file|
-      URI.open(image_url) { |f| temp_file.write(f.read) }
-      colors = Miro::DominantColors.new(temp_file.path).to_hex.first(2).map(&:upcase)
+    begin
+      Tempfile.create(["release_image", ".jpg"], binmode: true) do |temp_file|
+        URI.open(image_url) { |f| temp_file.write(f.read) }
+        colors = Miro::DominantColors.new(temp_file.path).to_hex.first(2).map(&:upcase)
+      end
+    rescue StandardError => e
+      puts(e.message)
+      colors =  ["#000000", "#FFFFFF"]
     end
 
     colors
