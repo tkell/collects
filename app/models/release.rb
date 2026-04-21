@@ -49,6 +49,8 @@ class Release < ApplicationRecord
       variant.save
       release.current_variant_id = variant.id
       release.save
+
+      return release, variant
     end
 
     def update_needed(release_data, release)

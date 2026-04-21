@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_11_010142) do
+ActiveRecord::Schema[7.1].define(version: 2026_04_20_234049) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -140,6 +140,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_11_010142) do
     t.text "colors"
     t.text "name"
     t.boolean "is_standard"
+    t.string "image_path_small"
     t.index ["release_id"], name: "idx_16443_index_variants_on_release_id"
   end
 
