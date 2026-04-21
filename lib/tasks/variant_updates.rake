@@ -44,3 +44,13 @@ task :add_jpg_to_image_path => :environment do
     v.save!
   end
 end
+
+task :backfill_image_path_small => :environment do
+  variants = Variant.where("image_path LIKE ?", "%tide-pool.ca%")
+  puts "Backfilling #{variants.count} variants..."
+  variants.each do |v|
+    image_path_small = v.image_path.split(".jpg")[0] + "-small.jpg"
+    v.update!(image_path_small: image_path_small)
+  end
+  puts "Done."
+end
