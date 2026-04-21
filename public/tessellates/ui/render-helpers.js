@@ -182,8 +182,7 @@ renderHelper._addStartingStateToRecord = function(record, index, tessellation) {
   }
   
   record.imagePath = record.currentVariant.image_path;
-  let imageFileName = record.currentVariant.image_path.slice(0, -4);
-  record.smallImagePath = imageFileName + "-small.jpg";
+  record.smallImagePath = record.currentVariant.image_path_small;
 
   // Assign shape class based on tessellation type
   if (tessellation.type === 'circle') {
