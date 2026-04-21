@@ -84,9 +84,10 @@ class ReleaseSource < ApplicationRecord
             .source(temp_file.path)
             .resize_to_limit(350, 350)
             .call
+
           bucket = Google::Cloud::Storage.new(
             project_id: "collects-416256",
-            credentials: "/home/rails/collects/keys/collects-416256-gcs-uploader-pk.json"
+            credentials: ENV['GCS_BUCKET_KEY_PATH']
           ).bucket("collects-images")
 
           bucket.create_file(small_image.path, small_image_name)
@@ -98,6 +99,7 @@ class ReleaseSource < ApplicationRecord
         return colors, small_image_url
       end
     rescue StandardError => e
+      puts("Image processing failed")
       puts(e.message)
       colors = ["#000000", "#FFFFFF"]
       small_image_path = ""

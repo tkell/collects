@@ -89,7 +89,7 @@ class VariantsController < ApplicationController
     begin
       bucket = create_bucket_handle(
         "collects-416256",
-        "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json",
+        ENV['GCS_BUCKET_KEY_PATH'],
         "collects-images"
       )
       img_name, small_img_name = image_names(@release.external_id, @variant.id)
@@ -172,7 +172,7 @@ class VariantsController < ApplicationController
     img_name, small_img_name = image_names(@release.external_id, @variant.id)
     bucket = create_bucket_handle(
       "collects-416256",
-      "/Users/thor/Desktop/collects-416256-gcs-uploader-pk.json",
+      ENV['GCS_BUCKET_KEY_PATH'],
       "collects-images"
     )
     delete_image(bucket, img_name)
@@ -223,7 +223,7 @@ class VariantsController < ApplicationController
   def create_bucket_handle(project_id, credentials_loc, bucket_name)
     storage = Google::Cloud::Storage.new(
       project_id: "collects-416256",
-      credentials: "/home/rails/collects/keys/collects-416256-gcs-uploader-pk.json"
+      credentials: ENV['GCS_BUCKET_KEY_PATH']
     )
     return storage.bucket("collects-images")
   end

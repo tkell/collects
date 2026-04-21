@@ -83,3 +83,5 @@ group :test do
 end
 
 gem "solid_cable", "~> 1.0"
+
+gem 'dotenv', groups: [:development, :test]

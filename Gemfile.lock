@@ -118,6 +118,7 @@ GEM
     declarative (0.0.20)
     digest-crc (0.7.0)
       rake (>= 12.0.0, < 14.0.0)
+    dotenv (3.2.0)
     drb (2.2.3)
     erb (6.0.2)
     erubi (1.13.1)
@@ -395,6 +396,7 @@ DEPENDENCIES
   bootsnap
   capybara
   debug
+  dotenv
   google-cloud-storage (~> 1.52.0)
   httparty (~> 0.23)
   image_processing (~> 1.2)
