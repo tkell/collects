@@ -36,9 +36,9 @@ class ReleaseSource < ApplicationRecord
         if existing_release.nil?
           # only image-process new release if we have to:
           if release_data["colors"].blank? || release_data["image_path_small"].blank?
-            colors, small_image_url = process_image(release_data[:image_path], release_data)
-            release_data["colors"] = colors
             _, variant = Release.make_from(release_data, collection.id)
+            colors, small_image_url = process_image(release_data["image_path"], release_data, variant)
+            variant.colors = colors
             variant.image_path_small = small_image_url
             variant.save!
           else
@@ -64,7 +64,7 @@ class ReleaseSource < ApplicationRecord
 
   private
 
-  def process_image(image_url, release_data)
+  def process_image(image_url, release_data, variant)
     begin
       Tempfile.create(["release_image", ".jpg"], binmode: true) do |temp_file|
         URI.open(image_url) { |f| temp_file.write(f.read) }

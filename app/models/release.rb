@@ -21,7 +21,7 @@ class Release < ApplicationRecord
         external_id: release_data["external_id"],
         collection_id: collection_id
       )
-      release.save
+      release.save!
 
       tracks = release_data["tracks"]
       tracks.each do |track|
@@ -34,7 +34,7 @@ class Release < ApplicationRecord
           purchase_date: release.purchase_date
         )
         release.tracks << t
-        t.save
+        t.save!
       end
 
       image_path = release_data["image_path"]
@@ -46,9 +46,9 @@ class Release < ApplicationRecord
         is_standard: true
       )
       release.variants << variant
-      variant.save
+      variant.save!
       release.current_variant_id = variant.id
-      release.save
+      release.save!
 
       return release, variant
     end

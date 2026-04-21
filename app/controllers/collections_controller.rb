@@ -94,6 +94,7 @@ class CollectionsController < ApplicationController
 
     collection = Collection.new(name: collection_params[:name], user: @current_user, level:0 )
     unless collection.save
+      puts(collection.errors)
       render json: { error: collection.errors }, status: :unprocessable_entity
       return
     end
@@ -118,6 +119,7 @@ class CollectionsController < ApplicationController
 
     render json: collection, status: :created
   rescue => e
+    puts(e.message)
     render json: { error: "Failed to create collection: #{e.message}" }, status: :unprocessable_entity
   end
 
