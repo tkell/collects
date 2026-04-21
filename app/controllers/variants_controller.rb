@@ -150,14 +150,6 @@ class VariantsController < ApplicationController
       return
     end
 
-    begin
-      delete_created_variant(@release, @variant)
-    rescue Exception => _
-      puts("failed to delete images for release #{params[:release_id]} and variant #{@variant.id}")
-      puts("retrying ...")
-      delete_created_variant(@release, @variant)
-    end
-
     @release.current_variant_id = nil
     @release.save
     @variant.destroy
@@ -166,17 +158,6 @@ class VariantsController < ApplicationController
     @release.save
 
     redirect_to action: "index"
-  end
-
-  def delete_created_variant(release, variant)
-    img_name, small_img_name = image_names(@release.external_id, @variant.id)
-    bucket = create_bucket_handle(
-      "collects-416256",
-      ENV['GCS_BUCKET_KEY_PATH'],
-      "collects-images"
-    )
-    delete_image(bucket, img_name)
-    delete_image(bucket, small_img_name)
   end
 
   private
