@@ -811,13 +811,15 @@ function displayCollections(collections) {
   if (collections && collections.length > 0) {
     collections.forEach(collection => {
       const li = document.createElement('li');
+      li.className = "collection-item"
       const link = document.createElement('a');
 
       const expandButton = document.createElement('button');
       expandButton.innerHTML = '&#x2314;';
       expandButton.title = 'Expand';
 
-      const updateControls = document.createElement('span');
+      const updateControls = document.createElement('div');
+      updateControls.className = "update-controls";
       updateControls.style.display = 'none';
 
       const fileInput = document.createElement('input');
@@ -827,7 +829,8 @@ function displayCollections(collections) {
       releaseTickerDiv.style.display = 'none';
 
       const levelSpan = document.createElement('span');
-      levelSpan.textContent = ` / level ${collection.level} `;
+      levelSpan.className = "level-span"
+      levelSpan.textContent = ` lvl ${collection.level} `;
 
       const updateButton = document.createElement('button');
       updateButton.innerText = 'Update';
@@ -847,7 +850,6 @@ function displayCollections(collections) {
       li.appendChild(link);
       li.appendChild(levelSpan);
       li.appendChild(expandButton);
-      li.appendChild(document.createElement('br'));
       li.appendChild(updateControls);
       li.appendChild(releaseTickerDiv);
       collectionsList.appendChild(li);

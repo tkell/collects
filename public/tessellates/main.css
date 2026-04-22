@@ -28,6 +28,27 @@ body {
   font-family: 'Inconsolata', "Courier New", Courier, monospace;
 }
 
+input[type="file"]::file-selector-button {
+  backface-visibility: hidden;
+  border-radius: .250rem;
+  border-style: solid;
+  border-width: .075rem;
+  box-sizing: border-box;
+  color: var(--color-text);
+  background-color: var(--color-bg);
+  border-color: var(--color-text);
+  cursor: pointer;
+  font-family: 'Inconsolata', "Courier New", Courier, monospace;
+  letter-spacing: -.01em;
+  padding: .375rem .750rem;
+  text-align: left;
+  transform: translateZ(0) scale(1);
+  transition: transform .2s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
 input[type="text"],
 input[type="email"],
 input[type="password"] {
@@ -72,6 +93,19 @@ select {
   opacity: 1;
 }
 
+li.collection-item {
+  margin-bottom: 15px;
+  list-style: none;
+}
+
+span.level-span {
+  color: #AAA;
+}
+
+div.update-controls {
+  margin-top: 10px;
+}
+
 /* Stats page */
 .stats-group-date {
   font-size: 33px;
@@ -107,7 +141,7 @@ button {
   box-sizing: border-box;
   color: var(--color-text);
   background-color: var(--color-bg);
-  border-color: var (--color-text);
+  border-color: var(--color-text);
   cursor: pointer;
   display: inline-block;
   font-family: 'Inconsolata', "Courier New", Courier, monospace;
