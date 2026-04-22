@@ -37,6 +37,14 @@ function drawLoginHexagons() {
     hex.style.setProperty('--color1', color1);
     hex.style.setProperty('--color2', color2);
 
+    const bounceDirections = ['bounce-up', 'bounce-down', 'bounce-left', 'bounce-right'];
+    hexWrapper.addEventListener('mouseover', () => {
+      const direction = bounceDirections[Math.floor(Math.random() * bounceDirections.length)];
+      hexWrapper.classList.remove(...bounceDirections);
+      void hexWrapper.offsetWidth;
+      hexWrapper.classList.add(direction);
+    });
+
     hexWrapper.appendChild(hex);
     container.appendChild(hexWrapper);
   }
