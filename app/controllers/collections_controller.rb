@@ -102,6 +102,16 @@ class CollectionsController < ApplicationController
     case collection_params[:release_source]
     when 'json_file'
       release_source = RubyHashReleaseSource.new(collection: collection)
+      unless release_source.save
+        collection.destroy
+        render json: { error: release_source.errors }, status: :unprocessable_entity
+        return
+      end
+      if params[:releases].present?
+        release_source.raw_releases = params[:releases]
+        release_source.import_releases('only_new', {})
+      end
+
     when 'spotify_liked_songs'
       unless @current_user.linked_accounts.exists?(provider: LinkedAccount::SPOTIFY)
         collection.destroy
@@ -109,22 +119,18 @@ class CollectionsController < ApplicationController
         return
       end
       release_source = SpotifyLikedSongsReleaseSource.new(collection: collection)
+      unless release_source.save
+        collection.destroy
+        render json: { error: release_source.errors }, status: :unprocessable_entity
+        return
+      end
+      release_source.import_releases('only_new', {})
     else
       collection.destroy
       render json: { error: "Unsupported release source" }, status: :unprocessable_entity
       return
     end
 
-    unless release_source.save
-      collection.destroy
-      render json: { error: release_source.errors }, status: :unprocessable_entity
-      return
-    end
-
-    if params[:releases].present?
-      release_source.raw_releases = params[:releases]
-      release_source.import_releases('only_new', {})
-    end
 
     render json: collection, status: :created
   rescue => e

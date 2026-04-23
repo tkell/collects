@@ -1,6 +1,6 @@
 class AuthenticationController < ApplicationController
   def new
-    target = "/tessellates/login/"
+    target = "/login"
     target += "?#{request.query_string}" if request.query_string.present?
     redirect_to target, allow_other_host: false
   end
