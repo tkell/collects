@@ -112,19 +112,6 @@ class CollectionsController < ApplicationController
         release_source.import_releases('only_new', {})
       end
 
-    when 'spotify_liked_songs'
-      unless @current_user.linked_accounts.exists?(provider: LinkedAccount::SPOTIFY)
-        collection.destroy
-        render json: { error: "Connect a Spotify account before creating a spotify-backed collection" }, status: :unprocessable_entity
-        return
-      end
-      release_source = SpotifyLikedSongsReleaseSource.new(collection: collection)
-      unless release_source.save
-        collection.destroy
-        render json: { error: release_source.errors }, status: :unprocessable_entity
-        return
-      end
-      release_source.import_releases('only_new', {})
     else
       collection.destroy
       render json: { error: "Unsupported release source" }, status: :unprocessable_entity

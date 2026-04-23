@@ -1,13 +1,13 @@
 require "test_helper"
 
 class OAuthControllerTest < ActionDispatch::IntegrationTest
-  test "should get authorize" do
-    get o_auth_authorize_url
-    assert_response :success
+  test "authorize returns unsupported provider" do
+    get oauth_authorize_url(provider: 'unknown'), headers: authenticated_headers
+    assert_response :unprocessable_entity
   end
 
-  test "should get callback" do
-    get o_auth_callback_url
-    assert_response :success
+  test "callback returns unsupported provider" do
+    get oauth_callback_url(provider: 'unknown'), headers: authenticated_headers
+    assert_response :unprocessable_entity
   end
 end
