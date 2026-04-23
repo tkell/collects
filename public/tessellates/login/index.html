@@ -29,9 +29,12 @@
         <input type="text" id="new-collection-name" size="16" placeholder="collection name">
         <select id="new-collection-source">
           <option value="json_file">json file upload</option>
+          <option value="spotify_liked_songs">spotify liked songs</option>
         </select>
         <input type="file" id="new-collection-file" accept=".json" style="display: none;">
+        <button type="button" id="spotify-connect" style="display: none;">connect spotify</button>
         <button type="button" id="new-collection-submit">&#x1F333;</button>
+        <div id="spotify-status" style="display: none;"></div>
       </div>
     </div>
 

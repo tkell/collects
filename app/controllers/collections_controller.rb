@@ -99,10 +99,19 @@ class CollectionsController < ApplicationController
       return
     end
 
-    if collection_params[:release_source] == 'json_file'
+    case collection_params[:release_source]
+    when 'json_file'
       release_source = RubyHashReleaseSource.new(collection: collection)
+    when 'spotify_liked_songs'
+      unless @current_user.linked_accounts.exists?(provider: LinkedAccount::SPOTIFY)
+        collection.destroy
+        render json: { error: "Connect a Spotify account before creating a spotify-backed collection" }, status: :unprocessable_entity
+        return
+      end
+      release_source = SpotifyLikedSongsReleaseSource.new(collection: collection)
     else
-      render json: { error: "Only JSON collections are currently supported!" }, status: :unprocessable_entity
+      collection.destroy
+      render json: { error: "Unsupported release source" }, status: :unprocessable_entity
       return
     end
 

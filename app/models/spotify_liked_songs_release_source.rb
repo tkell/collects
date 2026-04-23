@@ -5,9 +5,7 @@ class SpotifyLikedSongsReleaseSource < ReleaseSource
     spotify_account = get_spotify_linked_account
     raise "No Spotify account linked for this collection's user" unless spotify_account
 
-    if spotify_account.expired?
-      refresh_spotify_token(spotify_account)
-    end
+    spotify_account.refresh_spotify_token! if spotify_account.expired?
 
     client = SpotifyClient.new(spotify_account.access_token)
 
@@ -27,15 +25,6 @@ class SpotifyLikedSongsReleaseSource < ReleaseSource
 
   def get_spotify_linked_account
     collection.user.linked_accounts.find_by(provider: LinkedAccount::SPOTIFY)
-  end
-
-  def refresh_spotify_token(spotify_account)
-    client = SpotifyClient.new(nil)
-    token_data = client.refresh_token(spotify_account.refresh_token)
-    spotify_account.update!(
-      access_token: token_data['access_token'],
-      expires_at: Time.current + token_data['expires_in'].to_i.seconds
-    )
   end
 
   def process_spotify_tracks(spotify_tracks)

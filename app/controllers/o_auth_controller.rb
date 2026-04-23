@@ -72,7 +72,7 @@ class OAuthController < ApplicationController
       linked_account.expires_at = Time.current + token_data['expires_in'].to_i.seconds
 
       if linked_account.save
-        render json: { success: true, message: 'Successfully connected to Spotify' }
+        redirect_to "/login/?spotify=connected", allow_other_host: false
       else
         render json: { error: linked_account.errors.full_messages }, status: :unprocessable_entity
       end

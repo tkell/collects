@@ -4,6 +4,7 @@
 
 // Store fetched collections for validation
 let userCollections = [];
+let spotifyLinked = false;
 
 /**
  * Generate a random hex color
@@ -313,6 +314,11 @@ function addNewCollectionInteraction(elementId, eventType) {
       return;
     }
 
+    if (releaseSource === 'spotify_liked_songs' && !spotifyLinked) {
+      alert('Please connect your Spotify account first');
+      return;
+    }
+
     if (releaseSource === 'json_file' && !fileStepActive) {
       fileInput.style.display = '';
       fileStepActive = true;
@@ -356,6 +362,56 @@ function addNewCollectionInteraction(elementId, eventType) {
     } catch (error) {
       alert('Error creating collection: ' + error.message);
     }
+  });
+}
+
+/**
+ * Check whether the current user has a Spotify linked account, and update
+ * the connect-button UI accordingly.
+ */
+async function refreshSpotifyLinkedStatus() {
+  const user_id = getCookieValue('loggedInUserId');
+  if (!user_id) {
+    spotifyLinked = false;
+    updateSpotifyConnectUI();
+    return;
+  }
+
+  try {
+    const url = `${apiState.protocol}://${apiState.host}/users/${user_id}/linked_accounts`;
+    const response = await fetch(url, { credentials: 'include' });
+    if (!response.ok) {
+      spotifyLinked = false;
+    } else {
+      const accounts = await response.json();
+      spotifyLinked = Array.isArray(accounts) && accounts.some(a => a.provider === 'spotify');
+    }
+  } catch (err) {
+    spotifyLinked = false;
+  }
+  updateSpotifyConnectUI();
+}
+
+function updateSpotifyConnectUI() {
+  const source = document.getElementById('new-collection-source').value;
+  const connectBtn = document.getElementById('spotify-connect');
+  const statusDiv = document.getElementById('spotify-status');
+
+  if (source === 'spotify_liked_songs') {
+    connectBtn.style.display = '';
+    connectBtn.textContent = spotifyLinked ? 'reconnect spotify' : 'connect spotify';
+    statusDiv.style.display = spotifyLinked ? '' : 'none';
+    statusDiv.textContent = spotifyLinked ? 'spotify connected' : '';
+  } else {
+    connectBtn.style.display = 'none';
+    statusDiv.style.display = 'none';
+  }
+}
+
+function addSpotifyConnectInteraction() {
+  document.getElementById('new-collection-source').addEventListener('change', updateSpotifyConnectUI);
+  document.getElementById('spotify-connect').addEventListener('click', () => {
+    window.location.href = `${apiState.protocol}://${apiState.host}/oauth/authorize/spotify`;
   });
 }
 
@@ -764,6 +820,7 @@ function displayLoggedIn() {
     document.getElementById('settings-container').classList.add("is-hidden")
     document.getElementById("settings-container").classList.remove("is-visible");
     fetchAndDisplayCollections();
+    refreshSpotifyLinkedStatus();
   } else {
     document.getElementById('settings-toggle-container').style.display = 'none';
     document.getElementById('settings-container').classList.add("is-hidden")
@@ -921,6 +978,7 @@ window.addEventListener("load", (event) => {
   addDeleteUserInteraction("delete-user-submit", "click");
 
   addNewCollectionInteraction("new-collection-submit", "click");
+  addSpotifyConnectInteraction();
   addDeleteCollectionInteraction("delete-collection-submit", "click");
 
   addResetPasswordRequestInteraction("forgot-password-submit", "click");
@@ -930,6 +988,12 @@ window.addEventListener("load", (event) => {
 
   addSettingsToggleInteraction("settings-toggle", "click");
   addSettingsToggleInteraction("settings-toggle", "keypress");
+
+  const spotifyStatus = new URLSearchParams(window.location.search).get('spotify');
+  if (spotifyStatus === 'connected') {
+    window.history.replaceState({}, document.title, window.location.pathname);
+    document.getElementById('new-collection-source').value = 'spotify_liked_songs';
+  }
 
   const resetToken = new URLSearchParams(window.location.search).get('reset_token');
   if (resetToken) {

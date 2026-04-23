@@ -10,6 +10,10 @@ class Variant < ApplicationRecord
   private
 
   def delete_gcs_images
+    if !image_path.includes("storage.googleapis.com") and !image_path_small.includes("storage.googleapis.com")
+      return
+    end
+
     storage = Google::Cloud::Storage.new(
       project_id: "collects-416256",
       credentials: ENV['GCS_BUCKET_KEY_PATH']
