@@ -1,40 +1,51 @@
+<!DOCTYPE html>
 <html>
   <head>
+    <link rel="stylesheet" href="/main.css">
+    <script>
+      (function () {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark-mode') {
+          document.documentElement.setAttribute('data-theme', 'dark-mode');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light-mode');
+        }
+      })();
+    </script>
+  </head>
   <body>
-    <a href="login">tessellates</a>
+    <div class="centre"><a href="login">tessellates</a>
+      <h2>about</h2>
+      <p>
+      Tessellates is a few things, right now. It's a personal project to organize my own music collection that has gone a bit rogue.  It's a better display for music -- much better than the spreadsheet music views typically on offer.  It wants to be a delight to use, somewhere between Nintendo and Apple, heavy on the Nintendo.  If you're a certain kind of music nerd who wants to spend more time with the music you have, tessellates will probably be for you.
+      </p>
 
-    <h2>about</h2>
-    <p>
-    Tessellates is a few things, right now. It's a personal project to organize my own music collection that has gone a bit rogue.  It's a better display for music -- much better than the spreadsheet music views typically on offer.  It wants to be a delight to use, somewhere between Nintendo and Apple, heavy on the Nintendo.  If you're a certain kind of music nerd who wants to spend more time with the music you have, tessellates will probably be for you.
-    </p>
+      <h2>goals</h2>
+      <p>
+      Tessellates has big dreams.
+      </p>
+      <ul>
+        <li>imports from major streaming services (Apple, YouTube, SoundCloud, etc)</li>
+        <li>imports from indie darlings (Discogs, Rekordbox, etc)</li>
+        <li>playback from same</li>
+        <li>stats</li>
+        <li>release annotations</li>
+      </ul>
 
-    <h2>goals</h2>
-    <p>
-    Tessellates has big dreams
-    <ul>
-      <li>imports from major streaming services (Spotify, Apple, etc)</li>
-      <li>imports from indie darlings (Discogs, Rekordbox, etc)</li>
-      <li>playback from same</li>
-      <li>stats</li>
-      <li>release annotations</li>
-    </ul>
+      <h2>changelog</h2>
+      <ul>
+        <li>&#8530; 0.0.1 (pre-alpha) - May 1, 2026 - json import, view, filters</li>
+      </ul>
 
-    <h2>changelog</h2>
-    <ul>
-      <li>0.0.1 (pre-alpha) - May 1, 2026 - json import, view, filters</li>
-    </ul>
+      <h2>llm disclaimer</h2>
+      <p>
+      I use LLMs for coding for tessellates, especially for arcane CSS that I am not expert in.  I do not use any LLM or AI tools for design or interaction choices.
+      </p>
 
-    <h2>llm disclaimer</h2>
-    <p>
-    I use LLMs for coding for tessellates, especially for arcane CSS that I am not expert in.  I do not use any LLM or AI tools for design or interaction choices.
-    </p>
-
-    <h2>blame</h2>
-    <p>
-    Made with music-emoji and heart-emoji by <a href="https://www.tide-pool.ca" target="_blank">Thor Kell</a> in Brooklyn, New York.
-    </p>
+      <h2>blame</h2>
+      <p>
+      Made with &#x1F3B5; and &#x2764;&#xFE0F; by <a href="https://www.tide-pool.ca" target="_blank">Thor Kell</a> in Brooklyn, New York. (also sometimes with &#x1FA90;, &#x1F98A;, &#8752;, and &#x2608;, yikes)
+      </p>
+    </div>
   </body>
 </html>
-
-
-

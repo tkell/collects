@@ -20,6 +20,10 @@
     --input-text: white;
 }
 
+h2 {
+  font-weight: 25
+}
+
 /* The body having size 600%, 600% is needed for my odd gradient fades! */
 body {
   background-size: 600% 600%;
