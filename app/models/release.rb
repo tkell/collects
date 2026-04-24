@@ -11,6 +11,7 @@ class Release < ApplicationRecord
   # class methods
   class << self 
     def make_from(release_data, collection_id)
+      puts(release_data)
       release = Release.new(
         title: release_data["title"],
         artist: release_data["artist"],

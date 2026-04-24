@@ -1,11 +1,14 @@
 require 'csv'
-require 'digest'
 
 class SpotifyExportifyCsvReleaseSource < ReleaseSource
+  require_relative '../../lib/clients/spotify_client'
+
   attr_accessor :raw_csv
 
   def import_releases(overwrite_strategy, current_releases, &block)
     all_releases = parse_csv_to_releases
+    client = SpotifyClient.with_client_credentials
+    enrich_with_spotify_data(all_releases, client)
     load_all_releases(all_releases, current_releases, overwrite_strategy, &block)
   end
 
@@ -13,7 +16,6 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
 
   def parse_csv_to_releases
     releases_by_key = {}
-    track_counts = {}
 
     rows = CSV.parse(raw_csv, headers: true)
     rows.each do |row|
@@ -26,16 +28,15 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
       album_key = "#{album_name}|#{first_artist}"
 
       unless releases_by_key[album_key]
-        track_counts[album_key] = 0
         releases_by_key[album_key] = {
-          'external_id' => Digest::MD5.hexdigest(album_key), ## need to get the real spotify album id here, hmm
+          'external_id' => nil,
           'title' => album_name,
           'artist' => first_artist,
           'label' => row['Record Label'],
           'release_year' => extract_year(row['Release Date']),
           'purchase_date' => row['Added At'],
-          'image_path' => "https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Full_Logo_RGB_Green.png", ## images are _very_ temporary, yikes!
-          'image_path_small' => "https://storage.googleapis.com/pr-newsroom-wp/1/2023/05/Spotify_Full_Logo_RGB_Green.png",
+          'image_path' => nil,
+          'image_path_small' => nil,
           'tracks' => []
         }
       end
@@ -54,15 +55,62 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
         releases_by_key[album_key]['artist'] = (existing_artists + new_artists).join(', ')
       end
 
-      track_counts[album_key] += 1
       releases_by_key[album_key]['tracks'] << {
+        'spotify_track_id' => track_id,
         'title' => row['Track Name'],
-        'position' => track_counts[album_key],
+        'position' => nil,
         'filepath' => "https://open.spotify.com/track/#{track_id}"
       }
     end
 
     releases_by_key.values
+  end
+
+  def enrich_with_spotify_data(releases, client)
+    # Fetch the first track of each album to get its album URI
+    first_track_ids = releases.map { |r| r['tracks'].first&.dig('spotify_track_id') }.compact
+    tracks = client.fetch_tracks(first_track_ids)
+    album_uri_by_track_id = tracks.each_with_object({}) do |track, memo|
+      memo[track['id']] = track['album']['uri']
+    end
+
+    # Assign album URIs and collect album IDs for batch fetching
+    album_ids = []
+    releases.each do |release|
+      first_track_id = release['tracks'].first&.dig('spotify_track_id')
+      album_uri = album_uri_by_track_id[first_track_id]
+      next unless album_uri
+
+      release['external_id'] = album_uri
+      album_ids << album_uri.split(':').last
+    end
+
+    albums = client.fetch_albums(album_ids)
+    albums_by_id = albums.index_by { |a| a['id'] }
+
+    releases.each do |release|
+      next unless release['external_id']
+      album_id = release['external_id'].split(':').last
+      album = albums_by_id[album_id]
+      next unless album
+
+      images = album['images'] || []
+      release['image_path'] = images.first&.dig('url')
+      small = images.find { |i| i['width'] == 300 && i['height'] == 300 }
+      release['image_path_small'] = small&.dig('url')
+
+      position_by_track_id = (album.dig('tracks', 'items') || []).each_with_object({}) do |item, memo|
+        memo[item['id']] = item['track_number']
+      end
+      release['tracks'].each do |track|
+        track['position'] = position_by_track_id[track['spotify_track_id']]
+        track['filepath'] = "https://open.spotify.com/track/#{track['spotify_track_id']}?context=#{release['external_id']}"
+      end
+    end
+
+    releases.each do |release|
+      release['tracks'].each { |t| t.delete('spotify_track_id') }
+    end
   end
 
   def extract_year(date_string)
