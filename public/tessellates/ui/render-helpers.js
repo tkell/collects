@@ -212,8 +212,9 @@ renderHelper._addStartingStateToRecord = function(record, index, tessellation) {
   }
   
   // Set up animation choices based on record ID
-  let directionId = Math.floor(record.external_id / 100) % 2;
-  let timeoutIndex = record.external_id % tessellation.timeoutFunctions.length;
+  
+  const directionId = record.tracks.length % 2
+  const timeoutIndex = record.tracks.length % tessellation.timeoutFunctions.length;
   if (directionId === 0) {
     record.timeoutFunction = tessellation.timeoutFunctions[timeoutIndex][0];
     record.reverseTimeoutFunction = tessellation.timeoutFunctions[timeoutIndex][1];

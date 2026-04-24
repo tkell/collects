@@ -112,6 +112,18 @@ class CollectionsController < ApplicationController
         release_source.import_releases('only_new', {})
       end
 
+    when 'spotify_exportify_csv'
+      release_source = SpotifyExportifyCsvReleaseSource.new(collection: collection)
+      unless release_source.save
+        collection.destroy
+        render json: { error: release_source.errors }, status: :unprocessable_entity
+        return
+      end
+      if params[:csv_content].present?
+        release_source.raw_csv = params[:csv_content]
+        release_source.import_releases('only_new', {})
+      end
+
     else
       collection.destroy
       render json: { error: "Unsupported release source" }, status: :unprocessable_entity
@@ -180,7 +192,7 @@ class CollectionsController < ApplicationController
   private
 
   def collection_params
-    params.permit(:name, :release_source)
+    params.permit(:name, :release_source, :csv_content)
   end
 
   def collection_update_params

@@ -71,14 +71,14 @@ class ReleaseSource < ApplicationRecord
         URI.open(image_url) { |f| temp_file.write(f.read) }
 
         # get colors
-        if release_data[:colors].blank?
+        if release_data["colors"].blank?
           colors = Miro::DominantColors.new(temp_file.path).to_hex.first(2).map(&:upcase)
         else
-          colors = release_data[:colors]
+          colors = release_data["colors"]
         end
 
         # make small image
-        if release_data[:image_path_small].blank?
+        if release_data["image_path_small"].blank?
           small_image_name = "#{release_data[:external_id]}-v#{variant.id}-small.jpg"
           small_image_path = "https://storage.googleapis.com/collects-images/"
           small_image = ImageProcessing::MiniMagick
@@ -94,7 +94,7 @@ class ReleaseSource < ApplicationRecord
           bucket.create_file(small_image.path, small_image_name)
           small_image_url = "#{small_image_path}#{small_image_name}"
         else
-          small_image_url = release_data[:image_path_small]
+          small_image_url = release_data["image_path_small"]
         end
 
         return colors, small_image_url

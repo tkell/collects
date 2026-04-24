@@ -299,21 +299,35 @@ function addCreateUserInteraction(elementId, eventType) {
 function addNewCollectionInteraction(elementId, eventType) {
   let fileStepActive = false;
 
+  const sourceSelect = document.getElementById('new-collection-source');
+  const fileInput = document.getElementById('new-collection-file');
+
+  sourceSelect.addEventListener('change', () => {
+    fileInput.accept = sourceSelect.value === 'spotify_exportify_csv' ? '.csv' : '.json';
+    if (fileStepActive) {
+      fileInput.value = '';
+      fileStepActive = false;
+      fileInput.style.display = 'none';
+    }
+  });
+
   document.getElementById(elementId).addEventListener(eventType, async (e) => {
     if (eventType === "keypress" && e.key !== "Enter") {
       return;
     }
 
     const name = document.getElementById('new-collection-name').value;
-    const releaseSource = document.getElementById('new-collection-source').value;
-    const fileInput = document.getElementById('new-collection-file');
+    const releaseSource = sourceSelect.value;
 
     if (!name) {
       alert('Please enter a collection name');
       return;
     }
 
-    if (releaseSource === 'json_file' && !fileStepActive) {
+    const needsFile = releaseSource === 'json_file' || releaseSource === 'spotify_exportify_csv';
+
+    if (needsFile && !fileStepActive) {
+      fileInput.accept = releaseSource === 'spotify_exportify_csv' ? '.csv' : '.json';
       fileInput.style.display = '';
       fileStepActive = true;
       return;
@@ -333,6 +347,13 @@ function addNewCollectionInteraction(elementId, eventType) {
         }
         const text = await file.text();
         body.releases = JSON.parse(text);
+      } else if (releaseSource === 'spotify_exportify_csv') {
+        const file = fileInput.files[0];
+        if (!file) {
+          alert('Please select a CSV file');
+          return;
+        }
+        body.csv_content = await file.text();
       }
 
       const response = await fetch(url, {

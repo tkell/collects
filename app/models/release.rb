@@ -38,9 +38,11 @@ class Release < ApplicationRecord
       end
 
       image_path = release_data["image_path"]
+      image_path_small = release_data["image_path_small"] # may be nil
       variant = Variant.new(
         release_id: release.id,
         image_path: image_path,
+        image_path_small: image_path_small,
         colors: release_data["colors"],
         name: "Standard",
         is_standard: true
