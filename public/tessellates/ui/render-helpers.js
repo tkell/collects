@@ -246,7 +246,20 @@ renderHelper._setMouseListeners = function(record, data, tessellation) {
     
     // Update text displays
     uiHelper.updateTextWithArtistAndTitle(record);
-    if (uiState.localPlayback) {
+    const spotifyUrl = record.tracks && record.tracks[0] && record.tracks[0].media_link;
+    if (spotifyUrl && spotifyUrl.includes('open.spotify.com')) {
+      uiHelper.updateTextForLocalPlayback(record);
+      const textElement = document.getElementById("text");
+      const link = document.createElement('a');
+      link.href = spotifyUrl;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = textElement.textContent;
+      link.style.color = 'inherit';
+      link.style.textDecoration = 'none';
+      textElement.textContent = '';
+      textElement.appendChild(link);
+    } else if (uiState.localPlayback) {
       uiHelper.updateTextForLocalPlayback(record);
     }
     uiHelper.updateTextForFocus(record);
