@@ -25,7 +25,7 @@ class Release < ApplicationRecord
 
       tracks = release_data["tracks"].sort_by { |t| t["position"] }
       tracks.each do |track|
-        track_id = release.external_id + "-" + track["position"].to_s
+        track_id = track["external_id"] || release.external_id + "-" + track["position"].to_s
         t = Track.new(
           title: track["title"],
           position: track["position"].to_s,

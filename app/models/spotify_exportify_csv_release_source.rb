@@ -55,9 +55,8 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
         releases_by_key[album_key]['artist'] = (existing_artists + new_artists).join(', ')
       end
 
-      spotify_track_id = row['Track URI'].split(":").last
       releases_by_key[album_key]['tracks'] << {
-        'spotify_track_id' => spotify_track_id,
+        'external_id' => track_id,
         'title' => row['Track Name'],
         'position' => nil,
         'filepath' => "https://open.spotify.com/track/#{track_id}"
@@ -70,7 +69,7 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
   def enrich_with_spotify_data(releases)
     releases.each do |release|
       # Let's get the album images
-      first_track_id = release['tracks'].first&.dig('spotify_track_id')
+      first_track_id = release['tracks'].first&.dig('external_id')
       next unless first_track_id
 
       track = find_one(RSpotify::Track, first_track_id)
@@ -91,15 +90,14 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
       # We can't trust the album lookup - we often get album id / track id mismatches for region reasons,
       # so we'll just be dumb and do one per track.
       release['tracks'].each do |t|
-        track = find_one(RSpotify::Track, t['spotify_track_id'])
+        track = find_one(RSpotify::Track, t['external_id'])
         disc_number = track.disc_number
         position = "#{track.track_number}"
         if disc_number > 1
           position = "#{disc_number} - #{track.track_number}"
         end
         t['position'] = position
-        t['filepath'] = "https://open.spotify.com/track/#{t['spotify_track_id']}?context=#{release['external_id']}"
-        t.delete('spotify_track_id')
+        t['filepath'] = "https://open.spotify.com/track/#{t['external_id']}?context=#{release['external_id']}"
       end
     end
   end
