@@ -133,6 +133,8 @@ class CollectionsController < ApplicationController
 
     render json: collection, status: :created
   rescue => e
+    puts(e)
+    puts(e.backtrace.join("\n"))
     puts(e.message)
     render json: { error: "Failed to create collection: #{e.message}" }, status: :unprocessable_entity
   end

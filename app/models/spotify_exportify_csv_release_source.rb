@@ -2,13 +2,11 @@ require 'csv'
 require 'rspotify'
 
 class SpotifyExportifyCsvReleaseSource < ReleaseSource
-  TRACK_BATCH_SIZE = 50
-  ALBUM_BATCH_SIZE = 20
-
   attr_accessor :raw_csv
 
   def import_releases(overwrite_strategy, current_releases, &block)
     all_releases = parse_csv_to_releases
+    puts("got all releases")
     config = OAuthConfig.get_provider_config('spotify')
     RSpotify.authenticate(config[:client_id], config[:client_secret])
     enrich_with_spotify_data(all_releases)
@@ -58,8 +56,11 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
         releases_by_key[album_key]['artist'] = (existing_artists + new_artists).join(', ')
       end
 
+      spotify_track_id = row['Track URI'].split(":").last
+      track_key = row['Track Name'].downcase.gsub(" ", "")
       releases_by_key[album_key]['tracks'] << {
-        'spotify_track_id' => track_id,
+        'spotify_track_id' => spotify_track_id,
+        'spotify_track_key' => track_key,
         'title' => row['Track Name'],
         'position' => nil,
         'filepath' => "https://open.spotify.com/track/#{track_id}"
@@ -70,29 +71,18 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
   end
 
   def enrich_with_spotify_data(releases)
-    first_track_ids = releases.map { |r| r['tracks'].first&.dig('spotify_track_id') }.compact
-    tracks = batch_find(RSpotify::Track, first_track_ids, TRACK_BATCH_SIZE)
-    album_uri_by_track_id = tracks.each_with_object({}) do |track, memo|
-      memo[track.id] = track.album.uri
-    end
-
-    album_ids = []
     releases.each do |release|
       first_track_id = release['tracks'].first&.dig('spotify_track_id')
-      album_uri = album_uri_by_track_id[first_track_id]
-      next unless album_uri
+      next unless first_track_id
 
+      track = find_one(RSpotify::Track, first_track_id)
+      next unless track
+
+      album_uri = track.album.uri
       release['external_id'] = album_uri
-      album_ids << album_uri.split(':').last
-    end
+      album_id = album_uri.split(':').last
 
-    albums = batch_find(RSpotify::Album, album_ids, ALBUM_BATCH_SIZE)
-    albums_by_id = albums.index_by(&:id)
-
-    releases.each do |release|
-      next unless release['external_id']
-      album_id = release['external_id'].split(':').last
-      album = albums_by_id[album_id]
+      album = find_one(RSpotify::Album, album_id)
       next unless album
 
       images = album.images || []
@@ -100,12 +90,17 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
       small = images.find { |i| i['width'] == 300 && i['height'] == 300 }
       release['image_path_small'] = small&.dig('url')
 
-      position_by_track_id = (album.tracks || []).each_with_object({}) do |item, memo|
-        memo[item.id] = item.track_number
+      position_by_track = (album.tracks || []).each_with_object({}) do |track, memo|
+        track_key = track.name.downcase.gsub(" ", "")
+        memo[track_key] = track.track_number
       end
-      release['tracks'].each do |track|
-        track['position'] = position_by_track_id[track['spotify_track_id']]
-        track['filepath'] = "https://open.spotify.com/track/#{track['spotify_track_id']}?context=#{release['external_id']}"
+
+      puts("track position indexes ...")
+      puts(album_uri)
+      puts(position_by_track)
+      release['tracks'].each do |t|
+        t['position'] = position_by_track[t['spotify_track_key']]
+        t['filepath'] = "https://open.spotify.com/track/#{t['spotify_track_id']}?context=#{release['external_id']}"
       end
     end
 
@@ -114,15 +109,12 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
     end
   end
 
-  def batch_find(klass, ids, batch_size)
-    results = []
-    ids.each_slice(batch_size) do |batch|
-      found = Array(klass.find(batch)).compact
-      results.concat(found)
-    rescue => e
-      puts "Warning: Failed to fetch #{klass.name} batch: #{e.message}"
-    end
-    results
+  def find_one(klass, id)
+    puts("querying Spotify API ...")
+    klass.find(id)
+  rescue => e
+    puts "Warning: Failed to fetch #{klass.name} #{id}: #{e.message}"
+    nil
   end
 
   def extract_year(date_string)
