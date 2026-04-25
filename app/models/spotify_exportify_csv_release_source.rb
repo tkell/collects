@@ -1,14 +1,17 @@
 require 'csv'
+require 'rspotify'
 
 class SpotifyExportifyCsvReleaseSource < ReleaseSource
-  require_relative '../../lib/clients/spotify_client'
+  TRACK_BATCH_SIZE = 50
+  ALBUM_BATCH_SIZE = 20
 
   attr_accessor :raw_csv
 
   def import_releases(overwrite_strategy, current_releases, &block)
     all_releases = parse_csv_to_releases
-    client = SpotifyClient.with_client_credentials
-    enrich_with_spotify_data(all_releases, client)
+    config = OAuthConfig.get_provider_config('spotify')
+    RSpotify.authenticate(config[:client_id], config[:client_secret])
+    enrich_with_spotify_data(all_releases)
     load_all_releases(all_releases, current_releases, overwrite_strategy, &block)
   end
 
@@ -66,15 +69,13 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
     releases_by_key.values
   end
 
-  def enrich_with_spotify_data(releases, client)
-    # Fetch the first track of each album to get its album URI
+  def enrich_with_spotify_data(releases)
     first_track_ids = releases.map { |r| r['tracks'].first&.dig('spotify_track_id') }.compact
-    tracks = client.fetch_tracks(first_track_ids)
+    tracks = batch_find(RSpotify::Track, first_track_ids, TRACK_BATCH_SIZE)
     album_uri_by_track_id = tracks.each_with_object({}) do |track, memo|
-      memo[track['id']] = track['album']['uri']
+      memo[track.id] = track.album.uri
     end
 
-    # Assign album URIs and collect album IDs for batch fetching
     album_ids = []
     releases.each do |release|
       first_track_id = release['tracks'].first&.dig('spotify_track_id')
@@ -85,8 +86,8 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
       album_ids << album_uri.split(':').last
     end
 
-    albums = client.fetch_albums(album_ids)
-    albums_by_id = albums.index_by { |a| a['id'] }
+    albums = batch_find(RSpotify::Album, album_ids, ALBUM_BATCH_SIZE)
+    albums_by_id = albums.index_by(&:id)
 
     releases.each do |release|
       next unless release['external_id']
@@ -94,13 +95,13 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
       album = albums_by_id[album_id]
       next unless album
 
-      images = album['images'] || []
+      images = album.images || []
       release['image_path'] = images.first&.dig('url')
       small = images.find { |i| i['width'] == 300 && i['height'] == 300 }
       release['image_path_small'] = small&.dig('url')
 
-      position_by_track_id = (album.dig('tracks', 'items') || []).each_with_object({}) do |item, memo|
-        memo[item['id']] = item['track_number']
+      position_by_track_id = (album.tracks || []).each_with_object({}) do |item, memo|
+        memo[item.id] = item.track_number
       end
       release['tracks'].each do |track|
         track['position'] = position_by_track_id[track['spotify_track_id']]
@@ -111,6 +112,17 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
     releases.each do |release|
       release['tracks'].each { |t| t.delete('spotify_track_id') }
     end
+  end
+
+  def batch_find(klass, ids, batch_size)
+    results = []
+    ids.each_slice(batch_size) do |batch|
+      found = Array(klass.find(batch)).compact
+      results.concat(found)
+    rescue => e
+      puts "Warning: Failed to fetch #{klass.name} batch: #{e.message}"
+    end
+    results
   end
 
   def extract_year(date_string)
