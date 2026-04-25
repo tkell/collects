@@ -11,7 +11,6 @@ class Release < ApplicationRecord
   # class methods
   class << self 
     def make_from(release_data, collection_id)
-      puts(release_data)
       release = Release.new(
         title: release_data["title"],
         artist: release_data["artist"],
@@ -24,7 +23,7 @@ class Release < ApplicationRecord
       )
       release.save!
 
-      tracks = release_data["tracks"]
+      tracks = release_data["tracks"].sort_by { |t| t["position"] }
       tracks.each do |track|
         track_id = release.external_id + "-" + track["position"].to_s
         t = Track.new(
@@ -110,7 +109,7 @@ class Release < ApplicationRecord
         # This is cool because we don't use tracks as a reference for anything, yet.
         # but we will soon, so this will need to be _formalized_
         release.tracks.destroy_all
-        tracks_data.each do |track|
+        tracks_data.sort_by { |t| t["position"] }.each do |track|
           t = Track.new(title: track["title"], position: track["position"].to_s, media_link: track["filepath"])
           release.tracks << t
           t.save

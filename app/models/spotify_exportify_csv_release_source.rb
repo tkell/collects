@@ -6,7 +6,6 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
 
   def import_releases(overwrite_strategy, current_releases, &block)
     all_releases = parse_csv_to_releases
-    puts("got all releases")
     config = OAuthConfig.get_provider_config('spotify')
     RSpotify.authenticate(config[:client_id], config[:client_secret])
     enrich_with_spotify_data(all_releases)
@@ -57,10 +56,8 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
       end
 
       spotify_track_id = row['Track URI'].split(":").last
-      track_key = row['Track Name'].downcase.gsub(" ", "")
       releases_by_key[album_key]['tracks'] << {
         'spotify_track_id' => spotify_track_id,
-        'spotify_track_key' => track_key,
         'title' => row['Track Name'],
         'position' => nil,
         'filepath' => "https://open.spotify.com/track/#{track_id}"
@@ -72,6 +69,7 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
 
   def enrich_with_spotify_data(releases)
     releases.each do |release|
+      # Let's get the album images
       first_track_id = release['tracks'].first&.dig('spotify_track_id')
       next unless first_track_id
 
@@ -90,27 +88,23 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
       small = images.find { |i| i['width'] == 300 && i['height'] == 300 }
       release['image_path_small'] = small&.dig('url')
 
-      position_by_track = (album.tracks || []).each_with_object({}) do |track, memo|
-        track_key = track.name.downcase.gsub(" ", "")
-        memo[track_key] = track.track_number
-      end
-
-      puts("track position indexes ...")
-      puts(album_uri)
-      puts(position_by_track)
+      # We can't trust the album lookup - we often get album id / track id mismatches for region reasons,
+      # so we'll just be dumb and do one per track.
       release['tracks'].each do |t|
-        t['position'] = position_by_track[t['spotify_track_key']]
+        track = find_one(RSpotify::Track, t['spotify_track_id'])
+        disc_number = track.disc_number
+        position = "#{track.track_number}"
+        if disc_number > 1
+          position = "#{disc_number} - #{track.track_number}"
+        end
+        t['position'] = position
         t['filepath'] = "https://open.spotify.com/track/#{t['spotify_track_id']}?context=#{release['external_id']}"
+        t.delete('spotify_track_id')
       end
-    end
-
-    releases.each do |release|
-      release['tracks'].each { |t| t.delete('spotify_track_id') }
     end
   end
 
   def find_one(klass, id)
-    puts("querying Spotify API ...")
     klass.find(id)
   rescue => e
     puts "Warning: Failed to fetch #{klass.name} #{id}: #{e.message}"
