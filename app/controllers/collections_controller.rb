@@ -99,6 +99,8 @@ class CollectionsController < ApplicationController
       return
     end
 
+    channel = "collection_import_#{params[:import_token].presence || collection.id}"
+
     case collection_params[:release_source]
     when 'json_file'
       release_source = RubyHashReleaseSource.new(collection: collection)
@@ -109,7 +111,12 @@ class CollectionsController < ApplicationController
       end
       if params[:releases].present?
         release_source.raw_releases = params[:releases]
-        release_source.import_releases('only_new', {})
+        ActionCable.server.broadcast(channel, { type: "start", input_count: release_source.input_count, existing: 0 })
+        release_source.import_releases('only_new', {}) do |release_data|
+          ActionCable.server.broadcast(channel, release_data)
+        end
+        collection.reload
+        ActionCable.server.broadcast(channel, { type: "done", level: collection.level })
       end
 
     when 'spotify_exportify_csv'
@@ -121,7 +128,12 @@ class CollectionsController < ApplicationController
       end
       if params[:csv_content].present?
         release_source.raw_csv = params[:csv_content]
-        release_source.import_releases('only_new', {})
+        ActionCable.server.broadcast(channel, { type: "start", input_count: release_source.input_count, existing: 0 })
+        release_source.import_releases('only_new', {}) do |release_data|
+          ActionCable.server.broadcast(channel, release_data)
+        end
+        collection.reload
+        ActionCable.server.broadcast(channel, { type: "done", level: collection.level })
       end
 
     else

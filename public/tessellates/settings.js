@@ -337,7 +337,8 @@ function addNewCollectionInteraction(elementId, eventType) {
 
     try {
       const url = `${apiState.protocol}://${apiState.host}/collections`;
-      const body = { name, release_source: releaseSource };
+      const importToken = crypto.randomUUID();
+      const body = { name, release_source: releaseSource, import_token: importToken };
 
       if (releaseSource === 'json_file') {
         const file = fileInput.files[0];
@@ -356,6 +357,53 @@ function addNewCollectionInteraction(elementId, eventType) {
         body.csv_content = await file.text();
       }
 
+      const tickerDiv = document.getElementById('new-collection-ticker');
+      const releaseQueue = [];
+      let tickerActive = false;
+      let drainPromise = Promise.resolve();
+      let tickerTimeout = 500;
+
+      function showNextRelease() {
+        return new Promise(resolve => {
+          function tick() {
+            if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
+            const release = releaseQueue.shift();
+            updateAllHexagonColors(release.colors);
+            tickerDiv.style.display = '';
+            tickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
+            setTimeout(tick, tickerTimeout);
+          }
+          tick();
+        });
+      }
+
+      const { ready, done } = connectCollectionImportSocket(importToken, (release) => {
+        if (release.colors && !release.artist) {
+          updateHexagonColors(release.colors);
+          return;
+        }
+        releaseQueue.push(release);
+        if (!tickerActive) { tickerActive = true; drainPromise = showNextRelease(); }
+      }, (startMsg) => {
+        const inputCount = startMsg.input_count || 0;
+        const newCount = inputCount - (startMsg.existing || 0);
+        if (newCount > 0) tickerTimeout = Math.max(50, Math.min(500, 2000 / newCount));
+        tickerDiv.style.display = '';
+        tickerDiv.textContent = `Loading ${newCount} new release${newCount === 1 ? '' : 's'} out of ${inputCount} total uploaded`;
+      });
+      await ready;
+
+      done.then(async () => {
+        await drainPromise;
+        tickerDiv.textContent = 'Collection created!';
+        setTimeout(() => {
+          bounceHexagons();
+          tickerDiv.style.display = 'none';
+          tickerDiv.textContent = '';
+          fetchAndDisplayCollections();
+        }, 1000);
+      });
+
       const response = await fetch(url, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -372,8 +420,6 @@ function addNewCollectionInteraction(elementId, eventType) {
       fileInput.value = '';
       fileStepActive = false;
       document.getElementById('new-collection-name').value = '';
-
-      fetchAndDisplayCollections();
     } catch (error) {
       alert('Error creating collection: ' + error.message);
     }
