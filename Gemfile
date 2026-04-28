@@ -1,6 +1,6 @@
 source "https://rubygems.org"
 
-ruby "3.2.2"
+ruby "3.4.5"
 
 # Bundle edge Rails instead: gem "rails", github: "rails/rails", branch: "main"
 gem "rails", "~> 7.1.2"
@@ -57,6 +57,12 @@ gem 'httparty', '~> 0.23'
 # postgres
 gem 'pg'
 
+# sockets
+gem "solid_cable", "~> 1.0"
+
+# spotify
+gem "rspotify", "~> 2.12.0"
+
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
   gem "debug", platforms: %i[ mri windows ]
@@ -82,6 +88,5 @@ group :test do
   gem "selenium-webdriver"
 end
 
-gem "solid_cable", "~> 1.0"
 
 gem 'dotenv', groups: [:development, :test]

@@ -3,7 +3,7 @@
   <head>
     <link rel="stylesheet" href="/main.css">
     <script src="/api-state.js"></script>
-    <script src="/login.js"></script>
+    <script src="/settings.js"></script>
     <script>
     (function () {
         const savedTheme = localStorage.getItem('theme');
@@ -29,9 +29,11 @@
         <input type="text" id="new-collection-name" size="16" placeholder="collection name">
         <select id="new-collection-source">
           <option value="json_file">json file upload</option>
+          <option value="spotify_exportify_csv">exportify csv</option>
         </select>
         <input type="file" id="new-collection-file" accept=".json" style="display: none;">
         <button type="button" id="new-collection-submit">&#x1F333;</button>
+        <div id="new-collection-ticker" style="display: none;"></div>
       </div>
     </div>
 

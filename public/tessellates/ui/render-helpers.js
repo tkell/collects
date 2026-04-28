@@ -212,8 +212,9 @@ renderHelper._addStartingStateToRecord = function(record, index, tessellation) {
   }
   
   // Set up animation choices based on record ID
-  let directionId = Math.floor(record.external_id / 100) % 2;
-  let timeoutIndex = record.external_id % tessellation.timeoutFunctions.length;
+  
+  const directionId = record.tracks.length % 2
+  const timeoutIndex = record.tracks.length % tessellation.timeoutFunctions.length;
   if (directionId === 0) {
     record.timeoutFunction = tessellation.timeoutFunctions[timeoutIndex][0];
     record.reverseTimeoutFunction = tessellation.timeoutFunctions[timeoutIndex][1];
@@ -245,7 +246,20 @@ renderHelper._setMouseListeners = function(record, data, tessellation) {
     
     // Update text displays
     uiHelper.updateTextWithArtistAndTitle(record);
-    if (uiState.localPlayback) {
+    const spotifyUrl = record.tracks && record.tracks[0] && record.tracks[0].media_link;
+    if (spotifyUrl && spotifyUrl.includes('open.spotify.com')) {
+      uiHelper.updateTextForLocalPlayback(record);
+      const textElement = document.getElementById("text");
+      const link = document.createElement('a');
+      link.href = spotifyUrl;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = textElement.textContent;
+      link.style.color = 'inherit';
+      link.style.textDecoration = 'none';
+      textElement.textContent = '';
+      textElement.appendChild(link);
+    } else if (uiState.localPlayback) {
       uiHelper.updateTextForLocalPlayback(record);
     }
     uiHelper.updateTextForFocus(record);

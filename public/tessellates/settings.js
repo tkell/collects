@@ -299,21 +299,35 @@ function addCreateUserInteraction(elementId, eventType) {
 function addNewCollectionInteraction(elementId, eventType) {
   let fileStepActive = false;
 
+  const sourceSelect = document.getElementById('new-collection-source');
+  const fileInput = document.getElementById('new-collection-file');
+
+  sourceSelect.addEventListener('change', () => {
+    fileInput.accept = sourceSelect.value === 'spotify_exportify_csv' ? '.csv' : '.json';
+    if (fileStepActive) {
+      fileInput.value = '';
+      fileStepActive = false;
+      fileInput.style.display = 'none';
+    }
+  });
+
   document.getElementById(elementId).addEventListener(eventType, async (e) => {
     if (eventType === "keypress" && e.key !== "Enter") {
       return;
     }
 
     const name = document.getElementById('new-collection-name').value;
-    const releaseSource = document.getElementById('new-collection-source').value;
-    const fileInput = document.getElementById('new-collection-file');
+    const releaseSource = sourceSelect.value;
 
     if (!name) {
       alert('Please enter a collection name');
       return;
     }
 
-    if (releaseSource === 'json_file' && !fileStepActive) {
+    const needsFile = releaseSource === 'json_file' || releaseSource === 'spotify_exportify_csv';
+
+    if (needsFile && !fileStepActive) {
+      fileInput.accept = releaseSource === 'spotify_exportify_csv' ? '.csv' : '.json';
       fileInput.style.display = '';
       fileStepActive = true;
       return;
@@ -323,7 +337,8 @@ function addNewCollectionInteraction(elementId, eventType) {
 
     try {
       const url = `${apiState.protocol}://${apiState.host}/collections`;
-      const body = { name, release_source: releaseSource };
+      const importToken = crypto.randomUUID();
+      const body = { name, release_source: releaseSource, import_token: importToken };
 
       if (releaseSource === 'json_file') {
         const file = fileInput.files[0];
@@ -333,7 +348,65 @@ function addNewCollectionInteraction(elementId, eventType) {
         }
         const text = await file.text();
         body.releases = JSON.parse(text);
+      } else if (releaseSource === 'spotify_exportify_csv') {
+        const file = fileInput.files[0];
+        if (!file) {
+          alert('Please select a CSV file');
+          return;
+        }
+        body.csv_content = await file.text();
       }
+
+      const tickerDiv = document.getElementById('new-collection-ticker');
+      const releaseQueue = [];
+      let tickerActive = false;
+      let drainPromise = Promise.resolve();
+      let tickerTimeout = 500;
+
+      function showNextRelease() {
+        return new Promise(resolve => {
+          function tick() {
+            if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
+            const item = releaseQueue.shift();
+            tickerDiv.style.display = '';
+            if (item.type === 'querying') {
+              tickerDiv.textContent = item.message;
+            } else {
+              if (item.colors) updateAllHexagonColors(item.colors);
+              tickerDiv.textContent = `${item.artist} - ${item.title} [${item.label}]`;
+            }
+            setTimeout(tick, tickerTimeout);
+          }
+          tick();
+        });
+      }
+
+      const { ready, done } = connectCollectionImportSocket(importToken, (release) => {
+        if (release.colors && !release.artist) {
+          updateHexagonColors(release.colors);
+          return;
+        }
+        releaseQueue.push(release);
+        if (!tickerActive) { tickerActive = true; drainPromise = showNextRelease(); }
+      }, (startMsg) => {
+        const inputCount = startMsg.input_count || 0;
+        const newCount = inputCount - (startMsg.existing || 0);
+        if (newCount > 0) tickerTimeout = Math.max(50, Math.min(500, 2000 / newCount));
+        tickerDiv.style.display = '';
+        tickerDiv.textContent = `Loading ${newCount} new release${newCount === 1 ? '' : 's'} out of ${inputCount} total uploaded`;
+      });
+      await ready;
+
+      done.then(async () => {
+        await drainPromise;
+        tickerDiv.textContent = 'Collection created!';
+        setTimeout(() => {
+          bounceHexagons();
+          tickerDiv.style.display = 'none';
+          tickerDiv.textContent = '';
+          fetchAndDisplayCollections();
+        }, 1000);
+      });
 
       const response = await fetch(url, {
         method: 'POST',
@@ -351,8 +424,6 @@ function addNewCollectionInteraction(elementId, eventType) {
       fileInput.value = '';
       fileStepActive = false;
       document.getElementById('new-collection-name').value = '';
-
-      fetchAndDisplayCollections();
     } catch (error) {
       alert('Error creating collection: ' + error.message);
     }
@@ -474,15 +545,18 @@ function connectCollectionImportSocket(collectionId, onRelease, onStart) {
 function addCollectionItemUpdateInteraction(button, fileInput, collection, updateControls, releaseTickerDiv, levelSpan, expandButton) {
   button.addEventListener('click', async () => {
     const file = fileInput.files[0];
+    const isCsv = collection.release_source_type === 'spotify_exportify_csv';
     if (!file) {
-      alert('Please select a JSON file');
+      alert(isCsv ? 'Please select a CSV file' : 'Please select a JSON file');
       return;
     }
     bounceHexagons();
 
     try {
       const text = await file.text();
-      const releases = JSON.parse(text);
+      const bodyExtras = isCsv
+        ? { csv_content: text }
+        : { releases: JSON.parse(text) };
 
       const releaseQueue = [];
       let tickerActive = false;
@@ -493,11 +567,14 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
         return new Promise(resolve => {
           function tick() {
             if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
-            const release = releaseQueue.shift();
-            console.log(release)
-            updateAllHexagonColors(release.colors);
+            const item = releaseQueue.shift();
             releaseTickerDiv.style.display = '';
-            releaseTickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
+            if (item.type === 'querying') {
+              releaseTickerDiv.textContent = item.message;
+            } else {
+              if (item.colors) updateAllHexagonColors(item.colors);
+              releaseTickerDiv.textContent = `${item.artist} - ${item.title} [${item.label}]`;
+            }
             setTimeout(tick, tickerTimeout);
           }
           tick();
@@ -538,7 +615,7 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
       const response = await fetch(url, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ releases, overwrite_strategy: 'only_new' }),
+        body: JSON.stringify({ ...bodyExtras, overwrite_strategy: 'only_new' }),
         credentials: 'include'
       });
 
@@ -832,6 +909,7 @@ function displayCollections(collections) {
 
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
+      fileInput.accept = collection.release_source_type === 'spotify_exportify_csv' ? '.csv' : '.json';
 
       const releaseTickerDiv = document.createElement('div');
       releaseTickerDiv.style.display = 'none';

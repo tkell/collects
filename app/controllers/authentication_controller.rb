@@ -1,5 +1,8 @@
 class AuthenticationController < ApplicationController
   def new
+    target = "/login"
+    target += "?#{request.query_string}" if request.query_string.present?
+    redirect_to target, allow_other_host: false
   end
 
   def login
@@ -11,7 +14,7 @@ class AuthenticationController < ApplicationController
       end
 
       token = JWT.encode({user_id: user.id}, Rails.application.credentials.read)
-      expires_at = Time.now + 300.days
+      expires_at = Time.now + 2000.days
       cookies.encrypted[:jwt] = {
         value: token,
         expires: expires_at,
