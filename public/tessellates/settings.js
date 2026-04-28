@@ -368,7 +368,7 @@ function addNewCollectionInteraction(elementId, eventType) {
           function tick() {
             if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
             const release = releaseQueue.shift();
-            updateAllHexagonColors(release.colors);
+            if (release.colors) updateAllHexagonColors(release.colors);
             tickerDiv.style.display = '';
             tickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
             setTimeout(tick, tickerTimeout);
@@ -561,8 +561,7 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
           function tick() {
             if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
             const release = releaseQueue.shift();
-            console.log(release)
-            updateAllHexagonColors(release.colors);
+            if (release.colors) updateAllHexagonColors(release.colors);
             releaseTickerDiv.style.display = '';
             releaseTickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
             setTimeout(tick, tickerTimeout);
