@@ -8,7 +8,13 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
     all_releases = parsed_releases
     config = OAuthConfig.get_provider_config('spotify')
     RSpotify.authenticate(config[:client_id], config[:client_secret])
-    enrich_with_spotify_data(all_releases)
+
+    all_releases.each do |release|
+      track_name = release['tracks'].first&.dig('title')
+      yield({ type: 'querying', message: "Querying Spotify for #{track_name} ..." }) if block_given?
+      enrich_release_with_spotify_data(release)
+    end
+
     load_all_releases(all_releases, current_releases, overwrite_strategy, &block)
   end
 
@@ -74,39 +80,36 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
     releases_by_key.values
   end
 
-  def enrich_with_spotify_data(releases)
-    releases.each do |release|
-      # Let's get the album images
-      first_track_id = release['tracks'].first&.dig('external_id')
-      next unless first_track_id
+  def enrich_release_with_spotify_data(release)
+    first_track_id = release['tracks'].first&.dig('external_id')
+    return unless first_track_id
 
-      track = find_one(RSpotify::Track, first_track_id)
-      next unless track
+    track = find_one(RSpotify::Track, first_track_id)
+    return unless track
 
-      album_uri = track.album.uri
-      release['external_id'] = album_uri
-      album_id = album_uri.split(':').last
+    album_uri = track.album.uri
+    release['external_id'] = album_uri
+    album_id = album_uri.split(':').last
 
-      album = find_one(RSpotify::Album, album_id)
-      next unless album
+    album = find_one(RSpotify::Album, album_id)
+    return unless album
 
-      images = album.images || []
-      release['image_path'] = images.first&.dig('url')
-      small = images.find { |i| i['width'] == 300 && i['height'] == 300 }
-      release['image_path_small'] = small&.dig('url')
+    images = album.images || []
+    release['image_path'] = images.first&.dig('url')
+    small = images.find { |i| i['width'] == 300 && i['height'] == 300 }
+    release['image_path_small'] = small&.dig('url')
 
-      # We can't trust the album lookup - we often get album id / track id mismatches for region reasons,
-      # so we'll just be dumb and do one per track.
-      release['tracks'].each do |t|
-        track = find_one(RSpotify::Track, t['external_id'])
-        disc_number = track.disc_number
-        position = "#{track.track_number}"
-        if disc_number > 1
-          position = "#{disc_number} - #{track.track_number}"
-        end
-        t['position'] = position
-        t['filepath'] = "https://open.spotify.com/track/#{t['external_id']}?context=#{release['external_id']}"
+    # We can't trust the album lookup - we often get album id / track id mismatches for region reasons,
+    # so we'll just be dumb and do one per track.
+    release['tracks'].each do |t|
+      track = find_one(RSpotify::Track, t['external_id'])
+      disc_number = track.disc_number
+      position = "#{track.track_number}"
+      if disc_number > 1
+        position = "#{disc_number} - #{track.track_number}"
       end
+      t['position'] = position
+      t['filepath'] = "https://open.spotify.com/track/#{t['external_id']}?context=#{release['external_id']}"
     end
   end
 

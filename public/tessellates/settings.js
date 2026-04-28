@@ -367,10 +367,14 @@ function addNewCollectionInteraction(elementId, eventType) {
         return new Promise(resolve => {
           function tick() {
             if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
-            const release = releaseQueue.shift();
-            if (release.colors) updateAllHexagonColors(release.colors);
+            const item = releaseQueue.shift();
             tickerDiv.style.display = '';
-            tickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
+            if (item.type === 'querying') {
+              tickerDiv.textContent = item.message;
+            } else {
+              if (item.colors) updateAllHexagonColors(item.colors);
+              tickerDiv.textContent = `${item.artist} - ${item.title} [${item.label}]`;
+            }
             setTimeout(tick, tickerTimeout);
           }
           tick();
@@ -560,10 +564,14 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
         return new Promise(resolve => {
           function tick() {
             if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
-            const release = releaseQueue.shift();
-            if (release.colors) updateAllHexagonColors(release.colors);
+            const item = releaseQueue.shift();
             releaseTickerDiv.style.display = '';
-            releaseTickerDiv.textContent = `${release.artist} - ${release.title} [${release.label}]`;
+            if (item.type === 'querying') {
+              releaseTickerDiv.textContent = item.message;
+            } else {
+              if (item.colors) updateAllHexagonColors(item.colors);
+              releaseTickerDiv.textContent = `${item.artist} - ${item.title} [${item.label}]`;
+            }
             setTimeout(tick, tickerTimeout);
           }
           tick();
