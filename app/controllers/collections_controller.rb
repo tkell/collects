@@ -150,12 +150,21 @@ class CollectionsController < ApplicationController
       return
     end
 
-    # will need to set up a switch based on release source type here
     overwrite_strategy = params.fetch(:overwrite_strategy, "only_new")
     release_source = collection.release_sources.first
-    release_source.raw_releases = params[:releases] || []
+
+    case release_source
+    when RubyHashReleaseSource
+      release_source.raw_releases = params[:releases] || []
+    when SpotifyExportifyCsvReleaseSource
+      release_source.raw_csv = params[:csv_content] || ""
+    else
+      render json: { error: "Unsupported release source" }, status: :unprocessable_entity
+      return
+    end
+
     current_releases = collection.releases.joins(:variants).pluck(:external_id, :colors).index_by {|r| r[0]}
-    ActionCable.server.broadcast("collection_import_#{collection.id}", { type: "start", input_count: release_source.raw_releases.length , existing: current_releases.length})
+    ActionCable.server.broadcast("collection_import_#{collection.id}", { type: "start", input_count: release_source.input_count, existing: current_releases.length})
     release_source.import_releases(overwrite_strategy, current_releases) do |release_data|
       ActionCable.server.broadcast("collection_import_#{collection.id}", release_data)
     end
@@ -199,7 +208,7 @@ class CollectionsController < ApplicationController
 
   def collection_update_params
     ## I hate this, there must be a way to generate them, hmm
-    params.permit(:id, :overwrite_strategy, releases: [:id, :title, :artist, :label, :image_path, :image_url, :year, :purchase_date, tracks: [:position, :title, :filepath]], collection: {})
+    params.permit(:id, :overwrite_strategy, :csv_content, releases: [:id, :title, :artist, :label, :image_path, :image_url, :year, :purchase_date, tracks: [:position, :title, :filepath]], collection: {})
   end
 
   def tessellates_params

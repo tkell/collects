@@ -5,14 +5,22 @@ class SpotifyExportifyCsvReleaseSource < ReleaseSource
   attr_accessor :raw_csv
 
   def import_releases(overwrite_strategy, current_releases, &block)
-    all_releases = parse_csv_to_releases
+    all_releases = parsed_releases
     config = OAuthConfig.get_provider_config('spotify')
     RSpotify.authenticate(config[:client_id], config[:client_secret])
     enrich_with_spotify_data(all_releases)
     load_all_releases(all_releases, current_releases, overwrite_strategy, &block)
   end
 
+  def input_count
+    parsed_releases.length
+  end
+
   private
+
+  def parsed_releases
+    @parsed_releases ||= parse_csv_to_releases
+  end
 
   def parse_csv_to_releases
     releases_by_key = {}

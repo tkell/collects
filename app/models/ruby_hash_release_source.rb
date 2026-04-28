@@ -5,4 +5,8 @@ class RubyHashReleaseSource < ReleaseSource
     all_releases = convert_well_formatted(raw_releases)
     load_all_releases(all_releases, current_releases, overwrite_strategy, &block)
   end
+
+  def input_count
+    raw_releases.length
+  end
 end
