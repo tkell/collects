@@ -185,6 +185,9 @@ class CollectionsController < ApplicationController
 
     render json: collection
   rescue => e
+    puts(e)
+    puts(e.backtrace.join("\n"))
+    puts(e.message)
     render json: { error: "Failed to update collection: #{e.message}" }, status: :unprocessable_entity
   end
 

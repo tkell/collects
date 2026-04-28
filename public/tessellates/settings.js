@@ -545,15 +545,18 @@ function connectCollectionImportSocket(collectionId, onRelease, onStart) {
 function addCollectionItemUpdateInteraction(button, fileInput, collection, updateControls, releaseTickerDiv, levelSpan, expandButton) {
   button.addEventListener('click', async () => {
     const file = fileInput.files[0];
+    const isCsv = collection.release_source_type === 'spotify_exportify_csv';
     if (!file) {
-      alert('Please select a JSON file');
+      alert(isCsv ? 'Please select a CSV file' : 'Please select a JSON file');
       return;
     }
     bounceHexagons();
 
     try {
       const text = await file.text();
-      const releases = JSON.parse(text);
+      const bodyExtras = isCsv
+        ? { csv_content: text }
+        : { releases: JSON.parse(text) };
 
       const releaseQueue = [];
       let tickerActive = false;
@@ -612,7 +615,7 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
       const response = await fetch(url, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ releases, overwrite_strategy: 'only_new' }),
+        body: JSON.stringify({ ...bodyExtras, overwrite_strategy: 'only_new' }),
         credentials: 'include'
       });
 
@@ -906,6 +909,7 @@ function displayCollections(collections) {
 
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
+      fileInput.accept = collection.release_source_type === 'spotify_exportify_csv' ? '.csv' : '.json';
 
       const releaseTickerDiv = document.createElement('div');
       releaseTickerDiv.style.display = 'none';
