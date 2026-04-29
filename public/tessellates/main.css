@@ -20,6 +20,11 @@
     --input-text: white;
 }
 
+a,
+a:visited {
+  color: var(--color-text);
+}
+
 h2 {
   font-weight: 25
 }
