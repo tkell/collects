@@ -26,7 +26,8 @@ a:visited {
 }
 
 h2 {
-  font-weight: 25
+  font-weight: 25;
+  margin-top: 50px;
 }
 
 /* The body having size 600%, 600% is needed for my odd gradient fades! */
@@ -87,6 +88,11 @@ select {
   margin-bottom: 5px;
   font-size: 22px;
 }
+
+.text-setup {
+  margin-left: 100px;
+  margin-right: 100px;
+} 
 
 /* Login page */
 
