@@ -90,9 +90,13 @@ select {
 }
 
 .text-setup {
-  margin-left: 100px;
-  margin-right: 100px;
+  margin-left: 12.5%;
+  margin-right: 12.5%;
 } 
+
+pre {
+  text-align: start;
+}
 
 /* Login page */
 

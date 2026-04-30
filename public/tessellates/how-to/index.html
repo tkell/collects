@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="../main.css">
+    <script>
+      (function () {
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark-mode') {
+          document.documentElement.setAttribute('data-theme', 'dark-mode');
+        } else {
+          document.documentElement.setAttribute('data-theme', 'light-mode');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div class="centre text-setup">
+      <a href="settings">tessellates</a>
+      <h2>how-to</h2>
+      <p>
+      This page talks about how to import music into tessellates.  This is not as easy as it should be;  it is being worked on.  For now, though, this is what we've got -- more coming soon.
+      </p>
+      <p>
+      Some general notes:  tessellates is not concerned with perfect metadata accuracy.  A Release in tessellates just has Title, Artist, Label, all of which are strings - and Track titles which are also just strings.  If you want to add, say, orchestral music that could be said to have any of 4 artists, you'll need to make choices about how to turn those into strings.
+      </p>
+
+      <hr/>
+      <h2>json file</h2>
+      <p>
+      A classic.  This was the original format that I used, back when tessellates loaded a static 6.3 MB json file each time, instead of having a "database". You'll need to make a list of json objects, each like so:
+      </p>
+      <pre><code>
+       {
+        "id": "3734564210",
+        "title": "Wallshaker",
+        "artist": "Aaron-Carl",
+        "label": "Millions of Moments",
+        "tracks": [
+          {
+            "position": "01",
+            "title": "Wallshaker (Original 12 Inch Mix)",
+          }
+        ],
+        "image_url": "https://tide-pool.ca/tessellates/digital/images/3734564210.jpg",
+        "image_url_small": "https://tide-pool.ca/tessellates/digital/images/3734564210-small.jpg",
+        "year": 2007,
+        "purchase_date": "2011-04-01"
+      }
+      </code></pre>
+
+      <p>
+      Some notes, for nerds, but this is a nerdy thing to do:
+      </p>
+      <ul>
+        <li>
+          - "image_url_small" is optional:  we'll make a small image and store it for you, if you don't have one.
+        </li>
+        <li>
+          - "id" becomes "external_id" in tessellates.  It is your job to make sure that your external_ids are unique.
+        </li>
+        <li>
+          - In "tracks", note that "position" is a string, not a number.  This allows constructions like "A-Side" and "B-Side"k, for instance.
+        </li>
+        <li>
+          - Note that year is a number, but purchase_date is a string.
+        </li>
+      </ul>
+
+  You can check out an example JSON file, of <a href="http://tide-pool.ca/tessellates-assets/thor-vinyl-subset.json" target="_blank">part of my vinyl collection, here.</a>
+      </p>
+
+      <hr/>
+      <h2>spotify via exportify csv</h2>
+      <p>
+      The Spotify API has been locked down as of early 2026, so tessellates can't get access to act as you.  The best way to get a Spotify playlist or Liked Songs collection loaded in is to visit the fine folks at <a href="https://exportify.net" target="_blank">Exportify</a>, connect your Spotify account there, and then load the CSV into tessellates.  
+      </p>
+
+      <p>
+      You can check out an example CSV, of <a href="http://tide-pool.ca/tessellates-assets/Ultimate_Breaks_and_Beats.csv" target="_blank">Ultimate Breaks & Beats here.</a>.  
+      </p>
+    </div>
+  </body>
+</html>
