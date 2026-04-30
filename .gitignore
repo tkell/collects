@@ -32,7 +32,10 @@
 !/tmp/storage/
 !/tmp/storage/.keep
 
+# ignore assets
 /public/assets
+/public/tessellates/img
+/public/tessellates/example-files
 
 # Ignore master key for decrypting credentials and more.
 /config/master.key

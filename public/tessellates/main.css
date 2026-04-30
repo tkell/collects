@@ -22,12 +22,12 @@
 
 a,
 a:visited {
-  color: var(--color-text);
+  color: inherit
 }
 
 h2 {
   font-weight: 25;
-  margin-top: 50px;
+  margin-top: 25px;
 }
 
 /* The body having size 600%, 600% is needed for my odd gradient fades! */
@@ -98,6 +98,11 @@ pre {
   text-align: start;
 }
 
+img.basic-border {
+ border-style: solid;
+ border-width: 1px;
+}
+
 /* Login page */
 
 .is-hidden {
@@ -118,6 +123,10 @@ li.collection-item {
 }
 
 span.level-span {
+  color: #AAA;
+}
+
+.grey-text {
   color: #AAA;
 }
 

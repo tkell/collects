@@ -915,7 +915,7 @@ function displayCollections(collections) {
       releaseTickerDiv.style.display = 'none';
 
       const levelSpan = document.createElement('span');
-      levelSpan.className = "level-span"
+      levelSpan.className = "grey-text"
       levelSpan.textContent = ` lvl ${collection.level} `;
 
       const updateButton = document.createElement('button');
