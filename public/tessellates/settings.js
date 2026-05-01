@@ -842,6 +842,7 @@ function displayLoggedIn() {
     document.getElementById("settings-container").classList.remove("is-visible");
     fetchAndDisplayCollections();
   } else {
+    document.getElementById('new-collection-container').style.display = 'none';
     document.getElementById('settings-toggle-container').style.display = 'none';
     document.getElementById('settings-container').classList.add("is-hidden")
     document.getElementById("settings-container").classList.remove("is-visible");
