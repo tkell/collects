@@ -279,7 +279,7 @@ function addCreateUserInteraction(elementId, eventType) {
         throw new Error(data.errors ? data.errors.join(', ') : 'User creation failed');
       }
 
-      alert('Account created! You can now log in.');
+      alert('Account created - please check your email to verify your account.');
       document.getElementById('create-username').value = '';
       document.getElementById('create-email').value = '';
       document.getElementById('create-password').value = '';

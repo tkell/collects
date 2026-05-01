@@ -21,10 +21,10 @@ class UsersController < ApplicationController
     if user.nil?
       render json: { error: "Invalid verification token" }, status: :not_found
     elsif user.email_verified?
-      redirect_to "/login"
+      redirect_to "/settings"
     else
       user.verify_email!
-      redirect_to "/login"
+      redirect_to "/settings"
     end
   end
 
