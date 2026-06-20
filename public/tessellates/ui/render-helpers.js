@@ -279,6 +279,7 @@ renderHelper._setMouseListeners = function(record, data, tessellation) {
     document.getElementById("annotation-link").setAttribute("href", annotationUrl);
     const variantsUrl = `${apiState.protocol}://${apiState.host}/releases/${record.id}/variants`;
     document.getElementById("variants-link").setAttribute("href", variantsUrl);
+    document.getElementById("release-edit-link").setAttribute("href", `/releases/?r=${record.id}`);
     
     // Transition to big image view with animation sequence
     uiHelper.replaceOtherRecords(record, data, tessellation.timeouts.slow)
