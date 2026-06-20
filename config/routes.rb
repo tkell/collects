@@ -20,13 +20,12 @@ Rails.application.routes.draw do
     resources :gardens
   end
 
-  # releases are also read-only, they're created via collections
-  # annotations are under releases, so index shows all annotations for a release
-  # hmm, release#show and annotations#index are awfully similar, oh well
-  resources :releases, only: [:show] do
+  resources :releases, only: [:show, :update, :destroy] do
     resources :annotations, only: [:index, :create, :update, :destroy]
     resources :variants, only: [:index, :show, :create, :update, :destroy]
   end
+
+  resources :tracks, only: [:index, :show, :update, :destroy]
 
   # playbacks can't be modified,
   # maybe move these under releases someday
