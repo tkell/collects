@@ -280,6 +280,9 @@ renderHelper._setMouseListeners = function(record, data, tessellation) {
     const variantsUrl = `${apiState.protocol}://${apiState.host}/releases/${record.id}/variants`;
     document.getElementById("variants-link").setAttribute("href", variantsUrl);
     document.getElementById("release-edit-link").setAttribute("href", `/releases/?r=${record.id}`);
+    ["annotation-link", "variants-link", "release-edit-link"].forEach(id => {
+      document.getElementById(id).classList.remove("disabled-link");
+    });
     
     // Transition to big image view with animation sequence
     uiHelper.replaceOtherRecords(record, data, tessellation.timeouts.slow)
@@ -296,6 +299,11 @@ renderHelper._setMouseListeners = function(record, data, tessellation) {
   };
 
   record.onBigImageClose = function() {
+    // Disable nav links until next release is focused
+    ["annotation-link", "variants-link", "release-edit-link"].forEach(id => {
+      document.getElementById(id).classList.add("disabled-link");
+    });
+
     // Clean up event listeners and text formatting
     document.getElementById("text").removeEventListener("click", record.playFunc);
     if (uiState.localPlayback) {

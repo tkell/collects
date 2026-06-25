@@ -927,3 +927,100 @@ transform: translate(25%);
 .login-hex-wrapper.bounce-right {
   animation: bounce-right var(--animation-duration-slow) ease-in-out;
 }
+
+/* Disabled nav links (annotation, variants, release-edit) before a release is focused */
+.disabled-link {
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+/* Release edit page */
+#release-header {
+  font-size: 1.2em;
+  display: inline;
+}
+
+#release-display {
+  display: inline-block;
+}
+
+#release-edit-form {
+  display: none;
+}
+
+#release-header-section {
+  margin-top: 2rem;
+}
+
+#cover-art-section {
+  margin-top: 1.25rem;
+}
+
+#cover-art {
+  width: 333px;
+  height: 333px;
+  object-fit: cover;
+  display: inline-block;
+}
+
+#tracklist-section {
+  margin-top: 1.5rem;
+}
+
+#tracklist {
+  display: inline-block;
+  text-align: left;
+}
+
+#metadata-section {
+  margin-top: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+#metadata {
+  display: inline-block;
+  text-align: left;
+  font-size: 0.9em;
+  opacity: 0.8;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4em;
+  margin-bottom: 0.5em;
+}
+
+.track-row {
+  display: flex;
+  align-items: center;
+  margin: 0.25em 0;
+  min-width: 400px;
+}
+
+.track-position {
+  min-width: 2.5em;
+  text-align: right;
+  margin-right: 0.6em;
+  opacity: 0.6;
+}
+
+.meta-row {
+  margin: 0.35em 0;
+}
+
+.small-btn {
+  font-size: 0.7em;
+  margin-left: 0.5em;
+  padding: 1px 5px;
+  cursor: pointer;
+}
+
+.edit-input {
+  font-family: inherit;
+  font-size: inherit;
+  background: var(--input-bg);
+  color: var(--input-text);
+  border: 1px solid currentColor;
+  padding: 1px 4px;
+}
