@@ -6,6 +6,7 @@ class Release < ApplicationRecord
   has_many :tracks, dependent: :destroy
   has_many :variants, dependent: :destroy
   has_many :playbacks, dependent: :destroy
+  has_many :annotations, dependent: :destroy
 
 
   # class methods
@@ -119,7 +120,7 @@ class Release < ApplicationRecord
   end
 
   def as_json(options={})
-    super(:include => [:tracks, :variants])
+    super(:include => [:tracks, :variants, :annotations])
   end
 
   def current_variant

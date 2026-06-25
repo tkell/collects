@@ -21,6 +21,20 @@ function putTrack(trackId, data) {
   );
 }
 
+function postAnnotation(releaseId, annotationType, body) {
+  return fetchWithCredentials(
+    apiState.protocol + '://' + apiState.host + '/releases/' + releaseId + '/annotations',
+    { method: 'POST', body: JSON.stringify({ annotation_type: annotationType, body: body }) }
+  );
+}
+
+function deleteAnnotation(releaseId, annotationId) {
+  return fetchWithCredentials(
+    apiState.protocol + '://' + apiState.host + '/releases/' + releaseId + '/annotations/' + annotationId,
+    { method: 'DELETE' }
+  );
+}
+
 function putVariant(releaseId, variantId, data) {
   return fetchWithCredentials(
     apiState.protocol + '://' + apiState.host + '/releases/' + releaseId + '/variants/' + variantId,
@@ -337,6 +351,82 @@ function renderRelease(release) {
 
 }
 
+var ANNOTATION_TYPES = ['genre', 'vibe', 'epoch', 'freeform'];
+
+function renderAnnotations(release) {
+  var container = document.getElementById('annotations');
+  container.innerHTML = '';
+
+  var header = document.createElement('div');
+  header.className = 'section-header';
+  header.style.justifyContent = 'center';
+  var headerTitle = document.createElement('span');
+  headerTitle.textContent = 'annotations';
+  header.appendChild(headerTitle);
+  container.appendChild(header);
+
+  ANNOTATION_TYPES.forEach(function(annotationType) {
+    var typeAnnotations = release.annotations.filter(function(a) {
+      return a.annotation_type === annotationType;
+    });
+
+    var row = document.createElement('div');
+    row.className = 'meta-row';
+
+    var label = document.createElement('span');
+    label.textContent = annotationType + ': ';
+    row.appendChild(label);
+
+    var tagList = document.createElement('span');
+    tagList.className = 'annotation-tag-list';
+
+    function addTagToList(annotation) {
+      var btn = document.createElement('button');
+      btn.textContent = annotation.body;
+      btn.className = 'small-btn';
+      btn.addEventListener('click', function() {
+        deleteAnnotation(release.id, annotation.id).then(function() {
+          tagList.removeChild(btn);
+        }).catch(function(err) {
+          alert('Delete failed: ' + err.message);
+        });
+      });
+      tagList.appendChild(btn);
+    }
+
+    typeAnnotations.forEach(addTagToList);
+    row.appendChild(tagList);
+
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'edit-input';
+    input.style.display = 'inline';
+    input.size = 18;
+    if (annotationType !== 'freeform') {
+      input.placeholder = 'comma-separated';
+    }
+
+    var saveBtn = makeSmallBtn('save');
+    saveBtn.addEventListener('click', function() {
+      var val = input.value.trim();
+      if (!val) return;
+      postAnnotation(release.id, annotationType, val).then(function(created) {
+        created.forEach(function(annotation) {
+          release.annotations.push(annotation);
+          addTagToList(annotation);
+        });
+        input.value = '';
+      }).catch(function(err) {
+        alert('Save failed: ' + err.message);
+      });
+    });
+
+    row.appendChild(input);
+    row.appendChild(saveBtn);
+    container.appendChild(row);
+  });
+}
+
 window.addEventListener('DOMContentLoaded', function() {
   var params = new URLSearchParams(window.location.search);
   var releaseId = params.get('r');
@@ -347,7 +437,10 @@ window.addEventListener('DOMContentLoaded', function() {
 
   var url = apiState.protocol + '://' + apiState.host + '/releases/' + releaseId;
   fetchWithCredentials(url)
-    .then(renderRelease)
+    .then(function(release) {
+      renderRelease(release);
+      renderAnnotations(release);
+    })
     .catch(function(err) {
       console.error(err);
       document.body.innerHTML = '<p class="centre">Failed to load release.</p>';

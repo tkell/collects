@@ -1,65 +1,44 @@
 class AnnotationsController < ApplicationController
   before_action :authenticate_user
 
-  # per-release
   def index
-    @release = Release.where(id: params['release_id']).includes(:tracks).first
-    @annotations = Annotation.where(release_id: @release.id)
+    release = Release.joins(collection: :user)
+      .where(users: { id: @current_user_id }, id: params[:release_id])
+      .first
+    return render json: { error: "Release not found" }, status: :not_found if release.nil?
 
-    if @release.collection_id == 1 || @release.collection_id == 3
-      @collection_name = 'digital'
-    else
-      @collection_name = 'vinyl'
-    end
-
-    @annotations_by_type = {}
-    @annotations.each do |annotation|
-      if @annotations_by_type[annotation.annotation_type].nil?
-        @annotations_by_type[annotation.annotation_type] = []
-      end
-      @annotations_by_type[annotation.annotation_type].push(annotation)
-    end
-  end
-
-  def new
-    @annotation = Annotation.new
+    render json: release.annotations
   end
 
   def create
-    @release_id = params['release_id']
-    @annotation_type = params['annotation_type'].to_i
-    @body = params['body']
-    user_id = @current_user_id
+    release = Release.joins(collection: :user)
+      .where(users: { id: @current_user_id }, id: params[:release_id])
+      .first
+    return render json: { error: "Release not found" }, status: :not_found if release.nil?
 
-    if @annotation_type != 3
-      @body = @body.downcase
-      @bodies = @body.split(',')
-    else
-      @bodies = [@body]
+    annotation_type = params['annotation_type']
+    body = params['body']
+    bodies = (annotation_type == 'freeform') ? [body] : body.downcase.split(',').map(&:strip).reject(&:empty?)
+
+    created = bodies.map do |b|
+      Annotation.create!(release_id: release.id, annotation_type: annotation_type, body: b, user_id: @current_user_id)
     end
 
-    @bodies.each do |body|
-      @annotation = Annotation.new(release_id: @release_id, annotation_type: @annotation_type, body: body.strip(), user_id: user_id)
-      @annotation.save
-    end
-
-    if @annotation.save
-      release = Release.find(@release_id)
-      release.points += 1
-      release.save
-      redirect_to action: "index"
-    else
-      render :new, status: :unprocessable_entity
-    end
+    release.increment!(:points)
+    render json: created
+  rescue ActiveRecord::RecordInvalid => e
+    render json: { error: e.message }, status: :unprocessable_entity
   end
 
   def destroy
-    @annotation = Annotation.find(params[:id])
-    @annotation.destroy
+    annotation = Annotation.joins(release: { collection: :user })
+      .where(users: { id: @current_user_id }, id: params[:id])
+      .first
+    return render json: { error: "Annotation not found" }, status: :not_found if annotation.nil?
 
-    redirect_to action: "index"
+    annotation.destroy
+    render json: { id: params[:id].to_i }
   end
-
 
   private
 

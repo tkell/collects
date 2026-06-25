@@ -275,12 +275,10 @@ renderHelper._setMouseListeners = function(record, data, tessellation) {
     document.getElementById("text").addEventListener("click", record.playFunc);
     
     // Set up links
-    const annotationUrl = `${apiState.protocol}://${apiState.host}/releases/${record.id}/annotations`;
-    document.getElementById("annotation-link").setAttribute("href", annotationUrl);
     const variantsUrl = `${apiState.protocol}://${apiState.host}/releases/${record.id}/variants`;
     document.getElementById("variants-link").setAttribute("href", variantsUrl);
     document.getElementById("release-edit-link").setAttribute("href", `/releases/?r=${record.id}`);
-    ["annotation-link", "variants-link", "release-edit-link"].forEach(id => {
+    ["variants-link", "release-edit-link"].forEach(id => {
       document.getElementById(id).classList.remove("disabled-link");
     });
     
@@ -300,7 +298,7 @@ renderHelper._setMouseListeners = function(record, data, tessellation) {
 
   record.onBigImageClose = function() {
     // Disable nav links until next release is focused
-    ["annotation-link", "variants-link", "release-edit-link"].forEach(id => {
+    ["variants-link", "release-edit-link"].forEach(id => {
       document.getElementById(id).classList.add("disabled-link");
     });
 
