@@ -178,7 +178,8 @@ function renderRelease(release) {
       color1Field.valueSpan.textContent = colors[0];
       color2Field.valueSpan.textContent = colors[1];
     }).catch(function(err) {
-      alert('Color save to variant failed: ' + err.message);
+      console.log(err);
+      // alert('Color save to variant failed: ' + err.message);
     });
 
     // Tracks need multiple PUTs
