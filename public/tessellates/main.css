@@ -936,7 +936,11 @@ transform: translate(25%);
 
 /* Release edit page */
 #release-header {
-  font-size: 1.2em;
+  display: inline;
+}
+
+#release-title {
+  font-size: 1.4em;
   display: inline;
 }
 

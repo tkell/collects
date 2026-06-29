@@ -118,9 +118,12 @@ function renderRelease(release) {
   var colors = currentVariant ? currentVariant.colors : ['#888', '#ccc'];
 
   // --- Header ---
-  var releaseHeader = document.getElementById('release-header');
-  releaseHeader.textContent = release.artist + ' - ' + release.title + ' [' + release.label + ']';
-  applyGradientText(releaseHeader, colors);
+  let releaseString = release.artist + ' - ' + release.title + ' [' + release.label + ']';
+  let releaseTitle = document.getElementById('release-title');
+  let releaseHeader = document.getElementById('release-header');
+  releaseTitle.textContent = releaseString;
+  releaseHeader.textContent = releaseString;
+  applyGradientText(releaseTitle, colors);
 
   var releaseDisplay = document.getElementById('release-display');
   var releaseEditForm = document.getElementById('release-edit-form');
@@ -131,6 +134,14 @@ function renderRelease(release) {
   function exitReleaseEditMode() {
     releaseEditForm.style.display = 'none';
     releaseDisplay.style.display = 'inline-block';
+    trackRows.forEach(function(r) {
+      r.titleSpan.style.display = '';
+      r.input.style.display = 'none';
+    });
+    metaFields.forEach(function(f) {
+      f.valueSpan.style.display = '';
+      f.input.style.display = 'none';
+    });
   }
 
   releaseEditBtn.addEventListener('click', function() {
@@ -139,21 +150,61 @@ function renderRelease(release) {
     document.getElementById('edit-label').value = release.label;
     releaseDisplay.style.display = 'none';
     releaseEditForm.style.display = 'block';
+    trackRows.forEach(function(r) {
+      r.input.value = r.titleSpan.textContent;
+      r.titleSpan.style.display = 'none';
+      r.input.style.display = '';
+    });
+    metaFields.forEach(function(f) {
+      f.input.value = f.valueSpan.textContent;
+      f.valueSpan.style.display = 'none';
+      f.input.style.display = '';
+    });
   });
 
   releaseSaveBtn.addEventListener('click', function() {
-    var artist = document.getElementById('edit-artist').value;
-    var title = document.getElementById('edit-title').value;
-    var label = document.getElementById('edit-label').value;
-    putRelease(release.id, { artist: artist, title: title, label: label }).then(function(updated) {
+    let artist = document.getElementById('edit-artist').value;
+    let title = document.getElementById('edit-title').value;
+    let label = document.getElementById('edit-label').value;
+    let purchaseDate = purchaseDateField.input.value;
+    let releaseYear = releaseYearField.input.value;
+
+    // Colors save to varient
+    putVariant(release.id, currentVariant.id, {
+      colors: [color1Field.input.value, color2Field.input.value]
+    }).then(function() {
+      colors[0] = color1Field.input.value;
+      colors[1] = color2Field.input.value;
+      color1Field.valueSpan.textContent = colors[0];
+      color2Field.valueSpan.textContent = colors[1];
+    }).catch(function(err) {
+      alert('Color save to variant failed: ' + err.message);
+    });
+
+    // Tracks need multiple PUTs
+    Promise.all(trackRows.map(function(r) {
+      return putTrack(r.track.id, { title: r.input.value }).then(function(updated) {
+        r.track.title = updated.title;
+        r.titleSpan.textContent = updated.title;
+      });
+    })).catch(function(err) {
+      alert('Tracks save failed: ' + err.message);
+    });
+    
+    putRelease(release.id, { artist: artist, title: title, label: label, release_year: releaseYear, purchase_date: purchaseDate}).then(function(updated) {
       release.artist = updated.artist;
       release.title = updated.title;
       release.label = updated.label;
+      release.purchase_date = updated.purchase_date;
+      release.release_year = updated.release_year;
+
+      purchaseDateField.valueSpan.textContent = release.purchase_date
+      releaseYearField.valueSpan.textContent = release.release_year;
       releaseHeader.textContent = release.artist + ' – ' + release.title + ' [' + release.label + ']';
       applyGradientText(releaseHeader, colors);
       exitReleaseEditMode();
     }).catch(function(err) {
-      alert('Save failed: ' + err.message);
+      alert('Release save failed: ' + err.message);
     });
   });
 
@@ -169,24 +220,7 @@ function renderRelease(release) {
     return (parseInt(a.position) || 0) - (parseInt(b.position) || 0);
   });
 
-  var trackEditToggle = makeSmallEmojiBtn([9999, 65039]);
-  var trackSaveBtn = makeSmallBtn('save');
-  var trackCancelBtn = makeSmallEmojiBtn([10060]);
-  trackSaveBtn.style.display = 'none';
-  trackCancelBtn.style.display = 'none';
-
-  var trackHeader = document.createElement('div');
-  trackHeader.className = 'section-header';
-  var trackTitle = document.createElement('span');
-  trackTitle.textContent = 'tracks';
-  trackHeader.appendChild(trackTitle);
-  trackHeader.appendChild(trackEditToggle);
-  trackHeader.appendChild(trackSaveBtn);
-  trackHeader.appendChild(trackCancelBtn);
-  tracklist.appendChild(trackHeader);
-
   var trackRows = [];
-
   tracks.forEach(function(track) {
     var row = document.createElement('div');
     row.className = 'track-row';
@@ -208,59 +242,9 @@ function renderRelease(release) {
     trackRows.push({ track: track, titleSpan: titleSpan, input: input });
   });
 
-  function enterTrackEditMode() {
-    trackRows.forEach(function(r) {
-      r.input.value = r.titleSpan.textContent;
-      r.titleSpan.style.display = 'none';
-      r.input.style.display = '';
-    });
-    trackEditToggle.style.display = 'none';
-    trackSaveBtn.style.display = '';
-    trackCancelBtn.style.display = '';
-  }
-
-  function exitTrackEditMode() {
-    trackRows.forEach(function(r) {
-      r.titleSpan.style.display = '';
-      r.input.style.display = 'none';
-    });
-    trackEditToggle.style.display = '';
-    trackSaveBtn.style.display = 'none';
-    trackCancelBtn.style.display = 'none';
-  }
-
-  trackEditToggle.addEventListener('click', enterTrackEditMode);
-  trackCancelBtn.addEventListener('click', exitTrackEditMode);
-  trackSaveBtn.addEventListener('click', function() {
-    Promise.all(trackRows.map(function(r) {
-      return putTrack(r.track.id, { title: r.input.value }).then(function(updated) {
-        r.track.title = updated.title;
-        r.titleSpan.textContent = updated.title;
-      });
-    })).then(exitTrackEditMode).catch(function(err) {
-      alert('Save failed: ' + err.message);
-    });
-  });
-
   // --- Metadata ---
   var metadata = document.getElementById('metadata');
   var metaFields = [];
-
-  var metaEditToggle = makeSmallEmojiBtn([9999, 65039]);
-  var metaSaveBtn = makeSmallBtn('save');
-  var metaCancelBtn = makeSmallEmojiBtn([10060]);
-  metaSaveBtn.style.display = 'none';
-  metaCancelBtn.style.display = 'none';
-
-  var metaHeader = document.createElement('div');
-  metaHeader.className = 'section-header';
-  var metaTitle = document.createElement('span');
-  metaTitle.textContent = 'meta';
-  metaHeader.appendChild(metaTitle);
-  metaHeader.appendChild(metaEditToggle);
-  metaHeader.appendChild(metaSaveBtn);
-  metaHeader.appendChild(metaCancelBtn);
-  metadata.appendChild(metaHeader);
 
   function metaRow(label, value) {
     var row = document.createElement('div');
@@ -296,75 +280,12 @@ function renderRelease(release) {
     metadata.appendChild(color2Field.row);
     metaFields.push(color1Field, color2Field);
   }
-
-  function enterMetaEditMode() {
-    metaFields.forEach(function(f) {
-      f.input.value = f.valueSpan.textContent;
-      f.valueSpan.style.display = 'none';
-      f.input.style.display = '';
-    });
-    metaEditToggle.style.display = 'none';
-    metaSaveBtn.style.display = '';
-    metaCancelBtn.style.display = '';
-  }
-
-  function exitMetaEditMode() {
-    metaFields.forEach(function(f) {
-      f.valueSpan.style.display = '';
-      f.input.style.display = 'none';
-    });
-    metaEditToggle.style.display = '';
-    metaSaveBtn.style.display = 'none';
-    metaCancelBtn.style.display = 'none';
-  }
-
-  metaEditToggle.addEventListener('click', enterMetaEditMode);
-  metaCancelBtn.addEventListener('click', exitMetaEditMode);
-  metaSaveBtn.addEventListener('click', function() {
-    var saves = [
-      putRelease(release.id, {
-        purchase_date: purchaseDateField.input.value,
-        release_year: releaseYearField.input.value
-      }).then(function() {
-        purchaseDateField.valueSpan.textContent = purchaseDateField.input.value;
-        releaseYearField.valueSpan.textContent = releaseYearField.input.value;
-      })
-    ];
-
-    if (color1Field && color2Field) {
-      saves.push(
-        putVariant(release.id, currentVariant.id, {
-          colors: [color1Field.input.value, color2Field.input.value]
-        }).then(function() {
-          colors[0] = color1Field.input.value;
-          colors[1] = color2Field.input.value;
-          color1Field.valueSpan.textContent = colors[0];
-          color2Field.valueSpan.textContent = colors[1];
-        })
-      );
-    }
-
-    Promise.all(saves).then(exitMetaEditMode).catch(function(err) {
-      alert('Save failed: ' + err.message);
-    });
-  });
-
 }
 
 var ANNOTATION_TYPES = ['genre', 'vibe', 'epoch', 'freeform'];
 
 function renderAnnotations(release) {
   var container = document.getElementById('annotations');
-  container.innerHTML = '';
-
-  var header = document.createElement('div');
-  header.className = 'section-header';
-  header.style.justifyContent = 'center';
-  var headerTitle = document.createElement('span');
-  headerTitle.textContent = 'annotations';
-  header.appendChild(headerTitle);
-  container.appendChild(header);
-
   ANNOTATION_TYPES.forEach(function(annotationType) {
     var typeAnnotations = release.annotations.filter(function(a) {
       return a.annotation_type === annotationType;
@@ -402,9 +323,6 @@ function renderAnnotations(release) {
     input.className = 'edit-input';
     input.style.display = 'inline';
     input.size = 18;
-    if (annotationType !== 'freeform') {
-      input.placeholder = 'comma-separated';
-    }
 
     var saveBtn = makeSmallBtn('save');
     saveBtn.addEventListener('click', function() {
