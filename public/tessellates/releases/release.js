@@ -250,14 +250,23 @@ function renderAnnotations(release) {
       return a.annotation_type === annotationType;
     });
 
-    var row = document.createElement('div');
-    row.className = 'meta-row';
+    var column = document.createElement('div');
+    column.className = 'annotation-column';
 
-    var label = document.createElement('span');
-    label.textContent = annotationType + ': ';
-    row.appendChild(label);
+    var label = document.createElement('div');
+    label.className = 'annotation-title';
+    label.textContent = annotationType;
+    column.appendChild(label);
 
-    var tagList = document.createElement('span');
+    var inputRow = document.createElement('div');
+    inputRow.className = 'annotation-input-row';
+
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'edit-input';
+    input.size = 12;
+
+    var tagList = document.createElement('div');
     tagList.className = 'annotation-tag-list';
 
     function addTagToList(annotation) {
@@ -274,17 +283,7 @@ function renderAnnotations(release) {
       tagList.appendChild(btn);
     }
 
-    typeAnnotations.forEach(addTagToList);
-    row.appendChild(tagList);
-
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'edit-input';
-    input.style.display = 'inline';
-    input.size = 18;
-
-    var saveBtn = makeSmallBtn('save');
-    saveBtn.addEventListener('click', function() {
+    function saveAnnotation() {
       var val = input.value.trim();
       if (!val) return;
       postAnnotation(release.id, annotationType, val).then(function(created) {
@@ -296,11 +295,22 @@ function renderAnnotations(release) {
       }).catch(function(err) {
         alert('Save failed: ' + err.message);
       });
+    }
+
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        saveAnnotation();
+      }
     });
 
-    row.appendChild(input);
-    row.appendChild(saveBtn);
-    container.appendChild(row);
+    inputRow.appendChild(input);
+    column.appendChild(inputRow);
+
+    typeAnnotations.forEach(addTagToList);
+    column.appendChild(tagList);
+
+    container.appendChild(column);
   });
 }
 

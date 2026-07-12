@@ -1016,6 +1016,46 @@ transform: translate(25%);
   margin-right: 0.5em;
 }
 
+#annotations {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1.5em;
+}
+
+.annotation-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 10em;
+}
+
+.annotation-title {
+  margin-bottom: 0.3em;
+}
+
+.annotation-input-row {
+  margin-bottom: 0.3em;
+  white-space: nowrap;
+}
+
+.annotation-tag-list {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25em;
+  width: 100%;
+}
+
+.annotation-tag-list .small-btn {
+  margin-left: 0;
+  max-width: 100%;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
 .small-btn {
   font-size: 0.7em;
   margin-left: 0.5em;
