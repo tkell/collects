@@ -145,11 +145,11 @@ function renderRelease(release) {
   }
 
   releaseEditBtn.addEventListener('click', function() {
+    releaseDisplay.style.display = 'none';
+    releaseEditForm.style.display = 'block';
     document.getElementById('edit-artist').value = release.artist;
     document.getElementById('edit-title').value = release.title;
     document.getElementById('edit-label').value = release.label;
-    releaseDisplay.style.display = 'none';
-    releaseEditForm.style.display = 'block';
     trackRows.forEach(function(r) {
       r.input.value = r.titleSpan.textContent;
       r.titleSpan.style.display = 'none';
