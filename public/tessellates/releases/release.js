@@ -42,21 +42,24 @@ function putVariant(releaseId, variantId, data) {
   );
 }
 
-function applyGradientText(el, colors) {
-  el.style.backgroundImage = 'linear-gradient(90deg, ' + colors[0] + ', ' + colors[1] + ')';
+function applyGradientText(el, releaseId, colors) {
+  let gradient = makeGradiantString(releaseId, colors);
+  el.style.backgroundImage = gradient
   el.style.color = 'transparent';
   el.style.backgroundClip = 'text';
   el.style.webkitBackgroundClip = 'text';
 }
 
-// Briefly sweep every piece of text on the page from its default colour into
-// the release gradient and back again — used as a "saved!" flourish.
-function pulseGradientText(colors) {
-  var gradient = 'linear-gradient(90deg, ' + colors[0] + ', ' + colors[1] + ')';
-  var half = 650; // ms spent fading each direction
+function makeGradiantString(releaseId, colors) {
+  let angleStr = (releaseId % 4) * 90 + 'deg';
+  return `linear-gradient(${angleStr}, ${colors[0]}, ${colors[1]})`;
+}
 
-  // Collect the leaf elements that actually render text, skipping form
-  // controls (their backgrounds/emoji don't play well with background-clip).
+function pulseGradientText(releaseId, colors) {
+  let gradient = makeGradiantString(releaseId, colors);
+  var half = 650;
+
+  // Collect the leaf elements that actually render text, skipping form controls
   var elements = [];
   var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
   var node;
@@ -129,7 +132,7 @@ function renderRelease(release) {
   let releaseHeader = document.getElementById('release-header');
   releaseTitle.textContent = releaseString;
   releaseHeader.textContent = releaseString;
-  applyGradientText(releaseTitle, colors);
+  applyGradientText(releaseTitle, release.id, colors);
 
   var releaseDisplay = document.getElementById('release-display');
   var releaseEditForm = document.getElementById('release-edit-form');
@@ -179,19 +182,16 @@ function renderRelease(release) {
     let releaseYear = releaseYearField.input.value;
 
     // Colors save to varient
-    putVariant(release.id, currentVariant.id, {
-      colors: [color1Field.input.value, color2Field.input.value]
-    }).then(function() {
-      colors[0] = color1Field.input.value;
-      colors[1] = color2Field.input.value;
-      color1Field.valueSpan.textContent = colors[0];
-      color2Field.valueSpan.textContent = colors[1];
-      color1Field.valueSpan.style.color = colors[0];
-      color2Field.valueSpan.style.color = colors[1];
-      applyGradientText(releaseTitle, colors);
+    let newColors = [color1Field.input.value, color2Field.input.value]
+    putVariant(release.id, currentVariant.id, {colors: newColors}).then(function() {
+      color1Field.valueSpan.textContent = newColors[0];
+      color2Field.valueSpan.textContent = newColors[1];
+      color1Field.valueSpan.style.color = newColors[0];
+      color2Field.valueSpan.style.color = newColors[1];
+      applyGradientText(releaseTitle, release.id, newColors);
     }).catch(function(err) {
       console.log(err);
-      // alert('Color save to variant failed: ' + err.message);
+      alert('Color save to variant failed: ' + err.message);
     });
 
     // Tracks need multiple PUTs
@@ -214,11 +214,11 @@ function renderRelease(release) {
       purchaseDateField.valueSpan.textContent = release.purchase_date
       releaseYearField.valueSpan.textContent = release.release_year;
       releaseHeader.textContent = release.artist + ' – ' + release.title + ' [' + release.label + ']';
-      applyGradientText(releaseTitle, colors);
+      applyGradientText(releaseTitle, release.id, newColors);
       exitReleaseEditMode();
-      pulseGradientText([color1Field.input.value, color2Field.input.value]);
+      pulseGradientText(release.id, newColors);
     }).catch(function(err) {
-      alert('Release save failed: ' + err.message);
+      lert('Release save failed: ' + err.message);
     });
   });
 
