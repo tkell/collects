@@ -67,7 +67,7 @@ function makeInput(value, size) {
   var input = document.createElement('input');
   input.type = 'text';
   input.value = value;
-  input.size = size || 15;
+  input.size = size;
   input.className = 'edit-input';
   input.style.display = 'none';
   return input;
@@ -148,8 +148,11 @@ function renderRelease(release) {
     releaseDisplay.style.display = 'none';
     releaseEditForm.style.display = 'block';
     document.getElementById('edit-artist').value = release.artist;
+    document.getElementById('edit-artist').size = release.artist.length;
     document.getElementById('edit-title').value = release.title;
+    document.getElementById('edit-title').size = release.title.length;
     document.getElementById('edit-label').value = release.label;
+    document.getElementById('edit-label').size = release.label.length;
     trackRows.forEach(function(r) {
       r.input.value = r.titleSpan.textContent;
       r.titleSpan.style.display = 'none';
