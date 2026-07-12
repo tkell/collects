@@ -140,6 +140,8 @@ function renderRelease(release) {
       colors[1] = color2Field.input.value;
       color1Field.valueSpan.textContent = colors[0];
       color2Field.valueSpan.textContent = colors[1];
+      color1Field.valueSpan.style.color = colors[0];
+      color2Field.valueSpan.style.color = colors[1];
     }).catch(function(err) {
       console.log(err);
       // alert('Color save to variant failed: ' + err.message);
@@ -235,6 +237,8 @@ function renderRelease(release) {
 
   var color1Field = metaRow('color 1', colors[0]);
   var color2Field = metaRow('color 2', colors[1]);
+  color1Field.valueSpan.style.color = colors[0];
+  color2Field.valueSpan.style.color = colors[1];
   metadata.appendChild(color1Field.row);
   metadata.appendChild(color2Field.row);
 
