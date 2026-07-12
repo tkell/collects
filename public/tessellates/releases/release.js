@@ -142,6 +142,7 @@ function renderRelease(release) {
       color2Field.valueSpan.textContent = colors[1];
       color1Field.valueSpan.style.color = colors[0];
       color2Field.valueSpan.style.color = colors[1];
+      applyGradientText(releaseTitle, colors);
     }).catch(function(err) {
       console.log(err);
       // alert('Color save to variant failed: ' + err.message);
@@ -167,7 +168,7 @@ function renderRelease(release) {
       purchaseDateField.valueSpan.textContent = release.purchase_date
       releaseYearField.valueSpan.textContent = release.release_year;
       releaseHeader.textContent = release.artist + ' – ' + release.title + ' [' + release.label + ']';
-      applyGradientText(releaseHeader, colors);
+      applyGradientText(releaseTitle, colors);
       exitReleaseEditMode();
     }).catch(function(err) {
       alert('Release save failed: ' + err.message);
