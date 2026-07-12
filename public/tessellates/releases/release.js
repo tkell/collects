@@ -248,7 +248,7 @@ function renderRelease(release) {
   var metaFields = [];
 
   function metaRow(label, value) {
-    var row = document.createElement('div');
+    var row = document.createElement('span');
     row.className = 'meta-row';
 
     var labelSpan = document.createElement('span');
@@ -257,7 +257,7 @@ function renderRelease(release) {
     var valueSpan = document.createElement('span');
     valueSpan.textContent = value;
 
-    var input = makeInput(value, 16);
+    var input = makeInput(value, valueSpan.textContent.length);
 
     row.appendChild(labelSpan);
     row.appendChild(valueSpan);
