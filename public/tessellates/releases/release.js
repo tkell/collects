@@ -49,6 +49,52 @@ function applyGradientText(el, colors) {
   el.style.webkitBackgroundClip = 'text';
 }
 
+// Briefly sweep every piece of text on the page from its default colour into
+// the release gradient and back again — used as a "saved!" flourish.
+function pulseGradientText(colors) {
+  var gradient = 'linear-gradient(90deg, ' + colors[0] + ', ' + colors[1] + ')';
+  var half = 650; // ms spent fading each direction
+
+  // Collect the leaf elements that actually render text, skipping form
+  // controls (their backgrounds/emoji don't play well with background-clip).
+  var elements = [];
+  var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null);
+  var node;
+  while ((node = walker.nextNode())) {
+    var parent = node.parentElement;
+    if (!parent || !node.textContent.trim()) continue;
+    var tag = parent.tagName;
+    if (tag === 'BUTTON' || tag === 'INPUT' || tag === 'SCRIPT' || tag === 'STYLE') continue;
+    if (elements.indexOf(parent) === -1) elements.push(parent);
+  }
+
+  elements.forEach(function(el) {
+    var savedStyle = el.getAttribute('style');
+    var originalColor = getComputedStyle(el).color;
+
+    el.style.transition = 'color ' + half + 'ms ease-in-out';
+    el.style.backgroundImage = gradient;
+    el.style.backgroundClip = 'text';
+    el.style.webkitBackgroundClip = 'text';
+
+    // Next frame: fade the text to transparent, revealing the gradient behind.
+    requestAnimationFrame(function() {
+      el.style.color = 'transparent';
+    });
+
+    // Once the gradient is showing, fade back to the original text colour.
+    setTimeout(function() {
+      el.style.color = originalColor;
+    }, half);
+
+    // Back to normal: restore whatever inline styles the element started with.
+    setTimeout(function() {
+      if (savedStyle === null) el.removeAttribute('style');
+      else el.setAttribute('style', savedStyle);
+    }, half * 2);
+  });
+}
+
 function makeSmallBtn(label) {
   var btn = document.createElement('button');
   btn.textContent = label;
@@ -170,6 +216,7 @@ function renderRelease(release) {
       releaseHeader.textContent = release.artist + ' – ' + release.title + ' [' + release.label + ']';
       applyGradientText(releaseTitle, colors);
       exitReleaseEditMode();
+      pulseGradientText([color1Field.input.value, color2Field.input.value]);
     }).catch(function(err) {
       alert('Release save failed: ' + err.message);
     });
