@@ -73,46 +73,6 @@ function makeInput(value, size) {
   return input;
 }
 
-// Wraps a value span with inline edit/save controls.
-// onSave(newValue) should return a promise.
-function makeEditableField(valueSpan, input, onSave) {
-  var editBtn = makeSmallEmojiBtn([9999, 65039]);
-  var saveBtn = makeSmallBtn('save');
-  var cancelBtn = makeSmallEmojiBtn([10060]);
-  saveBtn.style.display = 'none';
-  cancelBtn.style.display = 'none';
-
-  function exitEditMode() {
-    valueSpan.style.display = '';
-    input.style.display = 'none';
-    editBtn.style.display = '';
-    saveBtn.style.display = 'none';
-    cancelBtn.style.display = 'none';
-  }
-
-  editBtn.addEventListener('click', function() {
-    input.value = valueSpan.textContent;
-    valueSpan.style.display = 'none';
-    input.style.display = '';
-    editBtn.style.display = 'none';
-    saveBtn.style.display = '';
-    cancelBtn.style.display = '';
-  });
-
-  saveBtn.addEventListener('click', function() {
-    onSave(input.value).then(function() {
-      valueSpan.textContent = input.value;
-      exitEditMode();
-    }).catch(function(err) {
-      alert('Save failed: ' + err.message);
-    });
-  });
-
-  cancelBtn.addEventListener('click', exitEditMode);
-
-  return { editBtn: editBtn, saveBtn: saveBtn, cancelBtn: cancelBtn };
-}
-
 function renderRelease(release) {
   var currentVariant = release.variants.find(function(v) { return v.id === release.current_variant_id; });
   var colors = currentVariant.colors;
