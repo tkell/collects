@@ -115,7 +115,7 @@ function makeEditableField(valueSpan, input, onSave) {
 
 function renderRelease(release) {
   var currentVariant = release.variants.find(function(v) { return v.id === release.current_variant_id; });
-  var colors = currentVariant ? currentVariant.colors : ['#888', '#ccc'];
+  var colors = currentVariant.colors;
 
   // --- Header ---
   let releaseString = release.artist + ' - ' + release.title + ' [' + release.label + ']';
@@ -265,22 +265,17 @@ function renderRelease(release) {
     return { row: row, valueSpan: valueSpan, input: input };
   }
 
-  var purchaseDateField = metaRow('purchase date', release.purchase_date || '');
+  var purchaseDateField = metaRow('purchase date', release.purchase_date);
   metadata.appendChild(purchaseDateField.row);
-
-  var releaseYearField = metaRow('release year', release.release_year || '');
+  var releaseYearField = metaRow('release year', release.release_year);
   metadata.appendChild(releaseYearField.row);
 
-  metaFields.push(purchaseDateField, releaseYearField);
+  var color1Field = metaRow('color 1', colors[0]);
+  var color2Field = metaRow('color 2', colors[1]);
+  metadata.appendChild(color1Field.row);
+  metadata.appendChild(color2Field.row);
 
-  var color1Field, color2Field;
-  if (currentVariant && colors.length >= 2) {
-    color1Field = metaRow('color 1', colors[0]);
-    color2Field = metaRow('color 2', colors[1]);
-    metadata.appendChild(color1Field.row);
-    metadata.appendChild(color2Field.row);
-    metaFields.push(color1Field, color2Field);
-  }
+  metaFields.push(purchaseDateField, releaseYearField, color1Field, color2Field);
 }
 
 var ANNOTATION_TYPES = ['genre', 'vibe', 'epoch', 'freeform'];
