@@ -1002,7 +1002,6 @@ transform: translate(25%);
   display: flex;
   align-items: center;
   margin: 0.25em 0;
-  min-width: 400px;
 }
 
 .track-position {
