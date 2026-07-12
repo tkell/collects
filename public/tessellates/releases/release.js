@@ -196,7 +196,7 @@ function renderRelease(release) {
     var titleSpan = document.createElement('span');
     titleSpan.textContent = track.title;
 
-    var input = makeInput(track.title, 32);
+    var input = makeInput(track.title, track.title.length + 2);
 
     row.appendChild(pos);
     row.appendChild(titleSpan);
