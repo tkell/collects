@@ -122,6 +122,105 @@ function makeInput(value, size) {
   return input;
 }
 
+var COVER_GRID_COLUMNS = 3;
+
+// Mirror the collections page's square tessellation load-order options
+// (the shared timeout functions plus the square-specific ones), but pick
+// deterministically from the release id so a release always loads the same way.
+function pickCoverTimeoutFunction(releaseId) {
+  var functions = timeoutFunctions.concat(squareTimeoutFunctions);
+  var pairIndex = releaseId % functions.length;
+  var directionIndex = Math.floor(releaseId / functions.length) % 2;
+  return functions[pairIndex][directionIndex];
+}
+
+// Load the cover art as a 3x3 grid of cropped sub-views that reveal one by one,
+// then swap in the single full image (mirrors the square tessellation load).
+function loadCoverArtProgressive(currentVariant, colors, releaseId) {
+  var img = document.getElementById('cover-art');
+  if (!currentVariant) { img.src = ''; return; }
+
+  var imagePath = currentVariant.image_path_small || currentVariant.image_path || '';
+  if (!imagePath) { img.src = ''; return; }
+
+  var section = document.getElementById('cover-art-section');
+
+  // Build the 3x3 grid where the cover art will sit, and hide the real image.
+  var grid = document.createElement('div');
+  grid.id = 'cover-art-grid';
+
+  var cells = [];
+  var total = COVER_GRID_COLUMNS * COVER_GRID_COLUMNS;
+  for (var i = 0; i < total; i++) {
+    var cell = document.createElement('div');
+    cell.className = 'cover-art-cell';
+    grid.appendChild(cell);
+    cells.push(cell);
+  }
+
+  img.style.display = 'none';
+  section.insertBefore(grid, img);
+
+  // Load the image without displaying it, so we can measure it and build the crops.
+  var loader = new Image();
+  loader.onload = function() {
+    revealCoverCrops(loader, imagePath, cells, grid, img, releaseId);
+  };
+  loader.onerror = function() {
+    // Fall back to just showing the image directly.
+    grid.remove();
+    img.style.display = '';
+    img.src = imagePath;
+  };
+  loader.src = imagePath;
+}
+
+function revealCoverCrops(loadedImg, imagePath, cells, grid, img, releaseId) {
+  // Size the grid to the square cover-art box, then replicate object-fit: cover.
+  var gridSize = grid.clientWidth;
+  var cellSize = gridSize / COVER_GRID_COLUMNS;
+
+  var nw = loadedImg.naturalWidth || gridSize;
+  var nh = loadedImg.naturalHeight || gridSize;
+  var scale = Math.max(gridSize / nw, gridSize / nh);
+  var dispW = nw * scale;
+  var dispH = nh * scale;
+  var originX = (gridSize - dispW) / 2;
+  var originY = (gridSize - dispH) / 2;
+
+  var total = cells.length;
+  var maxMs = 725;
+  var timeoutFn = pickCoverTimeoutFunction(releaseId);
+  var promises = [];
+
+  cells.forEach(function(cell, i) {
+    var row = Math.floor(i / COVER_GRID_COLUMNS);
+    var col = i % COVER_GRID_COLUMNS;
+    var delay = timeoutFn(i, total, maxMs);
+
+    var p = new Promise(function(resolve) {
+      setTimeout(function() {
+        // Each cell shows its slice of the image, positioned as if it were the
+        // full cover cropped down to this cell.
+        cell.style.backgroundImage = 'url("' + imagePath + '")';
+        cell.style.backgroundSize = dispW + 'px ' + dispH + 'px';
+        cell.style.backgroundPosition = (originX - col * cellSize) + 'px ' + (originY - row * cellSize) + 'px';
+        resolve();
+      }, delay);
+    });
+    promises.push(p);
+  });
+
+  Promise.all(promises).then(function() {
+    // Once every crop is showing, swap in the single full image.
+    setTimeout(function() {
+      img.src = imagePath;
+      img.style.display = '';
+      grid.remove();
+    }, 350);
+  });
+}
+
 function renderRelease(release) {
   var currentVariant = release.variants.find(function(v) { return v.id === release.current_variant_id; });
   var colors = currentVariant.colors;
@@ -225,8 +324,7 @@ function renderRelease(release) {
   releaseCancelBtn.addEventListener('click', exitReleaseEditMode);
 
   // --- Cover art ---
-  var img = document.getElementById('cover-art');
-  img.src = currentVariant ? (currentVariant.image_path_small || currentVariant.image_path || '') : '';
+  loadCoverArtProgressive(currentVariant, colors, release.id);
 
   // --- Tracklist ---
   var tracklist = document.getElementById('tracklist');

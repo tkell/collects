@@ -970,6 +970,21 @@ transform: translate(25%);
   display: inline-block;
 }
 
+/* Progressive cover-art load: 3x3 grid of cropped sub-views */
+#cover-art-grid {
+  width: 333px;
+  height: 333px;
+  display: inline-grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+}
+
+.cover-art-cell {
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+}
+
 #tracklist-section {
   margin-top: 1.5rem;
 }
