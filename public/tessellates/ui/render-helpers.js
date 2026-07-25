@@ -276,9 +276,8 @@ renderHelper._setMouseListeners = function(record, data, tessellation) {
     
     // Set up links
     const variantsUrl = `${apiState.protocol}://${apiState.host}/releases/${record.id}/variants`;
-    document.getElementById("variants-link").setAttribute("href", variantsUrl);
     document.getElementById("release-edit-link").setAttribute("href", `/releases/?r=${record.id}`);
-    ["variants-link", "release-edit-link"].forEach(id => {
+    ["release-edit-link"].forEach(id => {
       document.getElementById(id).classList.remove("disabled-link");
     });
     
@@ -298,7 +297,7 @@ renderHelper._setMouseListeners = function(record, data, tessellation) {
 
   record.onBigImageClose = function() {
     // Disable nav links until next release is focused
-    ["variants-link", "release-edit-link"].forEach(id => {
+    ["release-edit-link"].forEach(id => {
       document.getElementById(id).classList.add("disabled-link");
     });
 
