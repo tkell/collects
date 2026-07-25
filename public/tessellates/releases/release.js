@@ -77,9 +77,30 @@ function makeGradiantString(releaseId, colors) {
   return `linear-gradient(${angleStr}, ${colors[0]}, ${colors[1]})`;
 }
 
+// Only these are touched by the pulse, so only these get saved and restored.
+// Snapshotting the whole style attribute instead would also revert inline
+// styles set by something else mid-pulse — notably the display toggles that
+// edit mode uses, which left spans and inputs both showing.
+var PULSE_PROPS = ['transition', 'backgroundImage', 'backgroundClip', 'webkitBackgroundClip', 'color'];
+
+// Restores pending from the pulse currently running, if any.
+var pendingPulseRestores = [];
+var pendingPulseTimers = [];
+
+function cancelPendingPulse() {
+  pendingPulseTimers.forEach(clearTimeout);
+  pendingPulseTimers = [];
+  pendingPulseRestores.forEach(function(restore) { restore(); });
+  pendingPulseRestores = [];
+}
+
 function pulseGradientText(releaseId, colors) {
   let gradient = makeGradiantString(releaseId, colors);
   var half = 650;
+
+  // A second pulse starting mid-flight would otherwise snapshot the first
+  // one's transient values (a transparent colour) and restore those at the end.
+  cancelPendingPulse();
 
   // Collect the leaf elements that actually render text, skipping form controls
   var elements = [];
@@ -94,8 +115,14 @@ function pulseGradientText(releaseId, colors) {
   }
 
   elements.forEach(function(el) {
-    var savedStyle = el.getAttribute('style');
+    var savedProps = {};
+    PULSE_PROPS.forEach(function(prop) { savedProps[prop] = el.style[prop]; });
     var originalColor = getComputedStyle(el).color;
+
+    function restore() {
+      PULSE_PROPS.forEach(function(prop) { el.style[prop] = savedProps[prop]; });
+    }
+    pendingPulseRestores.push(restore);
 
     el.style.transition = 'color ' + half + 'ms ease-in-out';
     el.style.backgroundImage = gradient;
@@ -108,16 +135,20 @@ function pulseGradientText(releaseId, colors) {
     });
 
     // Once the gradient is showing, fade back to the original text colour.
-    setTimeout(function() {
+    pendingPulseTimers.push(setTimeout(function() {
       el.style.color = originalColor;
-    }, half);
+    }, half));
 
-    // Back to normal: restore whatever inline styles the element started with.
-    setTimeout(function() {
-      if (savedStyle === null) el.removeAttribute('style');
-      else el.setAttribute('style', savedStyle);
-    }, half * 2);
+    // Back to normal: put back just the properties the pulse changed.
+    pendingPulseTimers.push(setTimeout(restore, half * 2));
   });
+
+  // The restores above have all run by now; drop them so a later pulse
+  // doesn't re-apply stale values.
+  pendingPulseTimers.push(setTimeout(function() {
+    pendingPulseRestores = [];
+    pendingPulseTimers = [];
+  }, half * 2));
 }
 
 function makeSmallBtn(label) {
@@ -339,7 +370,7 @@ function renderRelease(release) {
       exitReleaseEditMode();
       pulseGradientText(release.id, newColors);
     }).catch(function(err) {
-      lert('Release save failed: ' + err.message);
+      alert('Release save failed: ' + err.message);
     });
   });
 
@@ -403,12 +434,34 @@ function renderRelease(release) {
   var releaseYearField = metaRow('release year', release.release_year);
   metadata.appendChild(releaseYearField.row);
 
-  var color1Field = metaRow('color 1', colors[0]);
-  var color2Field = metaRow('color 2', colors[1]);
-  color1Field.valueSpan.style.color = colors[0];
-  color2Field.valueSpan.style.color = colors[1];
-  metadata.appendChild(color1Field.row);
-  metadata.appendChild(color2Field.row);
+  var colorsRow = document.createElement('span');
+  colorsRow.className = 'meta-row';
+
+  var colorsLabelSpan = document.createElement('span');
+  colorsLabelSpan.textContent = 'colors: ';
+  colorsRow.appendChild(colorsLabelSpan);
+
+  var color1ValueSpan = document.createElement('span');
+  color1ValueSpan.textContent = colors[0];
+  color1ValueSpan.style.color = colors[0];
+  var color1Input = makeInput(colors[0], colors[0].length);
+  colorsRow.appendChild(color1ValueSpan);
+  colorsRow.appendChild(color1Input);
+
+  var colorsCommaSpan = document.createElement('span');
+  colorsCommaSpan.textContent = ', ';
+  colorsRow.appendChild(colorsCommaSpan);
+
+  var color2ValueSpan = document.createElement('span');
+  color2ValueSpan.textContent = colors[1];
+  color2ValueSpan.style.color = colors[1];
+  var color2Input = makeInput(colors[1], colors[1].length);
+  colorsRow.appendChild(color2ValueSpan);
+  colorsRow.appendChild(color2Input);
+
+  var color1Field = { row: colorsRow, valueSpan: color1ValueSpan, input: color1Input };
+  var color2Field = { row: colorsRow, valueSpan: color2ValueSpan, input: color2Input };
+  metadata.appendChild(colorsRow);
 
   metaFields.push(purchaseDateField, releaseYearField, color1Field, color2Field);
 }
