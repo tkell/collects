@@ -1,3 +1,25 @@
+const basicGenreList = [
+    "African",
+    "Blues",
+    "Children's",
+    "Classical",
+    "East Asian",
+    "Electronic",
+    "Folk & Country",
+    "Soul / Funk",
+    "Hip-Hop",
+    "Indian",
+    "Jazz",
+    "Latin",
+    "Near East",
+    "Non-Music",
+    "Pop",
+    "Reggae",
+    "Rock",
+    "South Asian",
+    "Stage & Screen",
+];
+
 function fetchWithCredentials(url, options) {
   options = options || {};
   return fetch(url, Object.assign({ credentials: 'include', headers: { 'Content-Type': 'application/json' } }, options))
@@ -391,7 +413,7 @@ function renderRelease(release) {
   metaFields.push(purchaseDateField, releaseYearField, color1Field, color2Field);
 }
 
-var ANNOTATION_TYPES = ['genre', 'vibe', 'epoch', 'freeform'];
+var ANNOTATION_TYPES = ['genre', 'vibe', 'freeform'];
 
 function renderAnnotations(release) {
   var container = document.getElementById('annotations');
@@ -411,10 +433,35 @@ function renderAnnotations(release) {
     var inputRow = document.createElement('div');
     inputRow.className = 'annotation-input-row';
 
-    var input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'edit-input';
-    input.size = 12;
+    var input;
+    if (annotationType === 'genre') {
+      input = document.createElement('select');
+      input.className = 'edit-input';
+
+      var placeholderOption = document.createElement('option');
+      placeholderOption.value = '';
+      placeholderOption.textContent = '-----> ∞';
+      placeholderOption.disabled = true;
+      placeholderOption.selected = true;
+      input.appendChild(placeholderOption);
+
+      basicGenreList.forEach(function(genre) {
+        var option = document.createElement('option');
+        option.value = genre;
+        option.textContent = genre;
+        input.appendChild(option);
+      });
+    } else {
+      input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'edit-input';
+      input.size = 12;
+      if (annotationType === 'vibe') {
+        input.placeholder = 'vibe / style';
+      } else if (annotationType === 'freeform') {
+        input.placeholder = 'free as in';
+      }
+    }
 
     var tagList = document.createElement('div');
     tagList.className = 'annotation-tag-list';
@@ -447,12 +494,19 @@ function renderAnnotations(release) {
       });
     }
 
-    input.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
+    if (annotationType === 'genre') {
+      input.addEventListener('change', function() {
         saveAnnotation();
-      }
-    });
+        input.value = '';
+      });
+    } else {
+      input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          saveAnnotation();
+        }
+      });
+    }
 
     inputRow.appendChild(input);
     column.appendChild(inputRow);
