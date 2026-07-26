@@ -72,7 +72,7 @@ class PlaybacksController < ApplicationController
     start_of_year_str = Date.new(year).to_s
     grouping = "month"
     params
-      .permit(:start_date, :end_date, :g, playback: {})
+      .permit(:start_date, :end_date, :g)
       .with_defaults(start_date: start_of_year_str, end_date: end_date_str, g: grouping)
   end
 

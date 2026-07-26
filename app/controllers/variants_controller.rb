@@ -38,10 +38,7 @@ class VariantsController < ApplicationController
     # This is me being clever and lazy, and allowing this route to do both
     # updates to the variant _and_ to assign different variants to releases.
     # I should move the current_variant_id change to a releases route - but later!
-    @variant.update(variant_params.except(:release_id))
-    puts("---!!---")
-    puts(variant_params)
-    puts(@variant)
+    @variant.update(variant_params)
     @release.current_variant_id = @variant.id
     @release.save
 
@@ -169,8 +166,13 @@ class VariantsController < ApplicationController
 
   private
 
+  # :id and :release_id come from the nested route rather than the body, so
+  # permit them to keep them out of the unpermitted-parameter log, then drop
+  # them before mass assignment.  :colors arrives as a two-element array.
   def variant_params
-    params.permit(:release).permit(:image_path, :name, :colors)
+    params
+      .permit(:id, :release_id, :image_path, :name, :img, colors: [])
+      .except(:id, :release_id)
   end
 
   def guard_release_owns_variant

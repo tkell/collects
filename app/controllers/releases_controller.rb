@@ -7,7 +7,7 @@ class ReleasesController < ApplicationController
   end
 
   def update
-    if @release.update(release_params.except(:collection_id))
+    if @release.update(release_params)
       render json: @release
     else
       render json: { error: @release.errors }, status: :unprocessable_entity
@@ -32,6 +32,8 @@ class ReleasesController < ApplicationController
   end
 
   def release_params
-    params.permit(:title, :artist, :label, :folder, :release_year, :purchase_date, :external_id)
+    params
+      .permit(:id, :title, :artist, :label, :folder, :release_year, :purchase_date, :external_id)
+      .except(:id)
   end
 end

@@ -99,7 +99,7 @@ class CollectionsController < ApplicationController
       return
     end
 
-    channel = "collection_import_#{params[:import_token].presence || collection.id}"
+    channel = "collection_import_#{collection_params[:import_token].presence || collection.id}"
 
     case collection_params[:release_source]
     when 'json_file'
@@ -109,8 +109,8 @@ class CollectionsController < ApplicationController
         render json: { error: release_source.errors }, status: :unprocessable_entity
         return
       end
-      if params[:releases].present?
-        release_source.raw_releases = params[:releases]
+      if collection_params[:releases].present?
+        release_source.raw_releases = collection_params[:releases]
         ActionCable.server.broadcast(channel, { type: "start", input_count: release_source.input_count, existing: 0 })
         release_source.import_releases('only_new', {}) do |release_data|
           ActionCable.server.broadcast(channel, release_data)
@@ -126,8 +126,8 @@ class CollectionsController < ApplicationController
         render json: { error: release_source.errors }, status: :unprocessable_entity
         return
       end
-      if params[:csv_content].present?
-        release_source.raw_csv = params[:csv_content]
+      if collection_params[:csv_content].present?
+        release_source.raw_csv = collection_params[:csv_content]
         ActionCable.server.broadcast(channel, { type: "start", input_count: release_source.input_count, existing: 0 })
         release_source.import_releases('only_new', {}) do |release_data|
           ActionCable.server.broadcast(channel, release_data)
@@ -162,14 +162,14 @@ class CollectionsController < ApplicationController
       return
     end
 
-    overwrite_strategy = params.fetch(:overwrite_strategy, "only_new")
+    overwrite_strategy = collection_update_params.fetch(:overwrite_strategy, "only_new")
     release_source = collection.release_sources.first
 
     case release_source
     when RubyHashReleaseSource
-      release_source.raw_releases = params[:releases] || []
+      release_source.raw_releases = collection_update_params[:releases] || []
     when SpotifyExportifyCsvReleaseSource
-      release_source.raw_csv = params[:csv_content] || ""
+      release_source.raw_csv = collection_update_params[:csv_content] || ""
     else
       render json: { error: "Unsupported release source" }, status: :unprocessable_entity
       return
@@ -218,17 +218,16 @@ class CollectionsController < ApplicationController
   private
 
   def collection_params
-    params.permit(:name, :release_source, :csv_content)
+    params.permit(:name, :release_source, :import_token, :csv_content, releases: {})
   end
 
   def collection_update_params
-    ## I hate this, there must be a way to generate them, hmm
-    params.permit(:id, :overwrite_strategy, :csv_content, releases: [:id, :title, :artist, :label, :image_path, :image_url, :year, :purchase_date, tracks: [:position, :title, :filepath]], collection: {})
+    params.permit(:id, :overwrite_strategy, :csv_content, releases: {})
   end
 
   def tessellates_params
     params
       .permit(:id, :serve_json, :limit, :offset, :filter, :folder, :release_year, :purchase_date, :sort, :randomize)
-      .with_defaults(limit: 100, offset: 0, filter_string: nil, folder: nil, release_year: nil, purchase_date: nil, sort: nil, randomize: nil)
+      .with_defaults(limit: 100, offset: 0)
   end
 end
