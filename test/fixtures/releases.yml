@@ -5,9 +5,3 @@ one:
   title: MyString
   label: MyString
   collection: one
-
-two:
-  artist: MyString
-  title: MyString
-  label: MyString
-  collection: two

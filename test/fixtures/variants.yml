@@ -3,7 +3,3 @@
 one:
   image_path: MyString
   release: one
-
-two:
-  image_path: MyString
-  release: two
