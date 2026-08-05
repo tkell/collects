@@ -16,8 +16,8 @@ class AnnotationsController < ApplicationController
       .first
     return render json: { error: "Release not found" }, status: :not_found if release.nil?
 
-    annotation_type = params['annotation_type']
-    body = params['body']
+    annotation_type = annotation_params[:annotation_type]
+    body = annotation_params[:body]
     bodies = (annotation_type == 'freeform') ? [body] : body.downcase.split(',').map(&:strip).reject(&:empty?)
 
     created = bodies.map do |b|

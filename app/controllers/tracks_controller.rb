@@ -20,7 +20,7 @@ class TracksController < ApplicationController
   end
 
   def update
-    if @track.update(track_params.except(:release_id))
+    if @track.update(track_params)
       render json: @track
     else
       render json: { error: @track.errors }, status: :unprocessable_entity
@@ -43,6 +43,8 @@ class TracksController < ApplicationController
   end
 
   def track_params
-    params.permit(:title, :position, :media_link, :external_id, :purchase_date)
+    params
+      .permit(:id, :release_id, :title, :position, :media_link, :external_id, :purchase_date)
+      .except(:id, :release_id)
   end
 end
