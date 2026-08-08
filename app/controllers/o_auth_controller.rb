@@ -34,10 +34,11 @@ class OAuthController < ApplicationController
 
   def callback
     # OK, so this is a GET with `verifier` in the params, cool
-    if request.referer != "some-discogs-url-yikes-there-must-be-a-better-way"
-      render json: { error: 'Unsupported provider' }, status: :unprocessable_entity
-      return
-    end
+    # need to guard this, somehow?
+    # if request.referer != "some-discogs-url-yikes-there-must-be-a-better-way"
+    #   render json: { error: 'Unsupported provider' }, status: :unprocessable_entity
+    #   return
+    # end
 
     linked_account = LinkedAccount.find(user_id: @current_user.id, provider: "discogs")
     verifier = params[:verifier]
