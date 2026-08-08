@@ -302,12 +302,18 @@ function addNewCollectionInteraction(elementId, eventType) {
   const sourceSelect = document.getElementById('new-collection-source');
   const fileInput = document.getElementById('new-collection-file');
 
+  const verifierContainer = document.getElementById('discogs-verifier-container');
+
   sourceSelect.addEventListener('change', () => {
     fileInput.accept = sourceSelect.value === 'spotify_exportify_csv' ? '.csv' : '.json';
     if (fileStepActive) {
       fileInput.value = '';
       fileStepActive = false;
       fileInput.style.display = 'none';
+    }
+    if (sourceSelect.value !== 'discogs_oauth') {
+      verifierContainer.style.display = 'none';
+      document.getElementById('discogs-verifier').value = '';
     }
   });
 
@@ -321,6 +327,15 @@ function addNewCollectionInteraction(elementId, eventType) {
 
     if (!name) {
       alert('Please enter a collection name');
+      return;
+    }
+
+    // discogs needs an oauth handshake first: hand off to our authorize
+    // endpoint and let it redirect us on to discogs. discogs shows the user
+    // a verifier code rather than redirecting back, so they paste it here
+    if (releaseSource === 'discogs_oauth') {
+      open(`${apiState.protocol}://${apiState.host}/oauth/authorize/discogs`);
+      verifierContainer.style.display = '';
       return;
     }
 
@@ -426,6 +441,49 @@ function addNewCollectionInteraction(elementId, eventType) {
       document.getElementById('new-collection-name').value = '';
     } catch (error) {
       alert('Error creating collection: ' + error.message);
+    }
+  });
+}
+
+/**
+ * Add discogs verifier interaction: exchange the code discogs showed the user
+ * for access tokens via our callback endpoint
+ * @param {string} elementId - Element ID for the button or input
+ * @param {string} eventType - Event type (click or keypress)
+ */
+function addDiscogsVerifierInteraction(elementId, eventType) {
+  document.getElementById(elementId).addEventListener(eventType, async (e) => {
+    if (eventType === "keypress" && e.key !== "Enter") {
+      return;
+    }
+
+    const verifierInput = document.getElementById('discogs-verifier');
+    const verifier = verifierInput.value.trim();
+
+    if (!verifier) {
+      alert('Please enter the verifier code from discogs');
+      return;
+    }
+
+    bounceHexagons();
+
+    try {
+      const provider = 'discogs';
+      const url = `${apiState.protocol}://${apiState.host}/oauth/callback/${provider}?verifier=${encodeURIComponent(verifier)}`;
+      const response = await fetch(url, { credentials: 'include' });
+
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.error || 'Discogs authorization failed');
+      }
+
+      // collection creation comes next; just show what came back for now
+      console.log(data);
+
+      verifierInput.value = '';
+      document.getElementById('discogs-verifier-container').style.display = 'none';
+    } catch (error) {
+      alert('Error authorizing discogs: ' + error.message);
     }
   });
 }
@@ -1000,6 +1058,8 @@ window.addEventListener("load", (event) => {
   addDeleteUserInteraction("delete-user-submit", "click");
 
   addNewCollectionInteraction("new-collection-submit", "click");
+  addDiscogsVerifierInteraction("discogs-verifier-submit", "click");
+  addDiscogsVerifierInteraction("discogs-verifier", "keypress");
   addDeleteCollectionInteraction("delete-collection-submit", "click");
 
   addResetPasswordRequestInteraction("forgot-password-submit", "click");
