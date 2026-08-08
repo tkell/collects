@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_04_20_234049) do
+ActiveRecord::Schema[7.1].define(version: 2026_08_08_170228) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -59,6 +59,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_04_20_234049) do
     t.text "access_token"
     t.text "refresh_token"
     t.timestamptz "expires_at"
+    t.string "request_token"
+    t.string "access_token_secret"
+    t.string "request_token_secret"
     t.index ["user_id"], name: "idx_16466_index_linked_accounts_on_user_id"
   end
 

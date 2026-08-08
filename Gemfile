@@ -51,8 +51,9 @@ gem 'rack-cors', '~> 0.3.1'
 # auth via tokens
 gem 'jwt', '~> 2.2'
 
-# http party for oauth
+# http party and oauth for oauth
 gem 'httparty', '~> 0.23'
+gem 'oauth', '~> 1.1.8'
 
 # postgres
 gem 'pg'
