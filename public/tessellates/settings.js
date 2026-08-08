@@ -314,6 +314,7 @@ function addNewCollectionInteraction(elementId, eventType) {
     if (sourceSelect.value !== 'discogs_oauth') {
       verifierContainer.style.display = 'none';
       document.getElementById('discogs-verifier').value = '';
+      document.getElementById('discogs-create-container').style.display = 'none';
     }
   });
 
@@ -336,6 +337,7 @@ function addNewCollectionInteraction(elementId, eventType) {
     if (releaseSource === 'discogs_oauth') {
       open(`${apiState.protocol}://${apiState.host}/oauth/authorize/discogs`);
       verifierContainer.style.display = '';
+      document.getElementById('discogs-create-container').style.display = 'none';
       return;
     }
 
@@ -482,6 +484,7 @@ function addDiscogsVerifierInteraction(elementId, eventType) {
 
       verifierInput.value = '';
       document.getElementById('discogs-verifier-container').style.display = 'none';
+      document.getElementById('discogs-create-container').style.display = '';
     } catch (error) {
       alert('Error authorizing discogs: ' + error.message);
     }
