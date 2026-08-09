@@ -519,15 +519,16 @@ function addDiscogsCreateInteraction(elementId, eventType) {
       return;
     }
 
-    const created = await submitCollectionCreate(
+    // the handshake is done and we're off to the races: drop the prompt and
+    // the button so the user can't fire a second create while we fetch
+    document.getElementById('discogs-create-container').style.display = 'none';
+
+    await submitCollectionCreate(
       name,
       'discogs_oauth',
       {},
       'Fetching your discogs collection - a big collection can take a while ...'
     );
-    if (created) {
-      document.getElementById('discogs-create-container').style.display = 'none';
-    }
   });
 }
 
@@ -562,9 +563,6 @@ function addDiscogsVerifierInteraction(elementId, eventType) {
       if (!response.ok) {
         throw new Error(data.error || 'Discogs authorization failed');
       }
-
-      // collection creation comes next; just show what came back for now
-      console.log(data);
 
       verifierInput.value = '';
       document.getElementById('discogs-verifier-container').style.display = 'none';
