@@ -8,7 +8,8 @@ class Collection < ApplicationRecord
 
   RELEASE_SOURCE_TYPE_MAP = {
     'RubyHashReleaseSource' => 'json_file',
-    'SpotifyExportifyCsvReleaseSource' => 'spotify_exportify_csv'
+    'SpotifyExportifyCsvReleaseSource' => 'spotify_exportify_csv',
+    'DiscogsOAuthReleaseSource' => 'discogs_oauth'
   }.freeze
 
   def release_source_type

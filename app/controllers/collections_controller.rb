@@ -136,6 +136,29 @@ class CollectionsController < ApplicationController
         ActionCable.server.broadcast(channel, { type: "done", level: collection.level })
       end
 
+    when 'discogs_oauth'
+      release_source = DiscogsOAuthReleaseSource.new(collection: collection)
+      unless release_source.save
+        collection.destroy
+        render json: { error: release_source.errors }, status: :unprocessable_entity
+        return
+      end
+      # nothing is uploaded here - the release source pulls everything from
+      # discogs using the tokens we stored when the user linked their account
+      begin
+        ActionCable.server.broadcast(channel, { type: "start", input_count: release_source.input_count, existing: 0 })
+        release_source.import_releases('only_new', {}) do |release_data|
+          ActionCable.server.broadcast(channel, release_data)
+        end
+      rescue DiscogsOAuthClient::Error => e
+        collection.destroy
+        ActionCable.server.broadcast(channel, { type: "error", message: e.message })
+        render json: { error: e.message }, status: :unprocessable_entity
+        return
+      end
+      collection.reload
+      ActionCable.server.broadcast(channel, { type: "done", level: collection.level })
+
     else
       collection.destroy
       render json: { error: "Unsupported release source" }, status: :unprocessable_entity
@@ -170,6 +193,8 @@ class CollectionsController < ApplicationController
       release_source.raw_releases = collection_update_params[:releases] || []
     when SpotifyExportifyCsvReleaseSource
       release_source.raw_csv = collection_update_params[:csv_content] || ""
+    when DiscogsOAuthReleaseSource
+      # nothing to set up - it re-fetches from discogs itself
     else
       render json: { error: "Unsupported release source" }, status: :unprocessable_entity
       return

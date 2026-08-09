@@ -5,13 +5,13 @@ class LinkedAccountsController < ApplicationController
   def index
     @linked_accounts = current_user.linked_accounts
     render json: @linked_accounts, only: %i[id provider created_at updated_at],
-           methods: [:expired?]
+           methods: %i[expired? connected?]
   end
 
   def show
     if @linked_account
       render json: @linked_account, only: %i[id provider created_at updated_at],
-             methods: [:expired?]
+             methods: %i[expired? connected?]
     else
       render json: { error: 'Linked account not found' }, status: :not_found
     end

@@ -292,6 +292,128 @@ function addCreateUserInteraction(elementId, eventType) {
 }
 
 /**
+ * Has the user already been through the oauth handshake for this provider?
+ * A linked account row exists from the moment we start the handshake, so we
+ * check the connected flag rather than just presence.
+ * @param {string} provider
+ * @returns {Promise<boolean>}
+ */
+async function isProviderConnected(provider) {
+  const user_id = getCookieValue('loggedInUserId');
+  if (!user_id) return false;
+
+  try {
+    const url = `${apiState.protocol}://${apiState.host}/users/${user_id}/linked_accounts`;
+    const response = await fetch(url, { credentials: 'include' });
+    if (!response.ok) return false;
+
+    const accounts = await response.json();
+    return accounts.some(a => a.provider === provider && a['connected?'] && !a['expired?']);
+  } catch (error) {
+    return false;
+  }
+}
+
+/**
+ * POST a new collection and run the import ticker off the websocket.
+ * Shared by the file-based sources and the discogs button.
+ * @param {string} name - Collection name
+ * @param {string} releaseSource - Release source key
+ * @param {Object} extras - Extra body fields (releases, csv_content, ...)
+ * @param {string} waitingText - Ticker text to show before the import starts
+ * @returns {Promise<boolean>} whether the collection was created
+ */
+async function submitCollectionCreate(name, releaseSource, extras, waitingText) {
+  bounceHexagons();
+
+  try {
+    const url = `${apiState.protocol}://${apiState.host}/collections`;
+    const importToken = crypto.randomUUID();
+    const body = { name, release_source: releaseSource, import_token: importToken, ...extras };
+
+    const tickerDiv = document.getElementById('new-collection-ticker');
+    const releaseQueue = [];
+    let tickerActive = false;
+    let drainPromise = Promise.resolve();
+    let tickerTimeout = 500;
+
+    function showNextRelease() {
+      return new Promise(resolve => {
+        function tick() {
+          if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
+          const item = releaseQueue.shift();
+          tickerDiv.style.display = '';
+          if (item.type === 'querying') {
+            tickerDiv.textContent = item.message;
+          } else {
+            if (item.colors) updateAllHexagonColors(item.colors);
+            tickerDiv.textContent = `${item.artist} - ${item.title} [${item.label}]`;
+          }
+          setTimeout(tick, tickerTimeout);
+        }
+        tick();
+      });
+    }
+
+    const { ready, done } = connectCollectionImportSocket(importToken, (release) => {
+      if (release.colors && !release.artist) {
+        updateHexagonColors(release.colors);
+        return;
+      }
+      releaseQueue.push(release);
+      if (!tickerActive) { tickerActive = true; drainPromise = showNextRelease(); }
+    }, (startMsg) => {
+      const inputCount = startMsg.input_count || 0;
+      const newCount = inputCount - (startMsg.existing || 0);
+      if (newCount > 0) tickerTimeout = Math.max(50, Math.min(500, 2000 / newCount));
+      tickerDiv.style.display = '';
+      tickerDiv.textContent = `Loading ${newCount} new release${newCount === 1 ? '' : 's'} out of ${inputCount} total uploaded`;
+    }, () => {
+      releaseQueue.length = 0;
+      tickerDiv.style.display = 'none';
+      tickerDiv.textContent = '';
+    });
+    await ready;
+
+    // discogs has a long silent stretch before the first broadcast while we
+    // pull the collection down, so say something in the meantime
+    if (waitingText) {
+      tickerDiv.style.display = '';
+      tickerDiv.textContent = waitingText;
+    }
+
+    done.then(async () => {
+      await drainPromise;
+      tickerDiv.textContent = 'Collection created!';
+      setTimeout(() => {
+        bounceHexagons();
+        tickerDiv.style.display = 'none';
+        tickerDiv.textContent = '';
+        fetchAndDisplayCollections();
+      }, 1000);
+    });
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      credentials: 'include'
+    });
+
+    if (!response.ok) {
+      const data = await response.json();
+      throw new Error(data.error || 'Collection creation failed');
+    }
+
+    document.getElementById('new-collection-name').value = '';
+    return true;
+  } catch (error) {
+    alert('Error creating collection: ' + error.message);
+    return false;
+  }
+}
+
+/**
  * Add new collection interaction
  * @param {string} elementId - Element ID for the button or input
  * @param {string} eventType - Event type (click or keypress)
@@ -333,8 +455,14 @@ function addNewCollectionInteraction(elementId, eventType) {
 
     // discogs needs an oauth handshake first: hand off to our authorize
     // endpoint and let it redirect us on to discogs. discogs shows the user
-    // a verifier code rather than redirecting back, so they paste it here
+    // a verifier code rather than redirecting back, so they paste it here.
+    // if they've already linked discogs we can skip straight to creating.
     if (releaseSource === 'discogs_oauth') {
+      if (await isProviderConnected('discogs')) {
+        verifierContainer.style.display = 'none';
+        document.getElementById('discogs-create-container').style.display = '';
+        return;
+      }
       open(`${apiState.protocol}://${apiState.host}/oauth/authorize/discogs`);
       verifierContainer.style.display = '';
       document.getElementById('discogs-create-container').style.display = 'none';
@@ -350,99 +478,55 @@ function addNewCollectionInteraction(elementId, eventType) {
       return;
     }
 
-    bounceHexagons();
+    const extras = {};
 
-    try {
-      const url = `${apiState.protocol}://${apiState.host}/collections`;
-      const importToken = crypto.randomUUID();
-      const body = { name, release_source: releaseSource, import_token: importToken };
-
-      if (releaseSource === 'json_file') {
-        const file = fileInput.files[0];
-        if (!file) {
-          alert('Please select a JSON file');
-          return;
-        }
-        const text = await file.text();
-        body.releases = JSON.parse(text);
-      } else if (releaseSource === 'spotify_exportify_csv') {
-        const file = fileInput.files[0];
-        if (!file) {
-          alert('Please select a CSV file');
-          return;
-        }
-        body.csv_content = await file.text();
+    if (releaseSource === 'json_file') {
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select a JSON file');
+        return;
       }
-
-      const tickerDiv = document.getElementById('new-collection-ticker');
-      const releaseQueue = [];
-      let tickerActive = false;
-      let drainPromise = Promise.resolve();
-      let tickerTimeout = 500;
-
-      function showNextRelease() {
-        return new Promise(resolve => {
-          function tick() {
-            if (releaseQueue.length === 0) { tickerActive = false; resolve(); return; }
-            const item = releaseQueue.shift();
-            tickerDiv.style.display = '';
-            if (item.type === 'querying') {
-              tickerDiv.textContent = item.message;
-            } else {
-              if (item.colors) updateAllHexagonColors(item.colors);
-              tickerDiv.textContent = `${item.artist} - ${item.title} [${item.label}]`;
-            }
-            setTimeout(tick, tickerTimeout);
-          }
-          tick();
-        });
+      extras.releases = JSON.parse(await file.text());
+    } else if (releaseSource === 'spotify_exportify_csv') {
+      const file = fileInput.files[0];
+      if (!file) {
+        alert('Please select a CSV file');
+        return;
       }
+      extras.csv_content = await file.text();
+    }
 
-      const { ready, done } = connectCollectionImportSocket(importToken, (release) => {
-        if (release.colors && !release.artist) {
-          updateHexagonColors(release.colors);
-          return;
-        }
-        releaseQueue.push(release);
-        if (!tickerActive) { tickerActive = true; drainPromise = showNextRelease(); }
-      }, (startMsg) => {
-        const inputCount = startMsg.input_count || 0;
-        const newCount = inputCount - (startMsg.existing || 0);
-        if (newCount > 0) tickerTimeout = Math.max(50, Math.min(500, 2000 / newCount));
-        tickerDiv.style.display = '';
-        tickerDiv.textContent = `Loading ${newCount} new release${newCount === 1 ? '' : 's'} out of ${inputCount} total uploaded`;
-      });
-      await ready;
-
-      done.then(async () => {
-        await drainPromise;
-        tickerDiv.textContent = 'Collection created!';
-        setTimeout(() => {
-          bounceHexagons();
-          tickerDiv.style.display = 'none';
-          tickerDiv.textContent = '';
-          fetchAndDisplayCollections();
-        }, 1000);
-      });
-
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-        credentials: 'include'
-      });
-
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.error || 'Collection creation failed');
-      }
-
+    const created = await submitCollectionCreate(name, releaseSource, extras);
+    if (created) {
       fileInput.style.display = 'none';
       fileInput.value = '';
       fileStepActive = false;
-      document.getElementById('new-collection-name').value = '';
-    } catch (error) {
-      alert('Error creating collection: ' + error.message);
+    }
+  });
+}
+
+/**
+ * Add discogs create interaction: the user has linked their account, so pull
+ * their whole discogs collection down.  No file, no other input.
+ * @param {string} elementId - Element ID for the button
+ * @param {string} eventType - Event type (click)
+ */
+function addDiscogsCreateInteraction(elementId, eventType) {
+  document.getElementById(elementId).addEventListener(eventType, async () => {
+    const name = document.getElementById('new-collection-name').value;
+    if (!name) {
+      alert('Please enter a collection name');
+      return;
+    }
+
+    const created = await submitCollectionCreate(
+      name,
+      'discogs_oauth',
+      {},
+      'Fetching your discogs collection - a big collection can take a while ...'
+    );
+    if (created) {
+      document.getElementById('discogs-create-container').style.display = 'none';
     }
   });
 }
@@ -572,7 +656,7 @@ function addUpdateUserInteraction(elementId, eventType) {
  * @param {function} onRelease - called with each incoming release object
  * @returns {{ ws: WebSocket, ready: Promise<void> }}
  */
-function connectCollectionImportSocket(collectionId, onRelease, onStart) {
+function connectCollectionImportSocket(collectionId, onRelease, onStart, onError) {
   const wsProtocol = apiState.protocol === 'https' ? 'wss' : 'ws';
   const ws = new WebSocket(`${wsProtocol}://${apiState.host}/cable`);
   const identifier = JSON.stringify({ channel: 'CollectionImportChannel', collection_id: collectionId });
@@ -590,6 +674,7 @@ function connectCollectionImportSocket(collectionId, onRelease, onStart) {
     if (data.type === 'welcome' || data.type === 'ping') return;
     if (data.type === 'confirm_subscription') { resolveReady(); return; }
     if (data.message?.type === 'done') { ws.close(); resolveDone(data.message.level); return; }
+    if (data.message?.type === 'error') { ws.close(); if (onError) onError(data.message); return; }
     if (data.message?.type === 'start') { if (onStart) onStart(data.message); return; }
     if (data.message) onRelease(data.message);
   };
@@ -607,17 +692,22 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
   button.addEventListener('click', async () => {
     const file = fileInput.files[0];
     const isCsv = collection.release_source_type === 'spotify_exportify_csv';
-    if (!file) {
+    // discogs re-fetches from the API, so there's nothing to upload
+    const isDiscogs = collection.release_source_type === 'discogs_oauth';
+    if (!file && !isDiscogs) {
       alert(isCsv ? 'Please select a CSV file' : 'Please select a JSON file');
       return;
     }
     bounceHexagons();
 
     try {
-      const text = await file.text();
-      const bodyExtras = isCsv
-        ? { csv_content: text }
-        : { releases: JSON.parse(text) };
+      let bodyExtras = {};
+      if (!isDiscogs) {
+        const text = await file.text();
+        bodyExtras = isCsv
+          ? { csv_content: text }
+          : { releases: JSON.parse(text) };
+      }
 
       const releaseQueue = [];
       let tickerActive = false;
@@ -656,8 +746,17 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
         updateControls.style.display = 'none';
         releaseTickerDiv.style.display = '';
         releaseTickerDiv.textContent = `Loading ${newCount} new release${newCount === 1 ? '' : 's'} out of ${inputCount} total uploaded`;
+      }, () => {
+        releaseQueue.length = 0;
+        releaseTickerDiv.style.display = 'none';
+        releaseTickerDiv.textContent = '';
       });
       await ready;
+
+      if (isDiscogs) {
+        releaseTickerDiv.style.display = '';
+        releaseTickerDiv.textContent = 'Fetching your discogs collection ...';
+      }
 
       done.then(async (newLevel) => {
         await drainPromise;
@@ -972,6 +1071,10 @@ function displayCollections(collections) {
       const fileInput = document.createElement('input');
       fileInput.type = 'file';
       fileInput.accept = collection.release_source_type === 'spotify_exportify_csv' ? '.csv' : '.json';
+      // discogs pulls from the API on update, so there's nothing to pick
+      if (collection.release_source_type === 'discogs_oauth') {
+        fileInput.style.display = 'none';
+      }
 
       const releaseTickerDiv = document.createElement('div');
       releaseTickerDiv.style.display = 'none';
@@ -1063,6 +1166,7 @@ window.addEventListener("load", (event) => {
   addNewCollectionInteraction("new-collection-submit", "click");
   addDiscogsVerifierInteraction("discogs-verifier-submit", "click");
   addDiscogsVerifierInteraction("discogs-verifier", "keypress");
+  addDiscogsCreateInteraction("discogs-create-submit", "click");
   addDeleteCollectionInteraction("delete-collection-submit", "click");
 
   addResetPasswordRequestInteraction("forgot-password-submit", "click");

@@ -68,7 +68,8 @@ class ReleaseSource < ApplicationRecord
   def process_image(image_url, release_data, variant)
     begin
       Tempfile.create(["release_image", ".jpg"], binmode: true) do |temp_file|
-        URI.open(image_url) { |f| temp_file.write(f.read) }
+        # discogs' image CDN 403s the default ruby user-agent
+        URI.open(image_url, "User-Agent" => "tessellates-user-agent") { |f| temp_file.write(f.read) }
 
         # get colors
         if release_data["colors"].blank?
