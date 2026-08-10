@@ -247,7 +247,7 @@ class CollectionsController < ApplicationController
   end
 
   def collection_update_params
-    params.permit(:id, :overwrite_strategy, :csv_content, releases: {})
+    params.permit(:id, :overwrite_strategy, :csv_content, releases: [:id, :title, :artist, :label, :image_path, :image_url, :image_url_small, :year, :purchase_date, tracks: [:position, :title, :filepath]] )
   end
 
   def tessellates_params

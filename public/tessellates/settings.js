@@ -783,7 +783,6 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
       }
 
       fileInput.value = '';
-      // fetchAndDisplayCollections();
     } catch (error) {
       alert('Error updating collection: ' + error.message);
     }
