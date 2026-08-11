@@ -243,7 +243,7 @@ class CollectionsController < ApplicationController
   private
 
   def collection_params
-    params.permit(:name, :release_source, :import_token, :csv_content, releases: {})
+    params.permit(:name, :release_source, :import_token, :csv_content, releases:[:id, :title, :artist, :label, :image_path, :image_url, :image_url_small, :year, :purchase_date, tracks: [:position, :title, :filepath]] )
   end
 
   def collection_update_params
