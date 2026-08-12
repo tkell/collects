@@ -1,15 +1,23 @@
 # Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
 
 one:
-  artist: MyString
-  title: MyString
-  label: MyString
+  artist: Siamese
+  title: Persian
+  label: Sphynx
   collection: one
   release_year: 1999
 
 two:
-  artist: OtherArtist
-  title: OtherTitle
-  label: OtherLabel
+  artist: Ragdoll
+  title: Bengal
+  label: Birman
   collection: one
   release_year: 2010
+
+three:
+  artist: Maine Coon
+  title: Abyssinian
+  label: Burmese
+  collection: one
+  release_year: 2015
+  purchase_date: 2015-06-15
