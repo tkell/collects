@@ -5,3 +5,11 @@ one:
   title: MyString
   label: MyString
   collection: one
+  release_year: 1999
+
+two:
+  artist: OtherArtist
+  title: OtherTitle
+  label: OtherLabel
+  collection: one
+  release_year: 2010
