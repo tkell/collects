@@ -4,16 +4,7 @@
     <meta charset="utf-8"/>
     <link rel="stylesheet" href="/main.css">
     <script src="/api-state.js"></script>
-    <script>
-    (function () {
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark-mode') {
-          document.documentElement.setAttribute('data-theme', 'dark-mode');
-        } else {
-          document.documentElement.setAttribute('data-theme', 'light-mode');
-        }
-    })();
-    </script>
+    <script src="/dark-mode.js"></script>
     <script src="/tessellations/timeout-functions.js"></script>
     <script src="/releases/releases.js"></script>
   </head>
