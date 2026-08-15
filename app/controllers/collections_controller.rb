@@ -1,4 +1,6 @@
 class CollectionsController < ApplicationController
+  before_action :authenticate_user!
+
   SORT_KEYS = {
     "a" => :artist,
     "t" => :title,
@@ -8,17 +10,12 @@ class CollectionsController < ApplicationController
   }
 
   def index
-    authenticate_user
-    return if performed?
     @collections = @current_user.collections.order(:created_at)
 
     render json: @collections
   end
 
   def show
-    authenticate_user
-    return if performed?
-
     p = tessellates_params
     name = params[:id]
     data = @current_user.collections.where('lower(name) = ?', name.downcase).first.releases
@@ -91,9 +88,6 @@ class CollectionsController < ApplicationController
   end
 
   def create
-    authenticate_user
-    return if performed?
-
     collection = Collection.new(name: collection_params[:name], user: @current_user, level:0 )
     unless collection.save
       puts(collection.errors)
@@ -177,9 +171,6 @@ class CollectionsController < ApplicationController
   end
 
   def update
-    authenticate_user
-    return if performed?
-
     id = collection_update_params[:id]
     collection = @current_user.collections.find(id)
     if collection.nil?
@@ -219,8 +210,6 @@ class CollectionsController < ApplicationController
   end
 
   def destroy
-    authenticate_user
-    return if performed?
     name = params[:id]
     collection = @current_user.collections.where('lower(name) = ?', name.downcase).first
 
