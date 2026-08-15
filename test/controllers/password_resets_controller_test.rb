@@ -1,0 +1,29 @@
+require 'test_helper'
+
+class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
+  test "create returns static json if no user is found" do
+    post password_resets_url, params: {email: "for-sure-not-a-real-email"}
+
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "If that email exists, a reset link has been sent.", body["message"]
+  end
+
+  test "create returns static json and emails if user is found" do
+    user = users(:one)
+    post password_resets_url, params: {email: user.email}
+
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "If that email exists, a reset link has been sent.", body["message"]
+    assert_enqueued_emails 1 do
+      UserMailer.password_reset_email(user).deliver_later
+    end
+  end
+
+  test "update fails if reset token is expired" do
+  end
+
+  test "update changes password and clears reset token" do
+  end
+end

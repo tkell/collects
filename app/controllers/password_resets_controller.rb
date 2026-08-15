@@ -1,5 +1,4 @@
 class PasswordResetsController < ApplicationController
-
   def create
     user = User.find_by(email: params[:email]&.downcase)
     if user && user.email_verified?
