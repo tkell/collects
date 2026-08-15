@@ -5,6 +5,10 @@
 // Store fetched collections for validation
 let userCollections = [];
 
+// Set once the discogs handshake is done, so the create button knows the next
+// press should actually build the collection
+let discogsAuthReady = false;
+
 /**
  * Generate a random hex color
  * @returns {string} - Random hex color
@@ -84,6 +88,20 @@ function bounceHexagons() {
       hexWrapper.classList.add(direction);
     }, timeout);
   });
+}
+
+/**
+ * Bounce the new collection button once, to say the flow is ready and the
+ * next press will create the collection
+ */
+function bounceNewCollectionButton() {
+  const button = document.getElementById('new-collection-submit');
+  const bounceDirections = ['bounce-up', 'bounce-down', 'bounce-left', 'bounce-right'];
+  const direction = bounceDirections[Math.floor(Math.random() * bounceDirections.length)];
+
+  button.classList.remove(...bounceDirections);
+  void button.offsetWidth;
+  button.classList.add(direction);
 }
 
 /**
@@ -425,6 +443,7 @@ function addNewCollectionInteraction(elementId, eventType) {
   const fileInput = document.getElementById('new-collection-file');
 
   const verifierContainer = document.getElementById('discogs-verifier-container');
+  const discogsCreateMessage = document.getElementById('discogs-create-message');
 
   sourceSelect.addEventListener('change', () => {
     fileInput.accept = sourceSelect.value === 'spotify_exportify_csv' ? '.csv' : '.json';
@@ -436,7 +455,14 @@ function addNewCollectionInteraction(elementId, eventType) {
     if (sourceSelect.value !== 'discogs_oauth') {
       verifierContainer.style.display = 'none';
       document.getElementById('discogs-verifier').value = '';
-      document.getElementById('discogs-create-container').style.display = 'none';
+      discogsCreateMessage.style.display = 'none';
+    }
+  });
+
+  // a chosen file is the last thing we need, so the button is now the create
+  fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) {
+      bounceNewCollectionButton();
     }
   });
 
@@ -458,14 +484,23 @@ function addNewCollectionInteraction(elementId, eventType) {
     // a verifier code rather than redirecting back, so they paste it here.
     // if they've already linked discogs we can skip straight to creating.
     if (releaseSource === 'discogs_oauth') {
-      if (await isProviderConnected('discogs')) {
-        verifierContainer.style.display = 'none';
-        document.getElementById('discogs-create-container').style.display = '';
+      if (!discogsAuthReady && !(await isProviderConnected('discogs'))) {
+        open(`${apiState.protocol}://${apiState.host}/oauth/authorize/discogs`);
+        verifierContainer.style.display = '';
+        discogsCreateMessage.style.display = 'none';
         return;
       }
-      open(`${apiState.protocol}://${apiState.host}/oauth/authorize/discogs`);
-      verifierContainer.style.display = '';
-      document.getElementById('discogs-create-container').style.display = 'none';
+
+      // we're off to the races: drop the prompt so it's clear the fetch started
+      verifierContainer.style.display = 'none';
+      discogsCreateMessage.style.display = 'none';
+
+      await submitCollectionCreate(
+        name,
+        'discogs_oauth',
+        {},
+        'Fetching your discogs collection - a big collection can take a while ...'
+      );
       return;
     }
 
@@ -506,33 +541,6 @@ function addNewCollectionInteraction(elementId, eventType) {
 }
 
 /**
- * Add discogs create interaction: the user has linked their account, so pull
- * their whole discogs collection down.  No file, no other input.
- * @param {string} elementId - Element ID for the button
- * @param {string} eventType - Event type (click)
- */
-function addDiscogsCreateInteraction(elementId, eventType) {
-  document.getElementById(elementId).addEventListener(eventType, async () => {
-    const name = document.getElementById('new-collection-name').value;
-    if (!name) {
-      alert('Please enter a collection name');
-      return;
-    }
-
-    // the handshake is done and we're off to the races: drop the prompt and
-    // the button so the user can't fire a second create while we fetch
-    document.getElementById('discogs-create-container').style.display = 'none';
-
-    await submitCollectionCreate(
-      name,
-      'discogs_oauth',
-      {},
-      'Fetching your discogs collection - a big collection can take a while ...'
-    );
-  });
-}
-
-/**
  * Add discogs verifier interaction: exchange the code discogs showed the user
  * for access tokens via our callback endpoint
  * @param {string} elementId - Element ID for the button or input
@@ -566,7 +574,9 @@ function addDiscogsVerifierInteraction(elementId, eventType) {
 
       verifierInput.value = '';
       document.getElementById('discogs-verifier-container').style.display = 'none';
-      document.getElementById('discogs-create-container').style.display = '';
+      document.getElementById('discogs-create-message').style.display = '';
+      discogsAuthReady = true;
+      bounceNewCollectionButton();
     } catch (error) {
       alert('Error authorizing discogs: ' + error.message);
     }
@@ -1163,7 +1173,6 @@ window.addEventListener("load", (event) => {
   addNewCollectionInteraction("new-collection-submit", "click");
   addDiscogsVerifierInteraction("discogs-verifier-submit", "click");
   addDiscogsVerifierInteraction("discogs-verifier", "keypress");
-  addDiscogsCreateInteraction("discogs-create-submit", "click");
   addDeleteCollectionInteraction("delete-collection-submit", "click");
 
   addResetPasswordRequestInteraction("forgot-password-submit", "click");
