@@ -25,7 +25,22 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil user.password_reset_token
   end
 
+  test "update fails if reset token is fake" do
+    put password_resets_url, params: {token: "not a real token"}
+    assert_response :not_found
+  end
+
   test "update fails if reset token is expired" do
+    user = users(:one)
+    post password_resets_url, params: {email: user.email}
+    assert_response :success
+
+    user.reload
+    user.update!(password_reset_sent_at: Time.current - 3.hours)
+    token = user.password_reset_token
+
+    put password_resets_url, params: {token: token}
+    assert_response :not_found
   end
 
   test "update changes password and clears reset token" do
