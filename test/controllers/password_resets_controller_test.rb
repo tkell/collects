@@ -9,7 +9,7 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
     assert_equal "If that email exists, a reset link has been sent.", body["message"]
   end
 
-  test "create returns static json and emails if user is found" do
+  test "create returns static json, emails user, and creats token if user is found" do
     user = users(:one)
     post password_resets_url, params: {email: user.email}
 
@@ -19,6 +19,10 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
     assert_enqueued_emails 1 do
       UserMailer.password_reset_email(user).deliver_later
     end
+
+    user.reload
+    assert_not_nil user.password_reset_sent_at
+    assert_not_nil user.password_reset_token
   end
 
   test "update fails if reset token is expired" do
