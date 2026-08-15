@@ -1,13 +1,6 @@
 class CollectionsController < ApplicationController
   before_action :authenticate_user!
 
-  SORT_KEYS = {
-    "a" => :artist,
-    "t" => :title,
-    "l" => :label,
-    "y" => :release_year,
-    "p" => 'purchase_date DESC'
-  }
 
   def index
     @collections = @current_user.collections.order(:created_at)
@@ -18,71 +11,8 @@ class CollectionsController < ApplicationController
   def show
     p = tessellates_params
     name = params[:id]
-    data = @current_user.collections.where('lower(name) = ?', name.downcase).first.releases
-    if p[:folder]
-      data = data.where(folder: p[:folder])
-    end
-
-    # format is `1990 - 1999`, or `1990`
-    if p[:release_year]
-      if p[:release_year].include? "-"
-        year_range = p[:release_year].split("-")
-        start_year = year_range[0].strip.to_i
-        end_year = year_range[1].strip.to_i
-        data = data.where(release_year: start_year..end_year)
-      else
-        data = data.where(release_year: Integer(p[:release_year]))
-      end
-    end
-
-    if p[:purchase_date]
-      if p[:purchase_date].include? "-"
-        year_range = p[:purchase_date].split("-")
-        start_year = year_range[0].strip.to_i
-        end_year = year_range[1].strip.to_i
-        start_date = "#{start_year}-01-01".to_date
-        end_date = "#{end_year}-12-31".to_date
-        data = data.where(purchase_date: start_date..end_date)
-      else
-        year = p[:purchase_date].strip.to_i
-        start_date = "#{year}-01-01".to_date
-        end_date = "#{year}-12-31".to_date
-        data = data.where(purchase_date: start_date..end_date)
-      end
-    end
-
-    if p[:filter]
-      filter_string = "%" + Release.sanitize_sql_like(p[:filter]) + "%"
-      data = data
-        .where("artist ILIKE :search_string OR title ILIKE :search_string OR label ILIKE :search_string", {search_string: filter_string})
-    end
-
-    # We use the front-end's "random" sort and pick an offset here, if we're randomizing
-    if p[:randomize]
-      p[:sort] = p[:randomize]
-      real_offset = (rand() * data.size).floor # SQL call to get the size of the data!
-    else
-      real_offset = p[:offset]
-    end
-
-    # see above, options are artist, title, label, release_year, purchase_date
-    if p[:sort] && p[:sort].length > 0 && p[:sort].size < 5
-      sort_args = []
-      p[:sort].split("").each do |key|
-        if SORT_KEYS.has_key?(key)
-          sort_args << SORT_KEYS[key]
-        end
-      end
-      data = data.order(*sort_args)
-    end
-
-
-    data = data
-      .limit(p[:limit])
-      .offset(real_offset)
-      .includes(:tracks)
-      .joins("LEFT JOIN variants ON variants.release_id = releases.id AND variants.id = releases.current_variant_id")
-      .includes(:variants)
+    collection = @current_user.collections.where('lower(name) = ?', name.downcase).first
+    data = collection.query_releases(p[:offset], p[:limit], p[:filter], p[:release_year], p[:purchase_date], p[:sort], p[:folder], p[:randomize])
 
     render json: data
   end
