@@ -60,5 +60,6 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
 
     user.reload
     assert_nil user.password_reset_token
+    assert_equal user, user.authenticate(new_password)
   end
 end
