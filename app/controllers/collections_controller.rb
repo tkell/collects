@@ -9,6 +9,7 @@ class CollectionsController < ApplicationController
 
   def index
     authenticate_user
+    return if performed?
     @collections = @current_user.collections.order(:created_at)
 
     render json: @collections
@@ -16,6 +17,7 @@ class CollectionsController < ApplicationController
 
   def show
     authenticate_user
+    return if performed?
 
     p = tessellates_params
     name = params[:id]
@@ -218,6 +220,7 @@ class CollectionsController < ApplicationController
 
   def destroy
     authenticate_user
+    return if performed?
     name = params[:id]
     collection = @current_user.collections.where('lower(name) = ?', name.downcase).first
 
