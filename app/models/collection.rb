@@ -107,5 +107,6 @@ class Collection < ApplicationRecord
       .includes(:tracks)
       .joins("LEFT JOIN variants ON variants.release_id = releases.id AND variants.id = releases.current_variant_id")
       .includes(:variants)
+      .as_json(include: [:tracks, :variants])
   end
 end

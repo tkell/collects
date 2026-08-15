@@ -119,8 +119,9 @@ class Release < ApplicationRecord
     end
   end
 
-  def as_json(options={})
-    super(:include => [:tracks, :variants, :annotations])
+  def as_json(options)
+    includes = options[:include] or [:tracks, :variants]
+    super(:include => includes)
   end
 
   def current_variant

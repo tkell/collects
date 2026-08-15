@@ -3,12 +3,12 @@ class ReleasesController < ApplicationController
   before_action :set_release, only: [:show, :update, :destroy]
 
   def show
-    render json: @release
+    render json: @release.as_json(include: [:tracks, :variants, :annotations])
   end
 
   def update
     if @release.update(release_params)
-      render json: @release
+      render json: @release.as_json(include: [:tracks, :variants, :annotations])
     else
       render json: { error: @release.errors }, status: :unprocessable_content
     end
