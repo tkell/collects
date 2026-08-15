@@ -4,7 +4,7 @@ class OAuthController < ApplicationController
   def authorize
     provider = params[:provider]
     if provider != "discogs"
-      render json: { error: 'Unsupported provider' }, status: :unprocessable_entity
+      render json: { error: 'Unsupported provider' }, status: :unprocessable_content
       return
     end
     # should this moved to the linked account model, probably

@@ -23,7 +23,7 @@ class TracksController < ApplicationController
     if @track.update(track_params)
       render json: @track
     else
-      render json: { error: @track.errors }, status: :unprocessable_entity
+      render json: { error: @track.errors }, status: :unprocessable_content
     end
   end
 

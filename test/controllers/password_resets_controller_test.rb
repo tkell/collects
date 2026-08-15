@@ -40,7 +40,7 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
     token = user.password_reset_token
 
     patch password_update_url(token)
-    assert_response :unprocessable_entity
+    assert_response :unprocessable_content
   end
 
   test "update changes password and clears reset token" do

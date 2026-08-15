@@ -21,7 +21,7 @@ class LinkedAccountsController < ApplicationController
     if @linked_account&.destroy
       render json: { success: true, message: 'Linked account removed successfully' }
     else
-      render json: { error: 'Failed to remove linked account' }, status: :unprocessable_entity
+      render json: { error: 'Failed to remove linked account' }, status: :unprocessable_content
     end
   end
 

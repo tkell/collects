@@ -91,7 +91,7 @@ class CollectionsController < ApplicationController
     collection = Collection.new(name: collection_params[:name], user: @current_user, level:0 )
     unless collection.save
       puts(collection.errors)
-      render json: { error: collection.errors }, status: :unprocessable_entity
+      render json: { error: collection.errors }, status: :unprocessable_content
       return
     end
 
@@ -102,7 +102,7 @@ class CollectionsController < ApplicationController
       release_source = RubyHashReleaseSource.new(collection: collection)
       unless release_source.save
         collection.destroy
-        render json: { error: release_source.errors }, status: :unprocessable_entity
+        render json: { error: release_source.errors }, status: :unprocessable_content
         return
       end
       if collection_params[:releases].present?
@@ -119,7 +119,7 @@ class CollectionsController < ApplicationController
       release_source = SpotifyExportifyCsvReleaseSource.new(collection: collection)
       unless release_source.save
         collection.destroy
-        render json: { error: release_source.errors }, status: :unprocessable_entity
+        render json: { error: release_source.errors }, status: :unprocessable_content
         return
       end
       if collection_params[:csv_content].present?
@@ -136,7 +136,7 @@ class CollectionsController < ApplicationController
       release_source = DiscogsOAuthReleaseSource.new(collection: collection)
       unless release_source.save
         collection.destroy
-        render json: { error: release_source.errors }, status: :unprocessable_entity
+        render json: { error: release_source.errors }, status: :unprocessable_content
         return
       end
       # nothing is uploaded here - the release source pulls everything from
@@ -149,7 +149,7 @@ class CollectionsController < ApplicationController
       rescue DiscogsOAuthClient::Error => e
         collection.destroy
         ActionCable.server.broadcast(channel, { type: "error", message: e.message })
-        render json: { error: e.message }, status: :unprocessable_entity
+        render json: { error: e.message }, status: :unprocessable_content
         return
       end
       collection.reload
@@ -157,7 +157,7 @@ class CollectionsController < ApplicationController
 
     else
       collection.destroy
-      render json: { error: "Unsupported release source" }, status: :unprocessable_entity
+      render json: { error: "Unsupported release source" }, status: :unprocessable_content
       return
     end
 
@@ -167,7 +167,7 @@ class CollectionsController < ApplicationController
     puts(e)
     puts(e.backtrace.join("\n"))
     puts(e.message)
-    render json: { error: "Failed to create collection: #{e.message}" }, status: :unprocessable_entity
+    render json: { error: "Failed to create collection: #{e.message}" }, status: :unprocessable_content
   end
 
   def update
@@ -189,7 +189,7 @@ class CollectionsController < ApplicationController
     when DiscogsOAuthReleaseSource
       # nothing to set up - it re-fetches from discogs itself
     else
-      render json: { error: "Unsupported release source" }, status: :unprocessable_entity
+      render json: { error: "Unsupported release source" }, status: :unprocessable_content
       return
     end
 
@@ -206,7 +206,7 @@ class CollectionsController < ApplicationController
     puts(e)
     puts(e.backtrace.join("\n"))
     puts(e.message)
-    render json: { error: "Failed to update collection: #{e.message}" }, status: :unprocessable_entity
+    render json: { error: "Failed to update collection: #{e.message}" }, status: :unprocessable_content
   end
 
   def destroy
@@ -229,7 +229,7 @@ class CollectionsController < ApplicationController
 
     render json: { message: "Collection deleted successfully" }, status: :ok
   rescue => e
-    render json: { error: "Failed to delete collection: #{e.message}" }, status: :unprocessable_entity
+    render json: { error: "Failed to delete collection: #{e.message}" }, status: :unprocessable_content
   end
 
   private

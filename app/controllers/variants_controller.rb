@@ -71,7 +71,7 @@ class VariantsController < ApplicationController
       colors = Miro::DominantColors.new(small_image.path)
     rescue Exception => _
       puts("failed to convert image for release #{params[:release_id]}")
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
 
     # Step 2: save the variant
@@ -86,7 +86,7 @@ class VariantsController < ApplicationController
       @variant.is_standard = false
       @variant.save!
     rescue ActiveRecord::RecordInvalid => _
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
 
     # Step 3: upload the images
@@ -108,7 +108,7 @@ class VariantsController < ApplicationController
       if bucket && bucket.file(small_img_name)
         bucket.delete_file(small_img_name)
       end
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
 
     begin
@@ -119,7 +119,7 @@ class VariantsController < ApplicationController
       @variant.destroy
       delete_image(bucket, image_name)
       delete_image(bucket, small_image_name)
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
 
     begin
@@ -139,7 +139,7 @@ class VariantsController < ApplicationController
       @variant.destroy
       delete_image(bucket, image_name)
       delete_image(bucket, small_image_name)
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
 
   end

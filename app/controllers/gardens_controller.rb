@@ -21,7 +21,7 @@ class GardensController < ApplicationController
     if @garden.save
       redirect_to collection_garden_path(@collection, @garden)
     else
-      render :new, status: :unprocessable_entity
+      render :new, status: :unprocessable_content
     end
   end
 
@@ -41,7 +41,7 @@ class GardensController < ApplicationController
     if @garden.update(garden_params)
       redirect_to collection_garden_path(@collection, @garden)
     else
-      render :edit, status: :unprocessable_entity
+      render :edit, status: :unprocessable_content
     end
   end
 

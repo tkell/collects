@@ -11,7 +11,7 @@ class UsersController < ApplicationController
       UserMailer.verification_email(@user).deliver_later
       render json: { message: "User created successfully. Please check your email to verify your account." }, status: :created
     else
-      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @user.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -35,7 +35,7 @@ class UsersController < ApplicationController
     if @user.update(user_params)
       render json: { message: "User updated successfully" }, status: :ok
     else
-      render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
+      render json: { errors: @user.errors.full_messages }, status: :unprocessable_content
     end
   end
 
@@ -61,7 +61,7 @@ class UsersController < ApplicationController
 
     render json: { message: "User and all associated data deleted successfully" }, status: :ok
   rescue => e
-    render json: { error: "Failed to delete user: #{e.message}" }, status: :unprocessable_entity
+    render json: { error: "Failed to delete user: #{e.message}" }, status: :unprocessable_content
   end
 
   private

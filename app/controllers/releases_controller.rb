@@ -10,7 +10,7 @@ class ReleasesController < ApplicationController
     if @release.update(release_params)
       render json: @release
     else
-      render json: { error: @release.errors }, status: :unprocessable_entity
+      render json: { error: @release.errors }, status: :unprocessable_content
     end
   end
 
@@ -18,7 +18,7 @@ class ReleasesController < ApplicationController
     @release.destroy
     render json: { message: "Release deleted successfully" }, status: :ok
   rescue => e
-    render json: { error: "Failed to delete release: #{e.message}" }, status: :unprocessable_entity
+    render json: { error: "Failed to delete release: #{e.message}" }, status: :unprocessable_content
   end
 
   private

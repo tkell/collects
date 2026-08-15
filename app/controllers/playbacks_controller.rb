@@ -56,7 +56,7 @@ class PlaybacksController < ApplicationController
     if @playback.save
       render json: @playback, status: :ok
     else
-      render json: @playback.errors, status: :unprocessable_entity
+      render json: @playback.errors, status: :unprocessable_content
     end
   end
 

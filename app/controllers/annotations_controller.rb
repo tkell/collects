@@ -27,7 +27,7 @@ class AnnotationsController < ApplicationController
     release.increment!(:points)
     render json: created
   rescue ActiveRecord::RecordInvalid => e
-    render json: { error: e.message }, status: :unprocessable_entity
+    render json: { error: e.message }, status: :unprocessable_content
   end
 
   def destroy
