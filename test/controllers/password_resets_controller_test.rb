@@ -43,22 +43,22 @@ class PasswordResetsControllerTest < ActionDispatch::IntegrationTest
     assert_response :unprocessable_entity
   end
 
-  # test "update changes password and clears reset token" do
-  #   user = users(:one)
-  #   post password_resets_url, params: {email: user.email}
-  #   assert_response :success
+  test "update changes password and clears reset token" do
+    user = users(:one)
+    post password_resets_url, params: {email: user.email}
+    assert_response :success
 
-  #   user.reload
-  #   assert_not_nil user.password_reset_token
-  #   token = user.password_reset_token
-  #   new_password = "a-new-password"
+    user.reload
+    assert_not_nil user.password_reset_token
+    token = user.password_reset_token
+    new_password = "a-new-password"
 
-  #   post password_resets_url, params: {token: token, password: new_password, password_confirmation: new_password}
-  #   assert_response :success
-  #   body = JSON.parse(response.body)
-  #   assert_equal "Password updated successfully", body["message"]
+    patch password_update_url(token), params: {password: new_password, password_confirmation: new_password}
+    assert_response :success
+    body = JSON.parse(response.body)
+    assert_equal "Password updated successfully", body["message"]
 
-  #   user.reload
-  #   assert_not_nil user.password_reset_token
-  # end
+    user.reload
+    assert_nil user.password_reset_token
+  end
 end
