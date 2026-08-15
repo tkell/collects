@@ -9,7 +9,7 @@ Rails.application.routes.draw do
   get 'oauth/callback/:provider', to: 'o_auth#callback', as: 'oauth_callback'
   get 'verify_email', to: 'users#verify_email'
   post 'password_resets', to: 'password_resets#create'
-  patch 'password_resets/:token', to: 'password_resets#update'
+  patch 'password_resets/:token', to: 'password_resets#update', as: 'password_update'
 
   resources :users, only: [:new, :create, :update, :destroy] do
     resources :linked_accounts, only: [:index, :show, :destroy]

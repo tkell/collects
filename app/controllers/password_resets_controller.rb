@@ -6,7 +6,7 @@ class PasswordResetsController < ApplicationController
       user.generate_password_reset_token!
       UserMailer.password_reset_email(user).deliver_later
     end
-    render json: { message: "If that email exists, a reset link has been sent." }, status: :ok
+    render json: { message: "If that email exists, a reset link has been sent" }, status: :ok
   end
 
   def update
