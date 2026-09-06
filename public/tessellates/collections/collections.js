@@ -78,6 +78,32 @@ function addPagingClick(elementId, offsetDelta) {
 }
 
 /**
+ * Add keyboard shortcuts for small/medium pagination:
+ * h/l = small pagination left/right, j/k = medium pagination left/right.
+ * Ignored while focus is on a text input/textarea.
+ */
+function addPagingKeyboardShortcuts() {
+  const keyToElementId = {
+    'h': 'back-small',
+    'l': 'forward-small',
+    'j': 'back-medium',
+    'k': 'forward-medium',
+  };
+
+  document.addEventListener("keydown", function(e) {
+    const activeTag = document.activeElement && document.activeElement.tagName;
+    if (activeTag === 'INPUT' || activeTag === 'TEXTAREA') {
+      return;
+    }
+
+    const elementId = keyToElementId[e.key];
+    if (elementId) {
+      document.getElementById(elementId).click();
+    }
+  });
+}
+
+/**
  * Add click handlers for folder selection
  * @param {string} elementId - Element ID for the folder button
  * @param {string} folder - Folder name or false for all
@@ -541,6 +567,7 @@ fetchWithCredentials(queryUrl)
     addPagingClick("forward-small", tess.paging.small);
     addPagingClick("forward-medium", tess.paging.medium);
     addPagingClick("forward-big", tess.paging.big);
+    addPagingKeyboardShortcuts();
 
     updateParamsOnKeypress('release-year-input', 'release_year');
     updateParamsOnKeypress('purchase-date-input', 'purchase_date');
