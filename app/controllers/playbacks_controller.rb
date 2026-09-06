@@ -37,7 +37,12 @@ class PlaybacksController < ApplicationController
     end
     groups = groups.sort.reverse.to_h
 
-    render json: {playbacks: all_playbacks, counts: sorted_counts, releases: releases, groups: groups}, status: :ok
+    render json: {
+      playbacks: all_playbacks,
+      counts: sorted_counts,
+      releases: releases.as_json(include: [:variants]),
+      groups: groups
+    }, status: :ok
   end
 
   def new
