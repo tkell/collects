@@ -78,16 +78,16 @@ function addPagingClick(elementId, offsetDelta) {
 }
 
 /**
- * Add keyboard shortcuts for small/medium pagination:
- * h/l = small pagination left/right, j/k = medium pagination left/right.
+ * Keyboard vim bindings for small/medium pagination
+ * The order is a bit contradictory, but it makes it more vim-esq
  * Ignored while focus is on a text input/textarea.
  */
 function addPagingKeyboardShortcuts() {
   const keyToElementId = {
     'h': 'back-small',
+    'j': 'forward-medium',
+    'k': 'back-medium',
     'l': 'forward-small',
-    'j': 'back-medium',
-    'k': 'forward-medium',
   };
 
   document.addEventListener("keydown", function(e) {
