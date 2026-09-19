@@ -44,7 +44,7 @@ class Collection < ApplicationRecord
   def query_releases(offset, limit, query_string, release_year, purchase_date, sort, folder, randomize)
     data = releases
     if folder
-      data = data.where(folder: p[:folder])
+      data = data.where(folder: folder)
     end
 
     # format is `1990 - 1999`, or `1990`
@@ -91,15 +91,17 @@ class Collection < ApplicationRecord
     end
 
     # see above, options are artist, title, label, release_year, purchase_date
+    sort_args = []
     if sort && sort.length > 0 && sort.size < 5
-      sort_args = []
       sort.split("").each do |key|
         if SORT_KEYS.has_key?(key)
           sort_args << SORT_KEYS[key]
         end
       end
-      data = data.order(*sort_args)
     end
+    # Break ties on id to avoid non-deterministic sorts
+    sort_args << :id
+    data = data.order(*sort_args)
 
     return data
       .limit(limit)

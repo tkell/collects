@@ -21,3 +21,56 @@ three:
   collection: one
   release_year: 2015
   purchase_date: 2015-06-15
+
+# A batch of releases all bought on the same day, to exercise tie-breaking in
+# purchase_date sorts.
+batch_one:
+  artist: Ocicat
+  title: Korat
+  label: Chartreux
+  collection: one
+  release_year: 2001
+  purchase_date: 2020-02-02
+  folder: Shorthair
+
+batch_two:
+  artist: Manx
+  title: Somali
+  label: Chartreux
+  collection: one
+  release_year: 2002
+  purchase_date: 2020-02-02
+  folder: Shorthair
+
+batch_three:
+  artist: Bombay
+  title: Havana Brown
+  label: Chartreux
+  collection: one
+  release_year: 2003
+  purchase_date: 2020-02-02
+  folder: Longhair
+
+batch_four:
+  artist: Turkish Van
+  title: Singapura
+  label: Chartreux
+  collection: one
+  release_year: 2004
+  purchase_date: 2020-02-02
+
+batch_five:
+  artist: Devon Rex
+  title: Cornish Rex
+  label: Chartreux
+  collection: one
+  release_year: 2005
+  purchase_date: 2020-02-02
+
+batch_six:
+  artist: Balinese
+  title: Tonkinese
+  label: Chartreux
+  collection: one
+  release_year: 2006
+  purchase_date: 2020-02-02
