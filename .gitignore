@@ -43,6 +43,7 @@
 # Ignore deploy scripts and prod env files
 deploy_to_digital_ocean.sh
 digital-ocean.profile
+digital-ocean.pgpass
 
 # Ignore GCS keys
 /keys/
