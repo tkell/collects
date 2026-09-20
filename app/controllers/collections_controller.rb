@@ -17,6 +17,7 @@ class CollectionsController < ApplicationController
     render json: data
   end
 
+
   def create
     collection = Collection.new(name: collection_params[:name], user: @current_user, level:0 )
     unless collection.save
@@ -30,45 +31,18 @@ class CollectionsController < ApplicationController
     case collection_params[:release_source]
     when 'json_file'
       release_source = RubyHashReleaseSource.new(collection: collection)
-      unless release_source.save
-        collection.destroy
-        render json: { error: release_source.errors }, status: :unprocessable_content
-        return
-      end
-      if collection_params[:releases].present?
-        release_source.raw_releases = collection_params[:releases]
-        ActionCable.server.broadcast(channel, { type: "start", input_count: release_source.input_count, existing: 0 })
-        release_source.import_releases('only_new', {}) do |release_data|
-          ActionCable.server.broadcast(channel, release_data)
-        end
-        collection.reload
-        ActionCable.server.broadcast(channel, { type: "done", level: collection.level })
-      end
+      release_source.raw_releases = collection_params[:releases]
+      current_releases = {}
+      load_and_cable_releases(release_source, collection, channel, 'only_new', current_releases)
 
     when 'spotify_exportify_csv'
       release_source = SpotifyExportifyCsvReleaseSource.new(collection: collection)
-      unless release_source.save
-        collection.destroy
-        render json: { error: release_source.errors }, status: :unprocessable_content
-        return
-      end
-      if collection_params[:csv_content].present?
-        release_source.raw_csv = collection_params[:csv_content]
-        ActionCable.server.broadcast(channel, { type: "start", input_count: release_source.input_count, existing: 0 })
-        release_source.import_releases('only_new', {}) do |release_data|
-          ActionCable.server.broadcast(channel, release_data)
-        end
-        collection.reload
-        ActionCable.server.broadcast(channel, { type: "done", level: collection.level })
-      end
+      release_source.raw_csv = collection_params[:csv_content]
+      current_releases = {}
+      load_and_cable_releases(release_source, collection, channel, 'only_new', current_releases)
 
     when 'discogs_oauth'
       release_source = DiscogsOAuthReleaseSource.new(collection: collection)
-      unless release_source.save
-        collection.destroy
-        render json: { error: release_source.errors }, status: :unprocessable_content
-        return
-      end
       # nothing is uploaded here - the release source pulls everything from
       # discogs using the tokens we stored when the user linked their account
       begin
@@ -78,6 +52,7 @@ class CollectionsController < ApplicationController
         end
       rescue DiscogsOAuthClient::Error => e
         collection.destroy
+        puts("discogs failed, destroying the collection")
         ActionCable.server.broadcast(channel, { type: "error", message: e.message })
         render json: { error: e.message }, status: :unprocessable_content
         return
@@ -124,12 +99,8 @@ class CollectionsController < ApplicationController
     end
 
     current_releases = collection.releases.joins(:variants).pluck(:external_id, :colors).index_by {|r| r[0]}
-    ActionCable.server.broadcast("collection_import_#{collection.id}", { type: "start", input_count: release_source.input_count, existing: current_releases.length})
-    release_source.import_releases(overwrite_strategy, current_releases) do |release_data|
-      ActionCable.server.broadcast("collection_import_#{collection.id}", release_data)
-    end
-    collection.reload
-    ActionCable.server.broadcast("collection_import_#{collection.id}", { type: "done", level: collection.level })
+    channel = "collection_update_#{collection_id}"
+    load_and_cable_releases(release_source, collection, channel, overwrite_strategy, current_releases)
 
     render json: collection
   rescue => e
@@ -163,6 +134,15 @@ class CollectionsController < ApplicationController
   end
 
   private
+
+  def load_and_cable_releases(release_source, collection, channel, overwrite_strategy, current_releases)
+    ActionCable.server.broadcast(channel, { type: "start", input_count: release_source.input_count, existing: current_releases.length })
+    release_source.import_releases(overwrite_strategy, current_releases) do |release_data|
+      ActionCable.server.broadcast(channel, release_data)
+    end
+    collection.reload
+    ActionCable.server.broadcast(channel, { type: "done", level: collection.level })
+  end
 
   def collection_params
     params.permit(:name, :release_source, :import_token, :csv_content, releases: [:id, :title, :artist, :label, :image_path, :image_url, :image_url_small, :year, :purchase_date, tracks: [:position, :title, :filepath]] )
