@@ -76,8 +76,8 @@ class CollectionsController < ApplicationController
   end
 
   def update
-    id = collection_update_params[:id]
-    collection = @current_user.collections.find(id)
+    collection_id = collection_update_params[:id]
+    collection = @current_user.collections.find(collection_id)
     if collection.nil?
       render json: { error: "Collection not found" }, status: :not_found
       return
