@@ -144,12 +144,16 @@ class CollectionsController < ApplicationController
     ActionCable.server.broadcast(channel, { type: "done", level: collection.level })
   end
 
+  def release_params
+      [:id, :title, :artist, :label, :image_path, :image_url, :image_url_small, :folder, :year, :purchase_date, tracks: [:position, :title, :filepath]]
+  end
+
   def collection_params
-    params.permit(:name, :release_source, :import_token, :csv_content, releases: [:id, :title, :artist, :label, :image_path, :image_url, :image_url_small, :year, :purchase_date, tracks: [:position, :title, :filepath]] )
+    params.permit(:name, :release_source, :import_token, :csv_content, releases: release_params)
   end
 
   def collection_update_params
-    params.permit(:id, :overwrite_strategy, :csv_content, releases: [:id, :title, :artist, :label, :image_path, :image_url, :image_url_small, :year, :purchase_date, tracks: [:position, :title, :filepath]] )
+    params.permit(:id, :overwrite_strategy, :csv_content, releases: release_params)
   end
 
   def tessellates_params
