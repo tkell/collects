@@ -31,13 +31,13 @@ class CollectionsController < ApplicationController
     case collection_params[:release_source]
     when 'json_file'
       release_source = RubyHashReleaseSource.new(collection: collection)
-      release_source.raw_releases = collection_params[:releases]
+      release_source.raw_releases = collection_params[:releases] || []
       current_releases = {}
       load_and_cable_releases(release_source, collection, channel, 'only_new', current_releases)
 
     when 'spotify_exportify_csv'
       release_source = SpotifyExportifyCsvReleaseSource.new(collection: collection)
-      release_source.raw_csv = collection_params[:csv_content]
+      release_source.raw_csv = collection_params[:csv_content] || ""
       current_releases = {}
       load_and_cable_releases(release_source, collection, channel, 'only_new', current_releases)
 
@@ -99,7 +99,7 @@ class CollectionsController < ApplicationController
     end
 
     current_releases = collection.releases.joins(:variants).pluck(:external_id, :colors).index_by {|r| r[0]}
-    channel = "collection_update_#{collection_id}"
+    channel = "collection_import_#{collection_id}"
     load_and_cable_releases(release_source, collection, channel, overwrite_strategy, current_releases)
 
     render json: collection
