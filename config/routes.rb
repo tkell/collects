@@ -13,6 +13,7 @@ Rails.application.routes.draw do
 
   resources :users, only: [:new, :create, :update, :destroy] do
     resources :linked_accounts, only: [:index, :show, :destroy]
+    resources :user_settings, only: [:update]
   end
 
   resources :collections, only: [:index, :show, :create, :update, :destroy] do
