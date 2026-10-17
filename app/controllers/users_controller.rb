@@ -6,6 +6,7 @@ class UsersController < ApplicationController
   def create
     @user = User.new(user_params)
     @user.email_verification_token = SecureRandom.urlsafe_base64(32)
+    @user.user_settings = UserSettings.new(dark_mode: false)
 
     if @user.save
       UserMailer.verification_email(@user).deliver_later
