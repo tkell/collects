@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_08_08_170228) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_16_235916) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -121,6 +121,14 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_170228) do
     t.index ["release_id"], name: "idx_16405_index_tracks_on_release_id"
   end
 
+  create_table "user_settings", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.boolean "dark_mode"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_user_settings_on_user_id"
+  end
+
   create_table "users", force: :cascade do |t|
     t.text "email"
     t.text "username"
@@ -160,5 +168,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_08_08_170228) do
   add_foreign_key "releases", "collections", name: "releases_collection_id_fkey"
   add_foreign_key "releases", "variants", column: "current_variant_id", name: "releases_current_variant_id_fkey"
   add_foreign_key "tracks", "releases", name: "tracks_release_id_fkey"
+  add_foreign_key "user_settings", "users"
   add_foreign_key "variants", "releases", name: "variants_release_id_fkey"
 end
