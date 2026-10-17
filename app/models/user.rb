@@ -7,7 +7,7 @@ class User < ApplicationRecord
   has_many :playbacks
   has_many :linked_accounts
   has_many :annotations
-  has_one :user_settings
+  has_one :user_settings, dependent: :destroy
 
   validates :email, presence: true, uniqueness: true
   validates :username, presence: true
