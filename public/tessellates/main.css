@@ -322,6 +322,11 @@ button:not(:disabled):active {
     rotate(calc(-1 * var(--ca)));
 }
 
+/* hovering doesn't change stacking order */
+.image-grid-circle .image-item:hover {
+  z-index: auto;
+}
+
 /* Triangle shape */
 .shape-triangle {
   clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
@@ -492,6 +497,22 @@ transform: translate(25%);
 .image-grid-octagon .image-item:nth-child(n+15):nth-child(-n+18) { grid-row: 5 / span 2; }
 .image-grid-octagon .image-item:nth-child(n+19):nth-child(-n+21) { grid-row: 6 / span 2; }
 .image-grid-octagon .image-item:nth-child(n+22):nth-child(-n+25) { grid-row: 7 / span 2; }
+
+/* hovering doesn't change stacking order; must come before the rows of 3 rule so they keep z-index: 1 */
+.image-grid-octagon .image-item:hover {
+  z-index: auto;
+}
+
+/* rows of 3 are 20% bigger, kept centred with negative margins, and overlap the rows of 4 */
+.image-grid-octagon .image-item:nth-child(7n+5),
+.image-grid-octagon .image-item:nth-child(7n+6),
+.image-grid-octagon .image-item:nth-child(7n+7) {
+  width: 228.90px;
+  height: 228.90px;
+  margin-left: -19.08px;
+  margin-top: -19.08px;
+  z-index: 1;
+}
 
 /* Animation states - base hover state */
 .image-item:hover {

@@ -21,6 +21,7 @@ makeOctagon = function() {
   octagon = {};
   octagon.size = 1000;
   octagon.halfStep = 134.88; // matches .image-grid-octagon in main.css
+  octagon.rowOfThreeScale = 1.2; // matches the rows of 3 in main.css
   octagon.defaultItems = 25;
   octagon.closeUpIndexes = [
     0, 1, 2, 3,
@@ -57,10 +58,15 @@ makeOctagon = function() {
     const xOffset = (newPosition.track - currentPosition.track) * this.halfStep;
     const yOffset = (newPosition.row - currentPosition.row) * this.halfStep;
 
+    // rows of 3 are bigger, so grow or shrink when moving between row types
+    const currentScale = currentPosition.row % 2 === 1 ? this.rowOfThreeScale : 1;
+    const newScale = newPosition.row % 2 === 1 ? this.rowOfThreeScale : 1;
+    const scale = newScale / currentScale;
+
     const jitter = (Math.random() - 0.5) * 200
     const moveTime = this.timeouts.slow + jitter
     record.imageItem.style.transition = `transform ${moveTime}ms ease-in-out`;
-    record.imageItem.style.transform = `translate(${xOffset}px, ${yOffset}px)`;
+    record.imageItem.style.transform = `translate(${xOffset}px, ${yOffset}px) scale(${scale})`;
     record.isAnimating = true;
   }
 
