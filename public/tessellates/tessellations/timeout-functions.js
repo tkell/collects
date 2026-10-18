@@ -130,3 +130,22 @@ var rhombusTimeoutFunctions = [
     }
   ]
 ];
+// Octagon-specific timeout functions, using octagonPosition() from octagon.js
+var octagonTimeoutFunctions = [
+  [
+    // Radial pattern outside to inside
+    function(index, total, maxMs) {
+      const position = octagonPosition(index);
+      const distance = Math.sqrt(Math.pow(position.row - 3, 2) + Math.pow(position.track - 3, 2));
+      const maxDistance = Math.sqrt(18);
+      return ((maxDistance - distance) / maxDistance) * maxMs;
+    },
+    // Radial pattern inside to outside
+    function(index, total, maxMs) {
+      const position = octagonPosition(index);
+      const distance = Math.sqrt(Math.pow(position.row - 3, 2) + Math.pow(position.track - 3, 2));
+      const maxDistance = Math.sqrt(18);
+      return (distance / maxDistance) * maxMs;
+    }
+  ]
+];

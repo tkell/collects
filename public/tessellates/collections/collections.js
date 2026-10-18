@@ -485,8 +485,10 @@ if (params['t'] == 'square') {
   tess = makeTriangle();
 } else if (params['t']== 'circle') {
   tess = makeCircle();
+} else if (params['t']== 'octagon') {
+  tess = makeOctagon();
 } else {
-  let random = Math.floor(Math.random() * 4);
+  let random = Math.floor(Math.random() * 5);
   if (random == 0) {
     tess = makeSquare();
     params['t'] = 'square';
@@ -496,6 +498,9 @@ if (params['t'] == 'square') {
   } else if (random == 2) {
     tess = makeTriangle();
     params['t'] = 'triangle';
+  } else if (random == 3) {
+    tess = makeOctagon();
+    params['t'] = 'octagon';
   } else {
     tess = makeCircle();
     params['t'] = 'circle';

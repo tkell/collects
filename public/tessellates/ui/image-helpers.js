@@ -75,7 +75,7 @@ imageHelper.createDivAndPlaceholder = function(record) {
 /**
  * Create an image item DOM element for a record
  * @param {Object} record - Record object containing image data
- * @param {string} shapeClass - CSS class for the shape (square, circle, triangle, rhombus)
+ * @param {string} shapeClass - CSS class for the shape (square, circle, triangle, rhombus, octagon)
  * @returns {HTMLElement} - The created image item element
  */
 imageHelper.loadImageItem = function(record, shapeClass) {

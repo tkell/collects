@@ -205,6 +205,10 @@ renderHelper._addStartingStateToRecord = function(record, index, tessellation) {
     record.bigClipPathClass = 'shape-square-rhombus';
     let positionClasses = [`rhombus-${record.rhombusType}`];
     record.positionClass = positionClasses.join(' ');
+  } else if (tessellation.type === 'octagon') {
+    record.clipPathClass = 'shape-octagon';
+    record.bigClipPathClass = 'shape-square';
+    record.positionClass = '';
   } else {
     record.clipPathClass = 'shape-square';
     record.bigClipPathClass = 'shape-square';
