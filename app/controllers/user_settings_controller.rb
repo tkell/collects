@@ -1,7 +1,9 @@
 class UserSettingsController < ApplicationController
   def update
     authenticate_user
-    @user_settings = UserSettings.find(params[:id])
+    return if performed?
+
+    @user_settings = current_user.user_settings
 
     if @user_settings.update(user_settings_params)
       render json: { message: "User settings updated successfully" }, status: :ok

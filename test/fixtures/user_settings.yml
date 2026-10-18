@@ -1,4 +1,6 @@
-# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+# I am being a bad pluralizer, so I need this
+_fixture:
+  model_class: UserSettings
 
 one:
   user: one

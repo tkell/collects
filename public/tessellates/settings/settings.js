@@ -908,15 +908,35 @@ function addModeChangeInteraction(elementId, eventType) {
     if (eventType === "keypress" && e.key !== "Enter") {
       return;
     }
-    var currentTheme = localStorage.getItem('theme') || "light-mode";
+    const currentTheme = localStorage.getItem('theme') || "light-mode";
+    const newTheme = currentTheme === "light-mode" ? "dark-mode" : "light-mode";
 
-    if (currentTheme === "light-mode") {
-      currentTheme = "dark-mode";
-    } else {
-      currentTheme = "light-mode";
+    // Logged out there's no server copy to sync, so just apply it locally
+    if (!checkCookieExistence('loggedInUser')) {
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+      return;
     }
-    document.documentElement.setAttribute('data-theme', currentTheme);
-    localStorage.setItem('theme', currentTheme);
+
+    try {
+      const url = `${apiState.protocol}://${apiState.host}/user_settings`;
+      const response = await fetch(url, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ user_settings: { dark_mode: newTheme === "dark-mode" } }),
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.errors ? data.errors.join(', ') : 'Settings update failed');
+      }
+
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('theme', newTheme);
+    } catch (error) {
+      alert('Error saving settings: ' + error.message);
+    }
   });
 }
 
