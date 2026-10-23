@@ -32,6 +32,7 @@ imageHelper.loadImage = function(imagePath) {
       resolve(img);
     };
     img.onerror = function() {
+      console.log(imagePath);
       reject(new Error(`Failed to load image: ${imagePath}`));
     };
     img.src = imagePath;
