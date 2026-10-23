@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_16_235916) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_23_234026) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -32,6 +32,15 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_16_235916) do
     t.bigint "user_id"
     t.bigint "level"
     t.index ["user_id"], name: "idx_16424_index_collections_on_user_id"
+  end
+
+  create_table "folders", force: :cascade do |t|
+    t.string "name"
+    t.string "short_name"
+    t.bigint "collection_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["collection_id"], name: "index_folders_on_collection_id"
   end
 
   create_table "garden_releases", force: :cascade do |t|
@@ -97,7 +106,9 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_16_235916) do
     t.bigint "points", default: 0
     t.bigint "points_spent", default: 0
     t.bigint "current_variant_id"
+    t.bigint "folder_id"
     t.index ["collection_id"], name: "idx_16450_index_releases_on_collection_id"
+    t.index ["folder_id"], name: "index_releases_on_folder_id"
   end
 
   create_table "solid_cable_messages", force: :cascade do |t|
@@ -158,6 +169,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_16_235916) do
   add_foreign_key "annotations", "releases", name: "annotations_release_id_fkey"
   add_foreign_key "annotations", "users", name: "annotations_user_id_fkey"
   add_foreign_key "collections", "users", name: "collections_user_id_fkey"
+  add_foreign_key "folders", "collections"
   add_foreign_key "garden_releases", "gardens", name: "garden_releases_garden_id_fkey"
   add_foreign_key "garden_releases", "releases", name: "garden_releases_release_id_fkey"
   add_foreign_key "gardens", "collections", name: "gardens_collection_id_fkey"
@@ -166,6 +178,7 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_16_235916) do
   add_foreign_key "playbacks", "users", name: "playbacks_user_id_fkey"
   add_foreign_key "release_sources", "collections", name: "release_sources_collection_id_fkey"
   add_foreign_key "releases", "collections", name: "releases_collection_id_fkey"
+  add_foreign_key "releases", "folders"
   add_foreign_key "releases", "variants", column: "current_variant_id", name: "releases_current_variant_id_fkey"
   add_foreign_key "tracks", "releases", name: "tracks_release_id_fkey"
   add_foreign_key "user_settings", "users"
