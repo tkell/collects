@@ -5,15 +5,19 @@ task :create_folders_from_releases => :environment do
     folders = {}
     collection.releases.each do |release|
       if folders.include?(release.folder)
-        continue
+        folder = folders[release.folder]
+        folder << release
+        release.save!
+      else
+        new_folder = Folder.new(name: release.folder, short_name: release.folder.slice(0, 2))
+        new_folder.save!
+        new_folder << release
+        release.save!
+        folders[release.folder] = new_folder
       end
-
-      new_folder = Folder.new(name: release.folder, short_name: release.folder.slice(0, 2))
-      folders[release.folder] = new_folder
     end
 
     folders.each do |f|
-      f.save!
       collection.folders << f
     end
     collection.save!
