@@ -2,6 +2,7 @@ class Collection < ApplicationRecord
   belongs_to :user
   has_many :gardens, dependent: :destroy
   has_many :releases, dependent: :destroy
+  has_many :folders, dependent: :destroy
   has_many :release_sources, dependent: :destroy
 
   validates :user, presence: true

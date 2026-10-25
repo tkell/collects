@@ -2,7 +2,6 @@ class Release < ApplicationRecord
   before_destroy :clean_up_variants
 
   belongs_to :collection
-  belongs_to :folder
   has_many :garden_releases, dependent: :destroy
   has_many :tracks, dependent: :destroy
   has_many :variants, dependent: :destroy
