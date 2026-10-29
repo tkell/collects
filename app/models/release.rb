@@ -17,6 +17,7 @@ class Release < ApplicationRecord
         artist: release_data["artist"],
         label: release_data["label"],
         folder:  release_data["folder"] || "",
+        folder_id: release_data["folder_id"] || nil,
         release_year: release_data["release_year"],
         purchase_date: release_data["purchase_date"] || Date.new(1982, 9, 23),
         external_id: release_data["external_id"],

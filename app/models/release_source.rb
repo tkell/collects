@@ -28,11 +28,23 @@ class ReleaseSource < ApplicationRecord
 
   def load_all_releases(all_releases, current_releases, overwrite_strategy, &block)
     level_increase = 0
+
+    all_folders_by_name = Folder.all.index_by(&:name)
     all_releases.each do | release_data |
       external_id = release_data["external_id"]
       existing_release = current_releases[external_id]
 
       if overwrite_strategy == "only_new"
+        if release_data["folder_name"]
+          folder_name = release_data["folder_name"]
+          if not all_folders_by_name.has_key?(folder_name)
+            new_folder = Folder.new(name: folder_name, short_name: folder_name.slice(0,2))
+            new_folder.save!
+            all_folders_by_name[folder_name] = new_folder
+          end
+          release_data["folder_id"] = all_folders_by_name[folder_name].id
+        end
+
         if existing_release.nil?
           # only image-process new release if we have to:
           if release_data["colors"].blank? || release_data["image_path_small"].blank?
