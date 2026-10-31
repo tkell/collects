@@ -2,6 +2,7 @@ class Release < ApplicationRecord
   before_destroy :clean_up_variants
 
   belongs_to :collection
+  belongs_to :folder
   has_many :garden_releases, dependent: :destroy
   has_many :tracks, dependent: :destroy
   has_many :variants, dependent: :destroy
@@ -16,7 +17,6 @@ class Release < ApplicationRecord
         title: release_data["title"],
         artist: release_data["artist"],
         label: release_data["label"],
-        folder:  release_data["folder"] || "",
         folder_id: release_data["folder_id"] || nil,
         release_year: release_data["release_year"],
         purchase_date: release_data["purchase_date"] || Date.new(1982, 9, 23),
@@ -59,7 +59,6 @@ class Release < ApplicationRecord
 
     def update_needed(release_data, release)
       fields_to_compare = ["title", "artist", "label", "release_year", "purchase_date"]
-      fields_to_compare << "folder" if release.folder
 
       update_needed = false
       fields_to_compare.each do |field|
@@ -101,7 +100,6 @@ class Release < ApplicationRecord
           label: release_data["label"],
           release_year: release_data["release_year"],
           purchase_date: release_data["purchase_date"],
-          folder:  release_data["folder"] || ""
         )
         release.save
       end
