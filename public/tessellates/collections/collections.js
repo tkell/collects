@@ -159,6 +159,37 @@ function addFolderClick(elementId, folder) {
 }
 
 /**
+ * Fetch the collection's folders and build a button for each one.
+ * Buttons display the folder's short_name, and filter on the folder's name.
+ * The folders section stays hidden if the collection has no folders.
+ */
+function loadFolders() {
+  const url = `${apiState.protocol}://${apiState.host}/collections/folders?c=${encodeURIComponent(apiState.collectionName)}`;
+  fetchWithCredentials(url)
+    .then(folders => {
+      if (!Array.isArray(folders) || folders.length === 0) {
+        return;
+      }
+
+      const foldersDiv = document.getElementById('folders-div');
+      const allButton = document.getElementById('all');
+
+      folders.forEach(folder => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'emoji-button';
+        button.id = `folder-${folder.id}`;
+        button.textContent = folder.short_name || folder.name;
+        foldersDiv.insertBefore(button, allButton);
+        addFolderClick(button.id, folder.name);
+      });
+      addFolderClick('all', false);
+
+      foldersDiv.style.display = '';
+    });
+}
+
+/**
  * Update the browser URL without reloading the page
  * @param {Object} params - Current parameters
  */
@@ -516,16 +547,6 @@ window.addEventListener("load", (event) => {
   // Draw preload hexagons
   uiHelper.drawPreloadHexagons(tess);
 
-  // Show folders section only for vinyl collection
-  const foldersDiv = document.getElementById('folders-div');
-  if (foldersDiv) {
-    if (apiState.collectionName === 'vinyl') {
-      foldersDiv.style.display = '';
-    } else {
-      foldersDiv.style.display = 'none';
-    }
-  }
-
   // Pre-populate input fields from URL params
   if (params['release_year']) {
     document.getElementById('release-year-input').value = params['release_year'];
@@ -590,21 +611,7 @@ fetchWithCredentials(queryUrl)
     // If we have folders, add some folder filters!
     let testItem = releaseData[0];
     if (testItem.folder) {
-      addFolderClick("balearic", '\"Balearic\"');
-      addFolderClick("world", '\"World Music\" / Exotica');
-      addFolderClick("seven-inches", '7\"');
-      addFolderClick("battletech", 'Battletech');
-      addFolderClick("breaks", 'Breaks');
-      addFolderClick("classical", 'Classical');
-      addFolderClick("disco", 'Disco');
-      addFolderClick("ambient-albums", 'Electronic Albums / Ambient');
-      addFolderClick("house-tech-dance", 'House/Tech/Dance');
-      addFolderClick("progressive", 'Progressive');
-      addFolderClick("swing-rock-albums", 'Swing / Rock / Soul Albums');
-      addFolderClick("techno", 'Techno');
-      addFolderClick("trance", 'Trance');
-      addFolderClick("wall-records", 'Wall Records');
-      addFolderClick("all", false);
+      loadFolders();
     } else {
       addLocalPlaybackClick();
       addLocalPauseClick();

@@ -44,9 +44,9 @@ class Collection < ApplicationRecord
 
   def query_releases(offset, limit, query_string, release_year, purchase_date, sort, folder_name, randomize)
     data = releases
-    if folders and folder_name
-      current_folder = Folder.find_by(name: folder_name)
-      data = data.where(folder: current_folder.name)
+    if folder_name.present?
+      current_folder = folders.find_by(name: folder_name)
+      data = current_folder ? data.where(folder: current_folder.name) : data
     end
 
     # format is `1990 - 1999`, or `1990`
