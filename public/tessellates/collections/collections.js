@@ -608,13 +608,8 @@ fetchWithCredentials(queryUrl)
     addFilterInteraction("filter-submit", "keypress");
     addRandomInteraction("random");
 
-    // If we have folders, add some folder filters!
-    let testItem = releaseData[0];
-    if (testItem.folder) {
-      loadFolders();
-    } else {
-      addLocalPlaybackClick();
-      addLocalPauseClick();
-      addLocalClearClick();
-    }
+    loadFolders();
+    addLocalPlaybackClick();
+    addLocalPauseClick();
+    addLocalClearClick();
   });

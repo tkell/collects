@@ -31,7 +31,7 @@ batch_one:
   collection: one
   release_year: 2001
   purchase_date: 2020-02-02
-  folder: Folder One
+  folder: one
 
 batch_two:
   artist: Manx
@@ -40,7 +40,7 @@ batch_two:
   collection: one
   release_year: 2002
   purchase_date: 2020-02-02
-  folder: Folder One
+  folder: one
 
 batch_three:
   artist: Bombay
@@ -49,7 +49,7 @@ batch_three:
   collection: one
   release_year: 2003
   purchase_date: 2020-02-02
-  folder: Folder Two
+  folder: two
 
 batch_four:
   artist: Turkish Van

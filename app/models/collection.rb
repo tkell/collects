@@ -46,7 +46,7 @@ class Collection < ApplicationRecord
     data = releases
     if folder_name.present?
       current_folder = folders.find_by(name: folder_name)
-      data = current_folder ? data.where(folder: current_folder.name) : data
+      data = current_folder ? data.where(folder: current_folder) : data
     end
 
     # format is `1990 - 1999`, or `1990`

@@ -33,7 +33,7 @@ class ReleasesController < ApplicationController
 
   def release_params
     params
-      .permit(:id, :title, :artist, :label, :folder, :release_year, :purchase_date, :external_id)
+      .permit(:id, :title, :artist, :label, :release_year, :purchase_date, :external_id)
       .except(:id)
   end
 end

@@ -145,7 +145,7 @@ class CollectionsController < ApplicationController
   end
 
   def release_params
-      [:id, :title, :artist, :label, :image_path, :image_url, :image_url_small, :folder, :year, :purchase_date, tracks: [:position, :title, :filepath]]
+      [:id, :title, :artist, :label, :image_path, :image_url, :image_url_small, :folder_name, :year, :purchase_date, tracks: [:position, :title, :filepath]]
   end
 
   def collection_params
