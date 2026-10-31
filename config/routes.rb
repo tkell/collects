@@ -14,12 +14,16 @@ Rails.application.routes.draw do
   resources :users, only: [:new, :create, :update, :destroy] do
     resources :linked_accounts, only: [:index, :show, :destroy]
   end
-  resource :user_settings, only: [:update]
+  resource :user_settings, only: [:update] # Singular: always the logged-in user's settings
 
-  # Singular: always the logged-in user's settings
+  # Folders live at /collections/folders?c=<collection_name>.
+  # This has to come before `resources :collections`, or "folders" would be
+  # matched as a collection name by collections#show.
+  scope 'collections' do
+    resources :folders, only: [:index, :update, :destroy]
+  end
 
   resources :collections, only: [:index, :show, :create, :update, :destroy] do
-    # Gardens will be / are fully REST-ful
     resources :gardens
   end
 

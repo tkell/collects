@@ -5,3 +5,9 @@ one:
   username: test_user
   password_digest: <%= BCrypt::Password.create('password123') %>
   email_verified_at: <%= Time.current %>
+
+two:
+  email: other_user@example.com
+  username: other_user
+  password_digest: <%= BCrypt::Password.create('password123') %>
+  email_verified_at: <%= Time.current %>

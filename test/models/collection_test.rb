@@ -32,7 +32,7 @@ class CollectionTest < ActiveSupport::TestCase
   test "filtering by folder returns only that folder's releases" do
     collection = collections(:one)
 
-    ids = page_ids(collection, 0, 100, nil, "Shorthair")
+    ids = page_ids(collection, 0, 100, nil, "Folder One")
 
     assert_equal [releases(:batch_one).id, releases(:batch_two).id].sort, ids.sort
   end

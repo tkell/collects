@@ -6,3 +6,11 @@ one:
   level: 0
   created_at: <%= Time.current %>
   updated_at: <%= Time.current %>
+
+# owned by a different user, to check we don't leak other users' data
+two:
+  name: Other Collection
+  user: two
+  level: 0
+  created_at: <%= Time.current %>
+  updated_at: <%= Time.current %>
