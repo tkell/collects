@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2026_10_23_234026) do
+ActiveRecord::Schema[7.1].define(version: 2026_10_31_191947) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -100,7 +100,6 @@ ActiveRecord::Schema[7.1].define(version: 2026_10_23_234026) do
     t.timestamptz "created_at"
     t.timestamptz "updated_at"
     t.text "external_id"
-    t.text "folder"
     t.bigint "release_year"
     t.date "purchase_date"
     t.bigint "points", default: 0
