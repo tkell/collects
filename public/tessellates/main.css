@@ -137,6 +137,14 @@ div.update-controls {
   margin-top: 10px;
 }
 
+div.folders-section {
+  margin-top: 10px;
+}
+
+div.folder-row {
+  margin-top: 4px;
+}
+
 /* Stats page */
 .stats-group-date {
   font-size: 33px;

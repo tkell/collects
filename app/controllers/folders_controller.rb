@@ -38,7 +38,9 @@ class FoldersController < ApplicationController
 
   def folder_params
     params
-      .permit(:id, :collection_id, :name, :short_name)
+      # name is read-only for now: renaming would break the folder filter and
+      # re-imports, which both match releases to folders by name
+      .permit(:id, :collection_id, :short_name)
       .except(:id, :collection_id)
   end
 end

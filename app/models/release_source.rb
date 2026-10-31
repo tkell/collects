@@ -29,7 +29,7 @@ class ReleaseSource < ApplicationRecord
   def load_all_releases(all_releases, current_releases, overwrite_strategy, &block)
     level_increase = 0
 
-    all_folders_by_name = Folder.all.index_by(&:name)
+    all_folders_by_name = collection.folders.index_by(&:name)
     all_releases.each do | release_data |
       external_id = release_data["external_id"]
       existing_release = current_releases[external_id]
@@ -38,7 +38,7 @@ class ReleaseSource < ApplicationRecord
         if release_data["folder_name"]
           folder_name = release_data["folder_name"]
           if not all_folders_by_name.has_key?(folder_name)
-            new_folder = Folder.new(name: folder_name, short_name: folder_name.slice(0,2))
+            new_folder = collection.folders.new(name: folder_name, short_name: folder_name.slice(0,2))
             new_folder.save!
             all_folders_by_name[folder_name] = new_folder
           end

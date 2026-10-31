@@ -800,6 +800,143 @@ function addCollectionItemUpdateInteraction(button, fileInput, collection, updat
 }
 
 /**
+ * Fetch a collection's folders and render them into the given container.
+ * Renders nothing if the collection has no folders.
+ * @param {Object} collection - The collection object
+ * @param {HTMLElement} container - Element to render the folders section into
+ */
+async function loadCollectionFolders(collection, container) {
+  try {
+    const url = `${apiState.protocol}://${apiState.host}/collections/folders?c=${encodeURIComponent(collection.name)}`;
+    const response = await fetch(url, { credentials: 'include' });
+    if (!response.ok) {
+      throw new Error(`Request failed: ${response.status}`);
+    }
+    const folders = await response.json();
+    renderCollectionFolders(folders, container);
+  } catch (error) {
+    console.error('Error fetching folders:', error);
+  }
+}
+
+/**
+ * Render a folders section: each folder's name and short name, with an edit
+ * button that swaps the short names for inputs (same pattern as the release
+ * edit page). Folder names are display-only.
+ * @param {Array} folders - Array of folder objects
+ * @param {HTMLElement} container - Element to render into
+ */
+function renderCollectionFolders(folders, container) {
+  container.innerHTML = '';
+  if (!folders || folders.length === 0) {
+    return;
+  }
+
+  function makeEditInput(size) {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'edit-input';
+    input.size = size;
+    input.style.display = 'none';
+    return input;
+  }
+
+  function makeSmallButton(html) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'small-btn';
+    button.innerHTML = html;
+    return button;
+  }
+
+  const header = document.createElement('div');
+  header.textContent = 'folders:';
+
+  const editButton = makeSmallButton('&#9999;&#65039;');
+  const saveButton = makeSmallButton('&#128190;');
+  const cancelButton = makeSmallButton('&#10060;');
+  saveButton.style.display = 'none';
+  cancelButton.style.display = 'none';
+  header.appendChild(editButton);
+  header.appendChild(saveButton);
+  header.appendChild(cancelButton);
+  container.appendChild(header);
+
+  const rows = folders.map(folder => {
+    const row = document.createElement('div');
+    row.className = 'folder-row';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = folder.name;
+
+    const separator = document.createElement('span');
+    separator.className = 'grey-text';
+    separator.textContent = ' / ';
+
+    const shortNameSpan = document.createElement('span');
+    shortNameSpan.textContent = folder.short_name || '';
+    const shortNameInput = makeEditInput(6);
+
+    row.appendChild(nameSpan);
+    row.appendChild(separator);
+    row.appendChild(shortNameSpan);
+    row.appendChild(shortNameInput);
+    container.appendChild(row);
+
+    return { folder, shortNameSpan, shortNameInput };
+  });
+
+  function setEditMode(editing) {
+    editButton.style.display = editing ? 'none' : '';
+    saveButton.style.display = editing ? '' : 'none';
+    cancelButton.style.display = editing ? '' : 'none';
+    rows.forEach(r => {
+      r.shortNameSpan.style.display = editing ? 'none' : '';
+      r.shortNameInput.style.display = editing ? '' : 'none';
+    });
+  }
+
+  editButton.addEventListener('click', () => {
+    rows.forEach(r => {
+      r.shortNameInput.value = r.folder.short_name || '';
+    });
+    setEditMode(true);
+  });
+
+  cancelButton.addEventListener('click', () => setEditMode(false));
+
+  saveButton.addEventListener('click', async () => {
+    // Only short names are editable for now: renaming a folder would break
+    // the folder filter and re-imports, which both match on the folder name
+    const changedRows = rows.filter(r =>
+      r.shortNameInput.value.trim() !== (r.folder.short_name || '')
+    );
+
+    try {
+      await Promise.all(changedRows.map(async r => {
+        const url = `${apiState.protocol}://${apiState.host}/collections/folders/${r.folder.id}`;
+        const response = await fetch(url, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ short_name: r.shortNameInput.value.trim() }),
+          credentials: 'include'
+        });
+        if (!response.ok) {
+          throw new Error(`Saving "${r.folder.name}" failed: ${response.status}`);
+        }
+        const updated = await response.json();
+        r.folder.short_name = updated.short_name;
+        r.shortNameSpan.textContent = updated.short_name || '';
+      }));
+      setEditMode(false);
+      bounceHexagons();
+    } catch (error) {
+      alert('Error saving folders: ' + error.message);
+    }
+  });
+}
+
+/**
  * Add delete collection interaction
  * @param {string} elementId - Element ID for the button or input
  * @param {string} eventType - Event type (click or keypress)
@@ -1114,13 +1251,23 @@ function displayCollections(collections) {
       updateButton.innerText = 'Update';
       addCollectionItemUpdateInteraction(updateButton, fileInput, collection, updateControls, releaseTickerDiv, levelSpan, expandButton);
 
+      const foldersDiv = document.createElement('div');
+      foldersDiv.className = 'folders-section';
+
       updateControls.appendChild(fileInput);
       updateControls.appendChild(updateButton);
+      updateControls.appendChild(foldersDiv);
 
+      // Folders are fetched the first time the collection is expanded
+      let foldersLoaded = false;
       expandButton.addEventListener('click', () => {
         const expanded = updateControls.style.display !== 'none';
         updateControls.style.display = expanded ? 'none' : '';
         expandButton.innerHTML = expanded ? '&#x2314;' : '&#x25B2;';
+        if (!expanded && !foldersLoaded) {
+          foldersLoaded = true;
+          loadCollectionFolders(collection, foldersDiv);
+        }
       });
 
       link.href = `/collections?c=${collection.name.toLowerCase()}`;
